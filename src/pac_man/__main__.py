@@ -1,4 +1,5 @@
 from .structures import Position, Size
+from .screenbuffer import ScreenBuffer
 from .spritesheet import SpriteSheet
 
 from mlx import Mlx
@@ -29,42 +30,19 @@ def main() -> int:
     if rc != 0:
         return 1
 
-    canvas_ptr = mlx.mlx_new_image(mlx_ptr, win_size.width, win_size.height)
-    canvas_data, _, canvas_sl, _ = mlx.mlx_get_data_addr(canvas_ptr)
-
-    SCALE = 3
-
-    spritesheet = SpriteSheet(mlx=mlx,
-                              mlx_ptr=mlx_ptr,
+    spritesheet = SpriteSheet(mlx=mlx, mlx_ptr=mlx_ptr,
                               file_path="data/spritesheet.xpm")
 
-    spritesheet.define("a", Position(50, 50), Size(100, 50))
-    sprite = spritesheet.get("a")
-    sprite_size = spritesheet.get_size("a")
-    sprite_data, _, sprite_sl, _ = mlx.mlx_get_data_addr(sprite)
+    screen = ScreenBuffer(mlx=mlx, mlx_ptr=mlx_ptr, win_ptr=win_ptr,
+                          size=win_size, spritesheet=spritesheet)
 
-    dest_x, dest_y = 200, 200
-    bytes_per_pixel = 4
+    spritesheet.define("0", Position(1, 1), Size(8, 8))
+    spritesheet.define("1", Position(10, 1), Size(8, 8))
 
-    for src_y in range(sprite_size.height):
-        src_row_offset = src_y * sprite_sl
+    screen.draw("0", Position(100, 100), 4)
+    screen.draw("1", Position(50, 100), 4)
 
-        for s_y in range(SCALE):
-            target_y = dest_y + (src_y * SCALE) + s_y
-            canvas_row_start = target_y * canvas_sl
-
-            for src_x in range(sprite_size.width):
-                src_pixel = src_row_offset + (src_x * bytes_per_pixel)
-
-                for s_x in range(SCALE):
-                    target_x = dest_x + (src_x * SCALE) + s_x
-                    canvas_pixel = (canvas_row_start +
-                                    (target_x * bytes_per_pixel))
-
-                    canvas_data[canvas_pixel:canvas_pixel + 4] = sprite_data[
-                        src_pixel:src_pixel + 4]
-
-    mlx.mlx_put_image_to_window(mlx_ptr, win_ptr, canvas_ptr, 200, 200)
+    screen.render()
 
     mlx.mlx_loop(mlx_ptr)
 

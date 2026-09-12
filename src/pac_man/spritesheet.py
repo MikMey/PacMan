@@ -5,14 +5,19 @@ from pydantic import (BaseModel, Field, PrivateAttr, ConfigDict,
                       model_validator, ValidationError)
 
 
+class Sprite(BaseModel):
+
+    ptr: int
+    size: Size
+
+
 class SpriteSheet(BaseModel):
 
     mlx: Mlx
     mlx_ptr: int
     file_path: str
 
-    sprites: dict[str, int] = Field(default_factory=dict)
-    sprite_sizes: dict[str, Size] = Field(default_factory=dict)
+    sprites: dict[str, Sprite] = Field(default_factory=dict)
 
     _ptr: int = PrivateAttr()
     _size: Size = PrivateAttr()
@@ -58,7 +63,7 @@ class SpriteSheet(BaseModel):
 
         return self
 
-    def define(self, name: str, src_pos: Position, src_size: Size):
+    def define(self, name: str, src_pos: Position, src_size: Size) -> Sprite:
 
         tile_ptr = self.mlx.mlx_new_image(self.mlx_ptr, *src_size)
         if tile_ptr is None:
@@ -81,11 +86,9 @@ class SpriteSheet(BaseModel):
 
             tile_data[dest_start:dest_end] = self._data[src_start:src_end]
 
-        self.sprites[name] = tile_ptr
-        self.sprite_sizes[name] = src_size
+        self.sprites[name] = Sprite(ptr=tile_ptr, size=src_size)
 
-    def get(self, name: str) -> int:
         return self.sprites[name]
 
-    def get_size(self, name: str) -> Size:
-        return self.sprite_sizes[name]
+    def get(self, name: str) -> Sprite:
+        return self.sprites[name]
