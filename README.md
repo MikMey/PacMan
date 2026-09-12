@@ -4,6 +4,7 @@ _This project has been created as part of the 42 curriculum by ldreger, mimeyer.
 
 https://projects.intra.42.fr/projects/pac-man
 https://github.com/42school/mlx_CLXV
+https://www.spriters-resource.com/arcade/pacman/
 
 # Instructions
 
