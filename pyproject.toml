@@ -1,10 +1,10 @@
 [project]
-name = "pacman"
+name = "pac-man"
 version = "0.1.0"
-description = "Add your description here"
+description = "Recreation of the arcade game Pac-Man"
 readme = "README.md"
-authors = []
-requires-python = ">=3.14"
+authors = [{ name = "ldreger" }, { name = "mimeyer" }]
+requires-python = ">=3.10"
 dependencies = [
     "flake8>=7.3.0",
     "mypy>=2.3.1",
@@ -12,9 +12,24 @@ dependencies = [
     "pydantic>=2.13.5",
 ]
 
-[project.scripts]
-pacman = "pacman:main"
+[dependency-groups]
+dev = [
+    "flake8>=7.3.0",
+    "mypy>=2.3.1",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.6,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "pac_man"
+module-root = "src"
+source-include = ["data/**"]
+
+[tool.uv.sources]
+mazegenerator = { path = "mazegenerator-2.1.0-py3-none-any.whl" }
+mlx = { path = "mlx-2.4-py3-none-any.whl" }
+
+[project.scripts]
+pac-man = "pac_man:main"
