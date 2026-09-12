@@ -243,6 +243,14 @@ wheels = [
 ]
 
 [[package]]
+name = "mlx"
+version = "2.4"
+source = { path = "mlx-2.4-py3-none-any.whl" }
+wheels = [
+    { filename = "mlx-2.4-py3-none-any.whl", hash = "sha256:ce94d62e1ff43b740e06304b78054ad450fa46461c6f57e4483ba154738a97b5" },
+]
+
+[[package]]
 name = "mypy"
 version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -548,6 +556,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "mazegenerator" },
+    { name = "mlx" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -563,6 +572,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "mazegenerator", path = "mazegenerator-2.1.0-py3-none-any.whl" },
+    { name = "mlx", path = "mlx-2.4-py3-none-any.whl" },
     { name = "numpy", specifier = ">=2.2.6" },
     { name = "pydantic", specifier = ">=2.13.5" },
 ]
