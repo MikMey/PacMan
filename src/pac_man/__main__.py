@@ -1,7 +1,8 @@
-from .structures import Position, Size
+from .structures import Size
 from .screenbuffer import ScreenBuffer
 from .spritesheet import SpriteSheet
-
+from .game import Game
+from mazegenerator import MazeGenerator
 from mlx import Mlx
 import os
 
@@ -36,11 +37,17 @@ def main() -> int:
     screen = ScreenBuffer(mlx=mlx, mlx_ptr=mlx_ptr, win_ptr=win_ptr,
                           size=win_size, spritesheet=spritesheet)
 
-    spritesheet.define("0", Position(1, 1), Size(8, 8))
-    spritesheet.define("1", Position(10, 1), Size(8, 8))
+    mazegen = MazeGenerator()
 
-    screen.draw("0", Position(100, 100), 4)
-    screen.draw("1", Position(50, 100), 4)
+    # Very slow idk why
+    game = Game(closed_data=mazegen.maze, screen=screen)
+
+    # a = Tile(closed_state=9, screen=screen)
+    # Tile(closed_state=3, screen=screen)
+
+    # a.display(Position(0, 0))
+
+    game.display()
 
     screen.render()
 

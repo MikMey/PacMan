@@ -7,6 +7,7 @@ from pydantic import (BaseModel, Field, PrivateAttr, ConfigDict,
 
 class Sprite(BaseModel):
 
+    name: str
     ptr: int
     size: Size
 
@@ -61,7 +62,20 @@ class SpriteSheet(BaseModel):
                 ]
             )
 
+        self._init_sprites()
+
         return self
+
+    def _init_sprites(self) -> None:
+        self.define("B-TL", Position(745, 187), Size(8, 8))
+        self.define("B-T", Position(754, 187), Size(8, 8))
+        self.define("B-TR", Position(763, 187), Size(8, 8))
+        self.define("B-L", Position(745, 196), Size(8, 8))
+        self.define("VOID", Position(754, 196), Size(8, 8))
+        self.define("B-R", Position(763, 196), Size(8, 8))
+        self.define("B-BL", Position(745, 205), Size(8, 8))
+        self.define("B-B", Position(754, 205), Size(8, 8))
+        self.define("B-BR", Position(763, 205), Size(8, 8))
 
     def define(self, name: str, src_pos: Position, src_size: Size) -> Sprite:
 
@@ -86,7 +100,7 @@ class SpriteSheet(BaseModel):
 
             tile_data[dest_start:dest_end] = self._data[src_start:src_end]
 
-        self.sprites[name] = Sprite(ptr=tile_ptr, size=src_size)
+        self.sprites[name] = Sprite(name=name, ptr=tile_ptr, size=src_size)
 
         return self.sprites[name]
 
