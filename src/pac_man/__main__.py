@@ -1,57 +1,71 @@
-from .structures import Size
-from .screenbuffer import ScreenBuffer
-from .spritesheet import SpriteSheet
-from .game import Game
-from mazegenerator import MazeGenerator
-from mlx import Mlx
-import os
+# from .structures import Size
+# from .screenbuffer import ScreenBuffer
+# from .spritesheet import SpriteSheet
+# from .game import Game
+# from mazegenerator import MazeGenerator
+# from mlx import Mlx
+from pydantic import ValidationError
+from rich import print
+from rich.console import Console
 
+from .configuration import Config
 
-def on_key(key, param):
-    if key == 65307:  # ESC
-        os._exit(0)
+# def on_key(key, param):
+#     if key == 65307:  # ESC
+#         os._exit(0)
 
 
 def main() -> int:
-    mlx = Mlx()
-    mlx_ptr = mlx.mlx_init()
-    if mlx_ptr is None:
+
+    console = Console()
+
+    try:
+        config = Config.from_argv_file()
+    except ValidationError as e:
+        console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 
-    win_size = Size(1000, 1000)
-    win_ptr = mlx.mlx_new_window(mlx_ptr, win_size.width,
-                                 win_size.height, "My Window")
-    if win_ptr is None:
-        return 1
+    print(config)
 
-    rc = mlx.mlx_key_hook(win_ptr, on_key, None)
-    if rc != 0:
-        return 1
-    rc = mlx.mlx_hook(win_ptr, 33, 0, lambda p: os._exit(0), None)
-    if rc != 0:
-        return 1
+    # mlx = Mlx()
+    # mlx_ptr = mlx.mlx_init()
+    # if mlx_ptr is None:
+    #     return 1
 
-    spritesheet = SpriteSheet(mlx=mlx, mlx_ptr=mlx_ptr,
-                              file_path="data/spritesheet.xpm")
+    # win_size = Size(1000, 1000)
+    # win_ptr = mlx.mlx_new_window(mlx_ptr, win_size.width,
+    #                              win_size.height, "My Window")
+    # if win_ptr is None:
+    #     return 1
 
-    screen = ScreenBuffer(mlx=mlx, mlx_ptr=mlx_ptr, win_ptr=win_ptr,
-                          size=win_size, spritesheet=spritesheet)
+    # rc = mlx.mlx_key_hook(win_ptr, on_key, None)
+    # if rc != 0:
+    #     return 1
+    # rc = mlx.mlx_hook(win_ptr, 33, 0, lambda p: os._exit(0), None)
+    # if rc != 0:
+    #     return 1
 
-    mazegen = MazeGenerator()
+    # spritesheet = SpriteSheet(mlx=mlx, mlx_ptr=mlx_ptr,
+    #                           file_path="data/spritesheet.xpm")
 
-    # Very slow idk why
-    game = Game(closed_data=mazegen.maze, screen=screen)
+    # screen = ScreenBuffer(mlx=mlx, mlx_ptr=mlx_ptr, win_ptr=win_ptr,
+    #                       size=win_size, spritesheet=spritesheet)
 
-    # a = Tile(closed_state=9, screen=screen)
-    # Tile(closed_state=3, screen=screen)
+    # mazegen = MazeGenerator()
 
-    # a.display(Position(0, 0))
+    # # Very slow idk why
+    # game = Game(closed_data=mazegen.maze, screen=screen)
 
-    game.display()
+    # # a = Tile(closed_state=9, screen=screen)
+    # # Tile(closed_state=3, screen=screen)
 
-    screen.render()
+    # # a.display(Position(0, 0))
 
-    mlx.mlx_loop(mlx_ptr)
+    # game.display()
+
+    # screen.render()
+
+    # mlx.mlx_loop(mlx_ptr)
 
     return 0
 
