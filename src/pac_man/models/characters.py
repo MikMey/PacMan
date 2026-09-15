@@ -38,8 +38,9 @@ class PlayerState(Enum):
 class Character(ABC):
 
 	def __init__(self, position: list):
-		self.position = np.array(position, np.float32)
-		self.velocity = np.array([], np.float32)
+		self.tile = np.array(position, int)
+		self.relative_pos = np.array([0, 0], np.float16)
+		self.velocity = np.array([0, 0], np.float16)
 
 class Player(Character):
 
