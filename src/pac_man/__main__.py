@@ -1,18 +1,21 @@
-# from .structures import Size
-# from .screenbuffer import ScreenBuffer
-# from .spritesheet import SpriteSheet
-# from .game import Game
-# from mazegenerator import MazeGenerator
-# from mlx import Mlx
-from pydantic import ValidationError
-from rich import print
-from rich.console import Console
-
 from .configuration import Config
+from .spritesheet import SpriteSheetCache
 
-# def on_key(key, param):
-#     if key == 65307:  # ESC
-#         os._exit(0)
+from pydantic import ValidationError
+from rich.console import Console
+import pygame
+
+
+class StaticBackgroundElement(pygame.sprite.Sprite):
+
+    def __init__(self, assets: SpriteSheetCache,
+                 asset_name: str, x: int, y: int) -> None:
+        super().__init__()
+        self.image = assets.get_static(asset_name)
+        self.rect = self.image.get_rect(topleft=(
+            x * self.image.get_width(),
+            y * self.image.get_height()
+        ))
 
 
 def main() -> int:
@@ -25,47 +28,45 @@ def main() -> int:
         console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 
-    print(config)
+    console.print(str(config))
 
-    # mlx = Mlx()
-    # mlx_ptr = mlx.mlx_init()
-    # if mlx_ptr is None:
-    #     return 1
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption("Pac-Man")
+    clock = pygame.time.Clock()
 
-    # win_size = Size(1000, 1000)
-    # win_ptr = mlx.mlx_new_window(mlx_ptr, win_size.width,
-    #                              win_size.height, "My Window")
-    # if win_ptr is None:
-    #     return 1
+    SCALE_FACTOR = 6
 
-    # rc = mlx.mlx_key_hook(win_ptr, on_key, None)
-    # if rc != 0:
-    #     return 1
-    # rc = mlx.mlx_hook(win_ptr, 33, 0, lambda p: os._exit(0), None)
-    # if rc != 0:
-    #     return 1
+    try:
+        assets = SpriteSheetCache.from_default_file_path(SCALE_FACTOR)
+    except ValidationError as e:
+        console.print(str(e), style="red", markup=False, highlight=False)
+        return 1
 
-    # spritesheet = SpriteSheet(mlx=mlx, mlx_ptr=mlx_ptr,
-    #                           file_path="data/spritesheet.xpm")
+    bg_group = pygame.sprite.Group()
+    for i in range(5):
+        bg_block = StaticBackgroundElement(
+            assets,
+            "B-B",
+            x=i,
+            y=1
+        )
+        bg_group.add(bg_block)
 
-    # screen = ScreenBuffer(mlx=mlx, mlx_ptr=mlx_ptr, win_ptr=win_ptr,
-    #                       size=win_size, spritesheet=spritesheet)
+    running = True
+    while running:
+        clock.tick(30)
 
-    # mazegen = MazeGenerator()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    # # Very slow idk why
-    # game = Game(closed_data=mazegen.maze, screen=screen)
+        screen.fill((140, 40, 40))
+        bg_group.draw(screen)
 
-    # # a = Tile(closed_state=9, screen=screen)
-    # # Tile(closed_state=3, screen=screen)
+        pygame.display.flip()
 
-    # # a.display(Position(0, 0))
-
-    # game.display()
-
-    # screen.render()
-
-    # mlx.mlx_loop(mlx_ptr)
+    pygame.quit()
 
     return 0
 

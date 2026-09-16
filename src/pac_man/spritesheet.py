@@ -1,108 +1,207 @@
-from .structures import Position, Size
+from pydantic import BaseModel, Field, ConfigDict, ValidationError
+from pydantic_core import InitErrorDetails
+from typing import Optional, Any
+import pygame
+import pathlib
 
-from mlx import Mlx
-from pydantic import (BaseModel, Field, PrivateAttr, ConfigDict,
-                      model_validator, ValidationError)
+
+DEFAULT_FILE_PATH = "./data/spritesheet.bmp"
 
 
-class Sprite(BaseModel):
+class SpriteRect(BaseModel):
+    """Defines a bounding box of a sprite in a spitesheet.
 
+    Parameters
+    ----------
+    x : int
+        Vertical top-left pixel position of sprite.
+    y : int
+        Horizontal top-left pixel position of sprite.
+    w : int
+        Vertical pixel height of sprite.
+    h : int
+        Horizontal pixel height of sprite.
+
+    """
+    x: int = Field(ge=0)
+    y: int = Field(ge=0)
+    w: int = Field(gt=0)
+    h: int = Field(gt=0)
+
+
+class AssetSource(BaseModel):
+    """Defines Asset type and resources. Can be static or animated.
+
+    Parameters
+    ----------
+    name : str
+        Identifiable Name for an asset. Will be the key in :obj:`AssetCache`.
+    is_animated : bool
+        True if sprite is animated, False if static. Defaults to False.
+    frames : list[:obj:`SpriteRect`]
+        List of all sprite frame locations and sizes.
+    scale : tuple[float, float], optional
+        Rescaling factor when drawing. Defaults to None.
+
+    """
     name: str
-    ptr: int
-    size: Size
-
-
-class SpriteSheet(BaseModel):
-
-    mlx: Mlx
-    mlx_ptr: int
-    file_path: str
-
-    sprites: dict[str, Sprite] = Field(default_factory=dict)
-
-    _ptr: int = PrivateAttr()
-    _size: Size = PrivateAttr()
-    _data: memoryview[int] = PrivateAttr()
-    _size_line: int = PrivateAttr()
+    is_animated: bool = False
+    frames: list[SpriteRect]
+    scale: Optional[tuple[float, float]] = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    @model_validator(mode="after")
-    def validate_sheet(self) -> "SpriteSheet":
+
+class SpriteSheetCache(BaseModel):
+    """Caches AssetSource under their name.
+    This does save scale but not in-window location.
+
+    Parameters
+    ----------
+    sheet_surface : pygame.Surface
+        The surface instance of the entire sprite sheet.
+
+    Attributes
+    ----------
+    reg_static : dict[str, pygame.Surface]
+        Dictionary of all non-moving assets. Empty on initialization.
+    reg_static : dict[str, list[pygame.Surface]]
+        Dictionary of all moving assets. Empty on initialization.
+
+    """
+    sheet_surface: pygame.Surface
+    scale_factor: float = Field(ge=1)
+
+    reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
+    reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initializes default cache."""
+        super().__init__(*args, **kwargs)
+
+        self._init_cache()
+
+    @classmethod
+    def from_default_file_path(cls, scale_factor: float) -> "SpriteSheetCache":
+        """Creates class from default spritesheet (DEFAULT_FILE_PATH).
+
+        Parameters
+        ----------
+        scale_factor : float
+            global scaling factor to be baked into cache.
+
+        Raises
+        ------
+        ValidationError
+            When default spritesheet cannot be opened is is invalid.
+
+        """
+        git_root = pathlib.Path.cwd()
+        absolute_sheet_path = (git_root / DEFAULT_FILE_PATH).resolve()
 
         try:
-            with open(self.file_path, 'r', encoding="utf-8"):
-                tmp_ptr, tmp_w, tmp_h = self.mlx.mlx_xpm_file_to_image(
-                    self.mlx_ptr,
-                    self.file_path
-                )
-
-                if tmp_ptr is None:
-                    raise MemoryError("Sprite Sheet pointer is None")
-                self._ptr = tmp_ptr
-                self._size = Size(width=tmp_w, height=tmp_h)
-
-                tmp_ptr, _, tmp_w, _ = self.mlx.mlx_get_data_addr(self._ptr)
-
-                if tmp_ptr is None:
-                    raise MemoryError("Sprite Sheet data pointer is None")
-                self._data = tmp_ptr
-                self._size_line = tmp_w
-
-        except (OSError, MemoryError) as e:
+            raw_sheet_image = pygame.image.load(
+                str(absolute_sheet_path)
+            ).convert_alpha()
+        except (OSError, pygame.error) as e:
             raise ValidationError.from_exception_data(
-                title="reading sprite sheet failed",
+                title=cls.__name__,
                 line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("SpriteSheet",),
-                        "input": self.file_path,
-                        "ctx": {"error": str(e)}
-                    }
+                    InitErrorDetails(
+                        type="value_error",
+                        loc=("DEFAULT_FILE_PATH",),
+                        input=DEFAULT_FILE_PATH,
+                        ctx={"error": str(e)}
+                    )
                 ]
             )
 
-        self._init_sprites()
+        return cls(sheet_surface=raw_sheet_image, scale_factor=scale_factor)
 
-        return self
+    def _init_cache(self) -> None:
+        """Caches known assets when initializing."""
+        self.cache_asset(AssetSource(
+            name="B-TL",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="B-T",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="B-TR",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="B-L",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="VOID",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="B-R",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="B-BL",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="B-B",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
+        self.cache_asset(AssetSource(
+            name="B-BR",
+            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            scale=(self.scale_factor, self.scale_factor)
+        ))
 
-    def _init_sprites(self) -> None:
-        self.define("B-TL", Position(745, 187), Size(8, 8))
-        self.define("B-T", Position(754, 187), Size(8, 8))
-        self.define("B-TR", Position(763, 187), Size(8, 8))
-        self.define("B-L", Position(745, 196), Size(8, 8))
-        self.define("VOID", Position(754, 196), Size(8, 8))
-        self.define("B-R", Position(763, 196), Size(8, 8))
-        self.define("B-BL", Position(745, 205), Size(8, 8))
-        self.define("B-B", Position(754, 205), Size(8, 8))
-        self.define("B-BR", Position(763, 205), Size(8, 8))
+    def cache_asset(self, asset_source: AssetSource) -> None:
+        """Creates Surface from :obj:`AssetSource` and saves it in reg.
 
-    def define(self, name: str, src_pos: Position, src_size: Size) -> Sprite:
+        Added to `reg_static` if not animated or `reg_anim` is animated.
 
-        tile_ptr = self.mlx.mlx_new_image(self.mlx_ptr, *src_size)
-        if tile_ptr is None:
-            raise MemoryError("New Sprite could not be defined")
+        Parameters
+        ----------
+        asset_source : :obj:`AssetSource`
+            AssetSource to be added as a Surface to registry.
 
-        tile_data, _, tile_sl, _ = self.mlx.mlx_get_data_addr(tile_ptr)
-        if tile_data is None:
-            raise MemoryError("New Sprite data could not be defined")
+        """
+        surfaces = []
 
-        bytes_per_pixel = 4
-        row_size_bytes = src_size.width * bytes_per_pixel
+        for frame in asset_source.frames:
+            rect = pygame.Rect(frame.x, frame.y, frame.w, frame.h)
+            sprite_surface = self.sheet_surface.subsurface(rect)
 
-        for y in range(src_size.height):
-            src_start = (((src_pos.y + y) * self._size_line) +
-                         (src_pos.x * bytes_per_pixel))
-            src_end = src_start + row_size_bytes
+            if asset_source.scale:
+                new_size = (int(frame.w * asset_source.scale[0]),
+                            int(frame.h * asset_source.scale[1]))
+                sprite_surface = pygame.transform.scale(sprite_surface,
+                                                        new_size)
 
-            dest_start = y * tile_sl
-            dest_end = dest_start + row_size_bytes
+            surfaces.append(sprite_surface)
 
-            tile_data[dest_start:dest_end] = self._data[src_start:src_end]
+        if asset_source.is_animated:
+            self.reg_anim[asset_source.name] = surfaces
+        else:
+            self.reg_static[asset_source.name] = surfaces[0]
 
-        self.sprites[name] = Sprite(name=name, ptr=tile_ptr, size=src_size)
+    def get_static(self, name: str) -> pygame.Surface:
+        """Gets Surface of non-animated asset."""
+        return self.reg_static[name]
 
-        return self.sprites[name]
-
-    def get(self, name: str) -> Sprite:
-        return self.sprites[name]
+    def get_anim(self, name: str) -> list[pygame.Surface]:
+        """Gets Surface of animated asset."""
+        return self.reg_anim[name]

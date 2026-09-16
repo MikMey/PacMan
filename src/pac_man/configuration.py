@@ -4,11 +4,10 @@ from pydantic_core import InitErrorDetails
 from typing import Any, Optional
 import sys
 import json
-# from rich import print
 
 
 class LevelMetadata(BaseModel):
-
+    """Metadata of a given level config."""
     width: int = Field(ge=1, default=10)
     height: int = Field(ge=1, default=10)
     lives: int = Field(ge=1, default=10)
@@ -18,13 +17,44 @@ class LevelMetadata(BaseModel):
 
 
 class HighscoreMetadata(BaseModel):
-
+    """Required keys of the highscore file."""
     name: str = Field(default="TEST")
     score: int = Field(ge=0, default=-1)
 
 
 class Config(BaseModel):
+    """Deals with parsing values from the config.json.
 
+    Parameters
+    ----------
+    highscore_filename : str
+        Path of the highscore.json file.
+    level_count : int
+        Amount of levels to be played.
+    points_per_pacgum : int
+        Amount of points gained per pacgum eaten.
+    points_per_super_pacgum : int
+        Amount of points gained per super pacgum eaten.
+    points_per_ghost : int
+        Amount of points gained per ghost eaten.
+    points_per_ghost : int
+        Amount of points gained per ghost eaten.
+    default_level : LevelMetadata
+        Defaults of level configurations if none are set.
+
+    Attributes
+    ----------
+    levels : list[LevelMetadata]
+        Level configurations per stage.
+    highscores : list[HighscoreMetadata]
+        List of all highscores.
+
+    Raises
+    ------
+    ValidationError
+        When config.json cannot be read or has invalid syntax.
+
+    """
     file_path: Optional[str] = None
     file_content: Optional[str] = None
 
@@ -43,7 +73,14 @@ class Config(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def parse_file_content(cls, data: Any) -> Any:
+        """Attempts to parse data from file_content if set.
 
+        Raises
+        ------
+        ValidationError
+            When config.json cannot be read or has invalid syntax.
+
+        """
         if not isinstance(data, dict) or not data.get("file_content"):
             return data
 
@@ -65,6 +102,21 @@ class Config(BaseModel):
                         ctx={"error": e}
                     )
                 ]
+            )
+
+        if not isinstance(content, dict):
+            errors.append(InitErrorDetails(
+                type="value_error",
+                loc=("file_content",),
+                input=content,
+                ctx={"error": ValueError(
+                    "json must be an object. "
+                    "Usage: Check README.md"
+                )}
+            ))
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=errors
             )
 
         if "levels" not in data:
@@ -198,7 +250,7 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def validate_config(self) -> "Config":
-
+        """Best effort parsing of data in highscore.json."""
         try:
             with open(self.highscore_filename, 'r', encoding="utf-8") as f:
                 content = f.read()
@@ -237,6 +289,14 @@ class Config(BaseModel):
 
     @classmethod
     def from_argv_file(cls) -> "Config":
+        """Attempts to read config.json specified in CLI argument.
+
+        Raises
+        ------
+        ValidationError
+            When CLI argument is malformed or destination cannot be read.
+
+        """
         if len(sys.argv) < 2:
             raise ValidationError.from_exception_data(
                 title=cls.__name__,
@@ -288,8 +348,20 @@ class Config(BaseModel):
         return cls(file_path=path, file_content=content)  # type: ignore
 
     @staticmethod
-    def _strip_config_comments(raw_content: str):
+    def _strip_config_comments(raw_content: str) -> str:
+        """Removes all comments (#, //, /*) from string.
 
+        Parameters
+        ----------
+        raw_content : str
+            Raw string to have its comments removed.
+
+        Returns
+        -------
+        str
+            String with comments removed.
+
+        """
         lines: list[str] = raw_content.splitlines()
         is_multiline = False
 
