@@ -122,49 +122,31 @@ class SpriteSheetCache(BaseModel):
 
     def _init_cache(self) -> None:
         """Caches known assets when initializing."""
+        # Wall Tiles
+        self.cache_new("CORNER-BOTTOM-RIGHT", 145, 1, 8)
+        self.cache_new("WALL-BOTTOM", 154, 1, 8)
+        self.cache_new("CORNER-BOTTOM-LEFT", 163, 1, 8)
+        self.cache_new("WALL-RIGHT", 145, 10, 8)
+        self.cache_new("WALL-FULL", 154, 10, 8)
+        self.cache_new("WALL-LEFT", 163, 10, 8)
+        self.cache_new("CORNER-TOP-RIGHT", 145, 19, 8)
+        self.cache_new("WALL-TOP", 154, 19, 8)
+        self.cache_new("CORNER-TOP-LEFT", 163, 19, 8)
+
+        # More Wall Tiles
+        self.cache_new("WALL-BOTTOM-RIGHT", 154, 37, 8)
+        self.cache_new("WALL-BOTTOM-LEFT", 163, 37, 8)
+        self.cache_new("WALL-TOP-RIGHT", 154, 46, 8)
+        self.cache_new("WALL-TOP-LEFT", 163, 46, 8)
+
+        # Other
+        self.cache_new("VOID", 181, 10, 8)
+
+    def cache_new(self, name: str, x: int, y: int, size: int) -> None:
+
         self.cache_asset(AssetSource(
-            name="B-TL",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="B-T",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="B-TR",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="B-L",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="VOID",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="B-R",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="B-BL",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="B-B",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
-            scale=(self.scale_factor, self.scale_factor)
-        ))
-        self.cache_asset(AssetSource(
-            name="B-BR",
-            frames=[SpriteRect(x=745, y=187, w=8, h=8)],
+            name=name,
+            frames=[SpriteRect(x=x, y=y, w=size, h=size)],
             scale=(self.scale_factor, self.scale_factor)
         ))
 
