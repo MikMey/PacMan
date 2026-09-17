@@ -6,7 +6,14 @@ import pygame
 
 
 class TileSpriteFactory(BaseModel):
+    """_summary_
 
+    Parameters
+    ----------
+    assets : :obj:`SpriteSheetCache`
+        Cached assets to be used in creating tiles
+
+    """
     assets: SpriteSheetCache
 
     _sub_w: int = PrivateAttr()
@@ -15,7 +22,8 @@ class TileSpriteFactory(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-
+        """Set subtile width and height."""
+        # NOTE: Currently kinda ugly
         super().__init__(*args, **kwargs)
 
         sub_sample = self.assets.get_static("WALL-FULL")
@@ -27,7 +35,27 @@ class TileSpriteFactory(BaseModel):
             top_tile: Optional[Tile], right_tile: Optional[Tile],
             bottom_tile: Optional[Tile], left_tile: Optional[Tile]
             ) -> pygame.Surface:
+        """Get baked tile surface from tile data and its neighbors.
 
+        Parameters
+        ----------
+        main_tile : Tile
+            Tile to get the surface data of.
+        top_tile : Optional[Tile]
+            Tile to the north of the main tile.
+        right_tile : Optional[Tile]
+            Tile to the east of the main tile.
+        bottom_tile : Optional[Tile]
+            Tile to the south of the main tile.
+        left_tile : Optional[Tile]
+            Tile to the west of the main tile.
+
+        Returns
+        -------
+        pygame.Surface
+            Ready to draw surface of collected subtiles.
+
+        """
         surface = pygame.Surface((self._sub_w * 3, self._sub_h * 3))
 
         def at(w: int, h: int) -> tuple[int, int]:
@@ -94,54 +122,42 @@ class TileSpriteFactory(BaseModel):
 
         return surface
 
-    def assemble_2x2_tile(self,
-                          tl: str, tr: str,
-                          bl: str, br: str) -> pygame.Surface:
+    def get_item(self, tile: Tile) -> pygame.Surface:
+        """Get item of tile based on tile data.
 
-        tile_surface = pygame.Surface((self._sub_w * 2, self._sub_h * 2))
+        Parameters
+        ----------
+        tile : Tile
+            Tile to get the item of.
 
-        tile_surface.blit(self.assets.get_static(tl), (0, 0))
-        tile_surface.blit(self.assets.get_static(tr), (self._sub_w, 0))
-        tile_surface.blit(self.assets.get_static(bl), (0, self._sub_h))
-        tile_surface.blit(self.assets.get_static(br), (self._sub_w,
-                                                       self._sub_h))
+        Returns
+        -------
+        pygame.Surface
+            Surface of the item (e.g. pacgum)
+        """
+        # NOTE: not fully implemented
+        surface = pygame.Surface((self._sub_w, self._sub_h))
 
-        return tile_surface.convert_alpha()
+        surface.blit(self.assets.get_static("PACGUM"), (0, 0))
 
-    def assemble_3x3_tile(self,
-                          tl: str, tm: str, tr: str,
-                          ml: str,          mr: str,
-                          bl: str, bm: str, br: str) -> pygame.Surface:
-
-        tile_surface = pygame.Surface((self._sub_w * 3, self._sub_h * 3))
-
-        tile_surface.blit(self.assets.get_static(tl),
-                          (0, 0))
-        tile_surface.blit(self.assets.get_static(tm),
-                          (self._sub_w, 0))
-        tile_surface.blit(self.assets.get_static(tr),
-                          (self._sub_w * 2, 0))
-
-        tile_surface.blit(self.assets.get_static(ml),
-                          (0, self._sub_h))
-        # tile_surface.blit(self.assets.get_static(mm),
-        #                   (self._sub_w, self._sub_h))
-        tile_surface.blit(self.assets.get_static(mr),
-                          (self._sub_w * 2, self._sub_h))
-
-        tile_surface.blit(self.assets.get_static(bl),
-                          (0, self._sub_h * 2))
-        tile_surface.blit(self.assets.get_static(bm),
-                          (self._sub_w, self._sub_h * 2))
-        tile_surface.blit(self.assets.get_static(br),
-                          (self._sub_w * 2, self._sub_h * 2))
-
-        return tile_surface.convert_alpha()
+        return surface
 
 
 class StaticBackgroundElement(pygame.sprite.Sprite):
+    """Sprite of background elements that are not animated.
 
+    Parameters
+    ----------
+    image : pygame.Surface
+        Image to be drawn on screen.
+    x : int
+        On screen posiition (times its on width).
+    y : int
+        On screen posiition (times its on height).
+
+    """
     def __init__(self, surface: pygame.Surface, x: int, y: int) -> None:
+        """Setting up pydantic sprite attributes."""
         super().__init__()
 
         self.image = surface
@@ -152,19 +168,37 @@ class StaticBackgroundElement(pygame.sprite.Sprite):
 
 
 class Tile(BaseModel):
+    """Metadata of tile walls and items (not holding sprite data).
 
+    Parameters
+    ----------
+    is_top_closed : bool
+        True if there is a wall to the north of tile.
+    is_right_closed : bool
+        True if there is a wall to the east of tile.
+    is_bottom_closed : bool
+        True if there is a wall to the south of tile.
+    is_left_closed : bool
+        True if there is a wall to the west of tile.
+
+    """
     is_top_closed: bool
     is_right_closed: bool
     is_bottom_closed: bool
     is_left_closed: bool
 
-    tile_layout: Optional[pygame.Surface] = None
-
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_hex_state(cls, hex: int) -> "Tile":
+        """Converts MazeGenerator hex values to class flags.
 
+        Parameters
+        ----------
+        hex : int
+            Hex value to be converted.
+
+        """
         return cls(
             is_top_closed=bool(hex & 0b0001),
             is_right_closed=bool(hex & 0b0010),
