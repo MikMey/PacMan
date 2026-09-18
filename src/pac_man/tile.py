@@ -6,7 +6,7 @@ import pygame
 
 
 class TileSpriteFactory(BaseModel):
-    """_summary_
+    """Creates tiles from tile data (separated for performance).
 
     Parameters
     ----------
@@ -26,7 +26,7 @@ class TileSpriteFactory(BaseModel):
         # NOTE: Currently kinda ugly
         super().__init__(*args, **kwargs)
 
-        sub_sample = self.assets.get_static("WALL-FULL")
+        sub_sample = self.assets.get_static("WALL-RIGHT")
         self._sub_w = sub_sample.get_width()
         self._sub_h = sub_sample.get_height()
 
@@ -58,67 +58,123 @@ class TileSpriteFactory(BaseModel):
         """
         surface = pygame.Surface((self._sub_w * 3, self._sub_h * 3))
 
-        def at(w: int, h: int) -> tuple[int, int]:
-            """Helper to convert subtile positions to pixel positions."""
-            return (self._sub_w * w, self._sub_h * h)
+        def blit(name: str, w: int, h: int) -> None:
+            """Helper function to blit to surface from subtile position.
 
-        # Neighbor dependent non-cardinals
-        if left_tile is not None:
-            if not main_tile.is_top_closed and left_tile.is_top_closed:
-                surface.blit(self.assets.get_static("CORNER-TOP-LEFT"),
-                             at(0, 0))
-            if not main_tile.is_bottom_closed and left_tile.is_bottom_closed:
-                surface.blit(self.assets.get_static("CORNER-BOTTOM-LEFT"),
-                             at(0, 2))
+            Parameters
+            ----------
+            name : str
+                Key of static surface in :obj:`SpriteSheetCache`.
+            w : int
+                Horizontal subtile position (0, 1, 2).
+            h : int
+                Vertical subtile position (0, 1, 2).
+
+            """
+            surface.blit(
+                self.assets.get_static(name),
+                (self._sub_w * w, self._sub_h * h)
+            )
+
+        # Wall Ends (Corners)
+        if top_tile is not None:
+            if not main_tile.is_right_closed and top_tile.is_right_closed:
+                blit("CORNER-TOP-RIGHT", 2, 0)
+            if not main_tile.is_left_closed and top_tile.is_left_closed:
+                blit("CORNER-TOP-LEFT", 0, 0)
         if right_tile is not None:
             if not main_tile.is_top_closed and right_tile.is_top_closed:
-                surface.blit(self.assets.get_static("CORNER-TOP-RIGHT"),
-                             at(2, 0))
+                blit("CORNER-TOP-RIGHT", 2, 0)
             if not main_tile.is_bottom_closed and right_tile.is_bottom_closed:
-                surface.blit(self.assets.get_static("CORNER-BOTTOM-RIGHT"),
-                             at(2, 2))
-        if top_tile is not None:
-            if not main_tile.is_left_closed and top_tile.is_left_closed:
-                surface.blit(self.assets.get_static("CORNER-TOP-LEFT"),
-                             at(0, 0))
-            if not main_tile.is_right_closed and top_tile.is_right_closed:
-                surface.blit(self.assets.get_static("CORNER-TOP-RIGHT"),
-                             at(2, 0))
+                blit("CORNER-BOTTOM-RIGHT", 2, 2)
         if bottom_tile is not None:
-            if not main_tile.is_left_closed and bottom_tile.is_left_closed:
-                surface.blit(self.assets.get_static("CORNER-BOTTOM-LEFT"),
-                             at(0, 2))
             if not main_tile.is_right_closed and bottom_tile.is_right_closed:
-                surface.blit(self.assets.get_static("CORNER-BOTTOM-RIGHT"),
-                             at(2, 2))
+                blit("CORNER-BOTTOM-RIGHT", 2, 2)
+            if not main_tile.is_left_closed and bottom_tile.is_left_closed:
+                blit("CORNER-BOTTOM-LEFT", 0, 2)
+        if left_tile is not None:
+            if not main_tile.is_top_closed and left_tile.is_top_closed:
+                blit("CORNER-TOP-LEFT", 0, 0)
+            if not main_tile.is_bottom_closed and left_tile.is_bottom_closed:
+                blit("CORNER-BOTTOM-LEFT", 0, 2)
 
-        # Block whole 3 tiles, change later
+        # Main Wall and Border Tilings
         if main_tile.is_top_closed:
-            surface.blit(self.assets.get_static("WALL-TOP"), at(0, 0))
-            surface.blit(self.assets.get_static("WALL-TOP"), at(1, 0))
-            surface.blit(self.assets.get_static("WALL-TOP"), at(2, 0))
+            if top_tile is None:
+                for i in range(3):
+                    blit("BORDER-TOP", i, 0)
+            else:
+                for i in range(3):
+                    blit("WALL-TOP", i, 0)
+            pass
         if main_tile.is_right_closed:
-            surface.blit(self.assets.get_static("WALL-RIGHT"), at(2, 0))
-            surface.blit(self.assets.get_static("WALL-RIGHT"), at(2, 1))
-            surface.blit(self.assets.get_static("WALL-RIGHT"), at(2, 2))
+            if right_tile is None:
+                for i in range(3):
+                    blit("BORDER-RIGHT", 2, i)
+            else:
+                for i in range(3):
+                    blit("WALL-RIGHT", 2, i)
         if main_tile.is_bottom_closed:
-            surface.blit(self.assets.get_static("WALL-BOTTOM"), at(0, 2))
-            surface.blit(self.assets.get_static("WALL-BOTTOM"), at(1, 2))
-            surface.blit(self.assets.get_static("WALL-BOTTOM"), at(2, 2))
+            if bottom_tile is None:
+                for i in range(3):
+                    blit("BORDER-BOTTOM", i, 2)
+            else:
+                for i in range(3):
+                    blit("WALL-BOTTOM", i, 2)
         if main_tile.is_left_closed:
-            surface.blit(self.assets.get_static("WALL-LEFT"), at(0, 0))
-            surface.blit(self.assets.get_static("WALL-LEFT"), at(0, 1))
-            surface.blit(self.assets.get_static("WALL-LEFT"), at(0, 2))
+            if left_tile is None:
+                for i in range(3):
+                    blit("BORDER-LEFT", 0, i)
+            else:
+                for i in range(3):
+                    blit("WALL-LEFT", 0, i)
 
-        # Corners when cardinal adjacent
-        if main_tile.is_top_closed and main_tile.is_left_closed:
-            surface.blit(self.assets.get_static("WALL-TOP-LEFT"), at(0, 0))
+        # Border to Wall Connections
+        if main_tile.is_top_closed and top_tile is None:
+            if main_tile.is_right_closed:
+                blit("BORDER-TOP-WALL-RIGHT", 2, 0)
+            if main_tile.is_left_closed:
+                blit("BORDER-TOP-WALL-LEFT", 0, 0)
+        if main_tile.is_right_closed and right_tile is None:
+            if main_tile.is_bottom_closed:
+                blit("BORDER-RIGHT-WALL-BOTTOM", 2, 2)
+            if main_tile.is_top_closed:
+                blit("BORDER-RIGHT-WALL-TOP", 2, 0)
+        if main_tile.is_bottom_closed and bottom_tile is None:
+            if main_tile.is_right_closed:
+                blit("BORDER-BOTTOM-WALL-RIGHT", 2, 2)
+            if main_tile.is_left_closed:
+                blit("BORDER-BOTTOM-WALL-LEFT", 0, 2)
+        if main_tile.is_left_closed and left_tile is None:
+            if main_tile.is_bottom_closed:
+                blit("BORDER-LEFT-WALL-BOTTOM", 0, 2)
+            if main_tile.is_top_closed:
+                blit("BORDER-LEFT-WALL-TOP", 0, 0)
+
+        # Border Corners
+        if top_tile is None and right_tile is None:
+            blit("BORDER-TOP-RIGHT", 2, 0)
+        if top_tile is None and left_tile is None:
+            blit("BORDER-TOP-LEFT", 0, 0)
+        if bottom_tile is None and right_tile is None:
+            blit("BORDER-BOTTOM-RIGHT", 2, 2)
+        if bottom_tile is None and left_tile is None:
+            blit("BORDER-BOTTOM-LEFT", 0, 2)
+
+        # End all Borders early
+        if (top_tile is None or right_tile is None or
+                bottom_tile is None or left_tile is None):
+            return surface
+
+        # Wall Conenctions
         if main_tile.is_top_closed and main_tile.is_right_closed:
-            surface.blit(self.assets.get_static("WALL-TOP-RIGHT"), at(2, 0))
-        if main_tile.is_bottom_closed and main_tile.is_left_closed:
-            surface.blit(self.assets.get_static("WALL-BOTTOM-LEFT"), at(0, 2))
+            blit("WALL-TOP-RIGHT", 2, 0)
+        if main_tile.is_top_closed and main_tile.is_left_closed:
+            blit("WALL-TOP-LEFT", 0, 0)
         if main_tile.is_bottom_closed and main_tile.is_right_closed:
-            surface.blit(self.assets.get_static("WALL-BOTTOM-RIGHT"), at(2, 2))
+            blit("WALL-BOTTOM-RIGHT", 2, 2)
+        if main_tile.is_bottom_closed and main_tile.is_left_closed:
+            blit("WALL-BOTTOM-LEFT", 0, 2)
 
         return surface
 

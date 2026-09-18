@@ -19,53 +19,74 @@ class Player(pygame.sprite.Sprite):
         """Initialize positioning and animation logic."""
         super().__init__()
         self.asset_cache = asset_cache
-
-        self.current_dir: Direction = Direction()
-        self.buffered_dir: Direction = Direction()
-
-        self.current_frame = 0
-        self.max_frame = -1
-        self.animation_speed = 0.1
-        self.animation_timer = 0.0
-        self.speed: int = 4
-        self.set_current_image()
-
         self.subtile_size: int = subtile_size
         self.tile_size: int = subtile_size * subtile_mult
+
+        # Game logic attributes
+        self.is_dying: bool = False
+
+        # Movement attributes
+        self.current_dir: Direction = Direction()
+        self.buffered_dir: Direction = Direction()
 
         self.current_tile: Tile_Pos = replace(start_pos)
         self.target_tile: Tile_Pos = replace(start_pos)
 
+        self.speed: int = 4
+
+        # Frame logic attributes
+        self.current_frame = 0
+        self.max_frame = -1
+        self.animation_speed = 0.1
+        self.animation_timer = 0.0
+        self.set_current_image()
+
+        # Needed by pygame
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.topleft = (
             self.current_tile.x * self.tile_size + self.subtile_size // 2,
             self.current_tile.y * self.tile_size + self.subtile_size // 2
         )
 
+    def kill(self) -> None:
+        """Starts death animation."""
+
+        self.is_dying = True
+        self.animation_timer = 0.0
+
+    def _dir_to_string(self, dir: Direction) -> str:
+        """Converts :obj:`Direction` to string. Defaults to RIGHT.
+
+        Parameters
+        ----------
+        dir : Direction
+            Direction class to be converted.
+
+        Returns
+        -------
+        str
+            String indicating direction (TOP, RIGHT, LEFT, BOTTOM).
+
+        """
+        if dir.vert == 1:
+            return "BOTTOM"
+        elif dir.vert == -1:
+            return "TOP"
+        elif dir.hori == -1:
+            return "LEFT"
+        return "RIGHT"
+
     def set_current_image(self) -> None:
-        """Get correct sprite data based on direction"""
-        dir = ""
-        if self.current_dir.is_still():
-            if self.buffered_dir.vert == 1:
-                dir = "BOTTOM"
-            elif self.buffered_dir.vert == -1:
-                dir = "TOP"
-            elif self.buffered_dir.hori == -1:
-                dir = "LEFT"
-            else:
-                dir = "RIGHT"
-
+        """Get correct sprite data based on context."""
+        if self.is_dying:
+            frames = self.asset_cache.get_anim("PACMAN-DEATH")
+        elif self.current_dir.is_still():
+            frames = self.asset_cache.get_anim(
+                "PACMAN-" + self._dir_to_string(self.buffered_dir))
         else:
-            if self.current_dir.vert == 1:
-                dir = "BOTTOM"
-            elif self.current_dir.vert == -1:
-                dir = "TOP"
-            elif self.current_dir.hori == -1:
-                dir = "LEFT"
-            else:
-                dir = "RIGHT"
+            frames = self.asset_cache.get_anim(
+                "PACMAN-" + self._dir_to_string(self.current_dir))
 
-        frames = self.asset_cache.get_anim("PACMAN-" + dir)
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
 
@@ -86,6 +107,9 @@ class Player(pygame.sprite.Sprite):
             self.buffered_dir.set(0, 1)
         elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.buffered_dir.set(-1, 0)
+
+        if keys[pygame.K_KP1]:
+            self.kill()
 
     def _is_wall(self, direction: Direction,
                  tile_matrix: list[list[Tile]]) -> bool:
@@ -166,6 +190,9 @@ class Player(pygame.sprite.Sprite):
             Full matrix of Tiles to look up wall states in.
 
         """
+        if self.is_dying:
+            return
+
         target_pixel: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
         target_pixel.x += self.subtile_size // 2
         target_pixel.y += self.subtile_size // 2

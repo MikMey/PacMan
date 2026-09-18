@@ -83,7 +83,7 @@ class SpriteSheetCache(BaseModel):
         """Initializes default cache."""
         super().__init__(*args, **kwargs)
 
-        self._init_cache()
+        self._init_default_cache()
 
     @classmethod
     def from_default_file_path(cls, scale_factor: float) -> "SpriteSheetCache":
@@ -122,25 +122,99 @@ class SpriteSheetCache(BaseModel):
 
         return cls(sheet_surface=raw_sheet_image, scale_factor=scale_factor)
 
-    def _init_cache(self) -> None:
+    def _init_default_cache(self) -> None:
         """Caches known assets when initializing."""
 
-        # Wall Tiles
-        self.cache_new("CORNER-BOTTOM-RIGHT", 145, 1, 8)
-        self.cache_new("WALL-BOTTOM", 154, 1, 8)
-        self.cache_new("CORNER-BOTTOM-LEFT", 163, 1, 8)
-        self.cache_new("WALL-RIGHT", 145, 10, 8)
-        self.cache_new("WALL-FULL", 154, 10, 8)
-        self.cache_new("WALL-LEFT", 163, 10, 8)
-        self.cache_new("CORNER-TOP-RIGHT", 145, 19, 8)
-        self.cache_new("WALL-TOP", 154, 19, 8)
-        self.cache_new("CORNER-TOP-LEFT", 163, 19, 8)
+        # === STATIC TILES === #
 
-        # More Wall Tiles
-        self.cache_new("WALL-BOTTOM-RIGHT", 154, 37, 8)
-        self.cache_new("WALL-BOTTOM-LEFT", 163, 37, 8)
+        # Border Tiles
+        self.cache_new("BORDER-TOP", 181, 19, 8)
+        self.cache_new("BORDER-RIGHT", 172, 10, 8)
+        self.cache_new("BORDER-BOTTOM", 181, 1, 8)
+        self.cache_new("BORDER-LEFT", 190, 10, 8)
+        self.cache_new("BORDER-TOP-RIGHT", 172, 28, 8)
+        self.cache_new("BORDER-TOP-LEFT", 145, 28, 8)
+        self.cache_new("BORDER-BOTTOM-RIGHT", 172, 55, 8)
+        self.cache_new("BORDER-BOTTOM-LEFT", 145, 55, 8)
+
+        # Border Tiles connectiong to Wall Tiles
+        self.cache_new("BORDER-TOP-WALL-RIGHT", 154, 28, 8)
+        self.cache_new("BORDER-TOP-WALL-LEFT", 163, 28, 8)
+        self.cache_new("BORDER-RIGHT-WALL-TOP", 172, 46, 8)
+        self.cache_new("BORDER-RIGHT-WALL-BOTTOM", 172, 37, 8)
+        self.cache_new("BORDER-BOTTOM-WALL-RIGHT", 154, 28, 8, flip_y=True)
+        self.cache_new("BORDER-BOTTOM-WALL-LEFT", 163, 28, 8, flip_y=True)
+        self.cache_new("BORDER-LEFT-WALL-TOP", 145, 46, 8)
+        self.cache_new("BORDER-LEFT-WALL-BOTTOM", 145, 37, 8)
+
+        # Wall Tiles
+        self.cache_new("WALL-TOP", 154, 19, 8)
+        self.cache_new("WALL-RIGHT", 145, 10, 8)
+        self.cache_new("WALL-BOTTOM", 154, 1, 8)
+        self.cache_new("WALL-LEFT", 163, 10, 8)
         self.cache_new("WALL-TOP-RIGHT", 154, 46, 8)
         self.cache_new("WALL-TOP-LEFT", 163, 46, 8)
+        self.cache_new("WALL-BOTTOM-RIGHT", 154, 37, 8)
+        self.cache_new("WALL-BOTTOM-LEFT", 163, 37, 8)
+
+        # Corner tiles (to round of ending walls)
+        self.cache_new("CORNER-TOP-RIGHT", 145, 19, 8)
+        self.cache_new("CORNER-TOP-LEFT", 163, 19, 8)
+        self.cache_new("CORNER-BOTTOM-RIGHT", 145, 1, 8)
+        self.cache_new("CORNER-BOTTOM-LEFT", 163, 1, 8)
+
+        # Tile Items
+        self.cache_new("PACGUM", 136, 10, 8)
+        self.cache_new("SUPER-PACGUM", 136, 28, 8)
+
+        # Numbers, Letters and Special Characters
+        self.cache_new("CHAR-0", 1, 19, 8)
+        self.cache_new("CHAR-1", 10, 19, 8)
+        self.cache_new("CHAR-2", 19, 19, 8)
+        self.cache_new("CHAR-3", 28, 19, 8)
+        self.cache_new("CHAR-4", 37, 19, 8)
+        self.cache_new("CHAR-5", 46, 19, 8)
+        self.cache_new("CHAR-6", 55, 19, 8)
+        self.cache_new("CHAR-7", 64, 19, 8)
+        self.cache_new("CHAR-8", 73, 19, 8)
+        self.cache_new("CHAR-9", 82, 19, 8)
+
+        self.cache_new("CHAR-A", 1, 28, 8)
+        self.cache_new("CHAR-B", 10, 28, 8)
+        self.cache_new("CHAR-C", 19, 28, 8)
+        self.cache_new("CHAR-D", 28, 28, 8)
+        self.cache_new("CHAR-E", 37, 28, 8)
+        self.cache_new("CHAR-F", 46, 28, 8)
+        self.cache_new("CHAR-G", 55, 28, 8)
+        self.cache_new("CHAR-H", 64, 28, 8)
+        self.cache_new("CHAR-I", 73, 28, 8)
+        self.cache_new("CHAR-J", 82, 28, 8)
+        self.cache_new("CHAR-K", 91, 28, 8)
+        self.cache_new("CHAR-L", 100, 28, 8)
+        self.cache_new("CHAR-M", 109, 28, 8)
+        self.cache_new("CHAR-N", 1, 37, 8)
+        self.cache_new("CHAR-O", 10, 37, 8)
+        self.cache_new("CHAR-P", 19, 37, 8)
+        self.cache_new("CHAR-Q", 28, 37, 8)
+        self.cache_new("CHAR-R", 37, 37, 8)
+        self.cache_new("CHAR-S", 46, 37, 8)
+        self.cache_new("CHAR-T", 55, 37, 8)
+        self.cache_new("CHAR-U", 64, 37, 8)
+        self.cache_new("CHAR-V", 73, 37, 8)
+        self.cache_new("CHAR-W", 82, 37, 8)
+        self.cache_new("CHAR-X", 91, 37, 8)
+        self.cache_new("CHAR-Y", 100, 37, 8)
+        self.cache_new("CHAR-Z", 109, 37, 8)
+
+        self.cache_new("CHAR-/", 91, 10, 8)
+        self.cache_new("CHAR--", 100, 10, 8)
+        self.cache_new("CHAR-.", 109, 10, 8)
+        self.cache_new("CHAR-\"", 91, 19, 8)
+        self.cache_new("CHAR-!", 109, 19, 8)
+
+        self.cache_new("CHAR-COPYRIGHT", 100, 19, 8)
+
+        # === ANIMATED TILES === #
 
         # Pacman Sprites
         self.cache_new_anim(
@@ -163,13 +237,12 @@ class SpriteSheetCache(BaseModel):
             [(103, 168), (120, 151), (120, 134), (120, 151)],
             size=16, flip_y=True
         )
-
-        # Tile Items
-        self.cache_new("PACGUM", 136, 10, 8)
-        self.cache_new("SUPER-PACGUM", 136, 28, 8)
-
-        # Other
-        self.cache_new("VOID", 181, 10, 8)
+        self.cache_new_anim(
+            "PACMAN-DEATH",
+            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
+             (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
+            size=16
+        )
 
     def cache_new(self, name: str, x: int, y: int, size: int,
                   flip_x: bool = False, flip_y: bool = False,

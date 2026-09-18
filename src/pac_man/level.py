@@ -2,6 +2,7 @@ from .structures import Tile_Pos
 from .spritesheet import SpriteSheetCache
 from .tile import TileSpriteFactory, Tile, StaticBackgroundElement
 from .player import Player
+from .text import TextSpriteFactory
 
 import pygame
 
@@ -17,8 +18,13 @@ class Level:
         self.tile_matrix = self.hex_to_tile_matrix(hex_matrix)
         self.screen = screen
 
+        # Tiles without pacgums
         self.bg_group = pygame.sprite.Group()
+        # Text and numbers
+        self.text_group = pygame.sprite.Group()
+        # Pacgums and such
         self.item_group = pygame.sprite.Group()
+        # Pacman
         self.player_group = pygame.sprite.Group()
 
         self.populate_sprite_groups()
@@ -32,6 +38,7 @@ class Level:
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
+        text_factory = TextSpriteFactory(assets=self.asset_cache)
 
         maze_x = len(self.tile_matrix[0])
         maze_y = len(self.tile_matrix)
@@ -83,6 +90,12 @@ class Level:
                         x=x * 3,
                         y=y * 3 + 1
                     ))
+
+        self.text_group.add(StaticBackgroundElement(
+            text_factory.from_string(s="HIGH SCORE"),
+            x=2,
+            y=0
+        ))
 
         self.pacman = Player(
             asset_cache=self.asset_cache,
@@ -136,3 +149,4 @@ class Level:
         self.bg_group.draw(self.screen)
         self.item_group.draw(self.screen)
         self.player_group.draw(self.screen)
+        self.text_group.draw(self.screen)
