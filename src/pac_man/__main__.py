@@ -1,6 +1,7 @@
 from .configuration import Config
 from .spritesheet import SpriteSheetCache
 from .level import Level
+from .hud import Hud
 
 from mazegenerator import MazeGenerator
 from pydantic import ValidationError
@@ -21,7 +22,7 @@ def main() -> int:
 
     # Start up pygame (NOTE: dimensions may need to fit maze dimensions)
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((1000, 1200))
     pygame.display.set_caption("Pac-Man")
     clock = pygame.time.Clock()
 
@@ -40,6 +41,7 @@ def main() -> int:
     hex_matrix = MazeGenerator(size=(maze_x, maze_y)).maze
 
     # Initialize Level (NOTE: soon in a centralized main class?)
+    hud = Hud(asset_cache=asset_cache, screen=screen)
     level = Level(
         hex_matrix=hex_matrix,
         asset_cache=asset_cache,
@@ -55,6 +57,8 @@ def main() -> int:
             if event.type == pygame.QUIT:
                 running = False
 
+        screen.fill((176, 38, 255))
+        hud.loop(dt)
         level.loop(dt)
 
         pygame.display.flip()

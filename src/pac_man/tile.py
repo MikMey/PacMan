@@ -199,7 +199,7 @@ class TileSpriteFactory(BaseModel):
         return surface
 
 
-class StaticBackgroundElement(pygame.sprite.Sprite):
+class StaticSpriteElement(pygame.sprite.Sprite):
     """Sprite of background elements that are not animated.
 
     Parameters
@@ -212,6 +212,9 @@ class StaticBackgroundElement(pygame.sprite.Sprite):
         On screen posiition (times its on height).
 
     """
+    image: pygame.Surface
+    rect = pygame.Rect
+
     def __init__(self, surface: pygame.Surface, x: int, y: int) -> None:
         """Setting up pydantic sprite attributes."""
         super().__init__()
@@ -221,6 +224,23 @@ class StaticBackgroundElement(pygame.sprite.Sprite):
             x * self.image.get_width(),
             y * self.image.get_height()
         ))
+
+    # @classmethod
+    # def from_pixel(cls, surface: pygame.Surface,
+    #                x: int, y: int) -> "StaticSpriteElement":
+    #     """_summary_
+
+    #     Parameters
+    #     ----------
+    #     surface : pygame.Surface
+    #         _description_
+    #     x : int
+    #         _description_
+    #     y : int
+    #         _description_
+
+    #     """
+    #     return cls(image=surface, rect=self.image.get_rect(topleft(1, 1)))
 
 
 class Tile(BaseModel):

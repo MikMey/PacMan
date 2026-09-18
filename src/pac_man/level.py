@@ -1,8 +1,7 @@
 from .structures import Tile_Pos
 from .spritesheet import SpriteSheetCache
-from .tile import TileSpriteFactory, Tile, StaticBackgroundElement
+from .tile import TileSpriteFactory, Tile, StaticSpriteElement
 from .player import Player
-from .text import TextSpriteFactory
 
 import pygame
 
@@ -18,10 +17,12 @@ class Level:
         self.tile_matrix = self.hex_to_tile_matrix(hex_matrix)
         self.screen = screen
 
+        # NOTE: currently arbitrary
+        self.display_surface = pygame.Surface((800, 800))
+        self.position = pygame.Vector2(100, 200)
+
         # Tiles without pacgums
         self.bg_group = pygame.sprite.Group()
-        # Text and numbers
-        self.text_group = pygame.sprite.Group()
         # Pacgums and such
         self.item_group = pygame.sprite.Group()
         # Pacman
@@ -38,7 +39,6 @@ class Level:
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
-        text_factory = TextSpriteFactory(assets=self.asset_cache)
 
         maze_x = len(self.tile_matrix[0])
         maze_y = len(self.tile_matrix)
@@ -47,7 +47,7 @@ class Level:
             for x in range(len(self.tile_matrix[y])):
                 main_tile = self.tile_matrix[y][x]
 
-                self.bg_group.add(StaticBackgroundElement(
+                self.bg_group.add(StaticSpriteElement(
                     tile_factory.from_tile(
                         main_tile=main_tile,
                         top_tile=self.tile_matrix[y-1][x] if y > 0 else None,
@@ -60,46 +60,40 @@ class Level:
                     x=x,
                     y=y
                 ))
-                self.item_group.add(StaticBackgroundElement(
+                self.item_group.add(StaticSpriteElement(
                     tile_factory.get_item(tile=main_tile),
                     x=x * 3 + 1,
                     y=y * 3 + 1
                 ))
 
                 if not main_tile.is_top_closed:
-                    self.item_group.add(StaticBackgroundElement(
+                    self.item_group.add(StaticSpriteElement(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 1,
                         y=y * 3
                     ))
                 if not main_tile.is_right_closed:
-                    self.item_group.add(StaticBackgroundElement(
+                    self.item_group.add(StaticSpriteElement(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 2,
                         y=y * 3 + 1
                     ))
                 if not main_tile.is_bottom_closed:
-                    self.item_group.add(StaticBackgroundElement(
+                    self.item_group.add(StaticSpriteElement(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 1,
                         y=y * 3 + 2
                     ))
                 if not main_tile.is_left_closed:
-                    self.item_group.add(StaticBackgroundElement(
+                    self.item_group.add(StaticSpriteElement(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3,
                         y=y * 3 + 1
                     ))
 
-        self.text_group.add(StaticBackgroundElement(
-            text_factory.from_string(s="HIGH SCORE"),
-            x=2,
-            y=0
-        ))
-
         self.pacman = Player(
             asset_cache=self.asset_cache,
-            start_pos=Tile_Pos(0, 0),
+            start_pos=Tile_Pos(1, 1),
             subtile_size=tile_factory._sub_w,
             subtile_mult=3
         )
@@ -145,8 +139,9 @@ class Level:
         for item in items_eaten:
             item.kill()
 
-        self.screen.fill((140, 40, 40))
-        self.bg_group.draw(self.screen)
-        self.item_group.draw(self.screen)
-        self.player_group.draw(self.screen)
-        self.text_group.draw(self.screen)
+        # self.display_surface.fill((140, 40, 40))
+        self.bg_group.draw(self.display_surface)
+        self.item_group.draw(self.display_surface)
+        self.player_group.draw(self.display_surface)
+
+        self.screen.blit(self.display_surface, self.position)
