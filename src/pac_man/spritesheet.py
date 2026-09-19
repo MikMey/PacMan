@@ -72,7 +72,7 @@ class SpriteSheetCache(BaseModel):
 
     """
     sheet_surface: pygame.Surface
-    scale_factor: float = Field(ge=1)
+    scale_factor: float  # = Field(ge=1)
 
     reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
     reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)

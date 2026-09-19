@@ -1,6 +1,6 @@
 from .structures import Tile_Pos
 from .spritesheet import SpriteSheetCache
-from .tile import TileSpriteFactory, Tile, StaticSpriteElement
+from .tile import (TileSpriteFactory, Tile, StaticSpriteElement, TILE_SIZE)
 from .player import Player
 
 import pygame
@@ -11,15 +11,23 @@ class Level:
 
     def __init__(self, hex_matrix: list[list[int]],
                  asset_cache: SpriteSheetCache,
-                 screen: pygame.Surface) -> None:
+                 screen: pygame.Surface,
+                 horizontal_padding: int,
+                 vertical_padding: int) -> None:
         """Create sprites that are needed in level."""
         self.asset_cache = asset_cache
         self.tile_matrix = self.hex_to_tile_matrix(hex_matrix)
         self.screen = screen
 
         # NOTE: currently arbitrary
-        self.display_surface = pygame.Surface((800, 800))
-        self.position = pygame.Vector2(100, 200)
+        self.display_surface = pygame.Surface((
+            self.screen.get_width() - 2 * horizontal_padding,
+            self.screen.get_height() - 2 * vertical_padding,
+        ))
+        self.position = pygame.Vector2(
+            horizontal_padding,
+            vertical_padding
+        )
 
         # Tiles without pacgums
         self.bg_group = pygame.sprite.Group()
@@ -47,7 +55,7 @@ class Level:
             for x in range(len(self.tile_matrix[y])):
                 main_tile = self.tile_matrix[y][x]
 
-                self.bg_group.add(StaticSpriteElement(
+                self.bg_group.add(StaticSpriteElement.from_relative(
                     tile_factory.from_tile(
                         main_tile=main_tile,
                         top_tile=self.tile_matrix[y-1][x] if y > 0 else None,
@@ -60,32 +68,32 @@ class Level:
                     x=x,
                     y=y
                 ))
-                self.item_group.add(StaticSpriteElement(
+                self.item_group.add(StaticSpriteElement.from_relative(
                     tile_factory.get_item(tile=main_tile),
                     x=x * 3 + 1,
                     y=y * 3 + 1
                 ))
 
                 if not main_tile.is_top_closed:
-                    self.item_group.add(StaticSpriteElement(
+                    self.item_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 1,
                         y=y * 3
                     ))
                 if not main_tile.is_right_closed:
-                    self.item_group.add(StaticSpriteElement(
+                    self.item_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 2,
                         y=y * 3 + 1
                     ))
                 if not main_tile.is_bottom_closed:
-                    self.item_group.add(StaticSpriteElement(
+                    self.item_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 1,
                         y=y * 3 + 2
                     ))
                 if not main_tile.is_left_closed:
-                    self.item_group.add(StaticSpriteElement(
+                    self.item_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3,
                         y=y * 3 + 1
@@ -126,14 +134,14 @@ class Level:
         )
 
         items_eaten = []
-        eat_radius = 10
+        eat_radius = 5 * self.asset_cache.scale_factor
 
         for item in possible_collisions:
             dx = self.pacman.rect.centerx - item.rect.centerx
             dy = self.pacman.rect.centery - item.rect.centery
-            distance_squared = (dx * dx) + (dy * dy)
+            distance_squared = (dx ** 2) + (dy ** 2)
 
-            if distance_squared < (eat_radius * eat_radius):
+            if distance_squared < (eat_radius ** 2):
                 items_eaten.append(item)
 
         for item in items_eaten:

@@ -5,6 +5,10 @@ from typing import Any, Optional
 import pygame
 
 
+SUBTILE_SIZE = 8
+TILE_SIZE = SUBTILE_SIZE * 3
+
+
 class TileSpriteFactory(BaseModel):
     """Creates tiles from tile data (separated for performance).
 
@@ -215,32 +219,38 @@ class StaticSpriteElement(pygame.sprite.Sprite):
     image: pygame.Surface
     rect = pygame.Rect
 
-    def __init__(self, surface: pygame.Surface, x: int, y: int) -> None:
+    def __init__(self, image: pygame.Surface, rect: pygame.Rect) -> None:
         """Setting up pydantic sprite attributes."""
         super().__init__()
 
-        self.image = surface
-        self.rect = self.image.get_rect(topleft=(
-            x * self.image.get_width(),
-            y * self.image.get_height()
-        ))
+        self.image = image
+        self.rect = rect
 
-    # @classmethod
-    # def from_pixel(cls, surface: pygame.Surface,
-    #                x: int, y: int) -> "StaticSpriteElement":
-    #     """_summary_
+    @classmethod
+    def from_pixel(cls, image: pygame.Surface,
+                   x: int, y: int) -> "StaticSpriteElement":
+        """_summary_
 
-    #     Parameters
-    #     ----------
-    #     surface : pygame.Surface
-    #         _description_
-    #     x : int
-    #         _description_
-    #     y : int
-    #         _description_
+        Parameters
+        ----------
+        surface : pygame.Surface
+            _description_
+        x : int
+            _description_
+        y : int
+            _description_
 
-    #     """
-    #     return cls(image=surface, rect=self.image.get_rect(topleft(1, 1)))
+        """
+        return cls(image=image, rect=image.get_rect(topleft=(x, y)))
+
+    @classmethod
+    def from_relative(cls, image: pygame.Surface,
+                      x: int, y: int) -> "StaticSpriteElement":
+
+        return cls(image=image, rect=image.get_rect(topleft=(
+            x * image.get_width(),
+            y * image.get_height()
+        )))
 
 
 class Tile(BaseModel):

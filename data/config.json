@@ -2,31 +2,31 @@
     /* === REQUIRED CONFIG === */
     # Data that has to be present to run
 
-    "highscore_filename": "./data/highscore.json",   // [str] highscore json file location
-    "level_count": 5,               // [int] [>=1] amount of levels
+    "highscore_filename": "./data/highscore.json",  // [str] highscore json file location
+    "level_count": 5,                               // [int] [>=1] amount of levels
 
     /* === OPTIONAL GLOBAL CONFIG === */
     # Data non-specific to individual levels
 
     "points": {
-        "pacgum": 10,               // [int] (10) points for each pacgum eaten
-        "super_pacgum": 50,         // [int] (50) points for each super pacgum eaten
-        "ghost": 200                // [int] (200) points for each ghost eaten
+        "pacgum": 10,                               // [int] (10) points for each pacgum eaten
+        "super_pacgum": 50,                         // [int] (50) points for each super pacgum eaten
+        "ghost": 200                                // [int] (200) points for each ghost eaten
     },
-    "seed": null,                   // [int|null] seed for the beginning level (null=random)
+    "seed": null,                                   // [int|null] seed for the beginning level (null=random)
 
     # Fallback for level data if not defined.
-    "width": 10,                    // [int] [>=1] (10) default maze width
-    "height": 10,                   // [int] [>=1] (10) default maze height
-    "lives": 3,                     // [int] [>=1] (3) default amount of lives per level
-    "pacgums": 42,                  // [int] [>=0] (-1) default pacgum amount per level (-1=full)
-    "super_pacgums": 4,             // [int] [<=pacgum] (4) default super pacgum amount per level
-    "timer": 90,                    // [int] [>=1] (90) defaut timer per level in seconds
+    "width": 10,                                    // [int] [>=1] (10) default maze width
+    "height": 10,                                   // [int] [>=1] (10) default maze height
+    "lives": 3,                                     // [int] [>=1] (3) default amount of lives per level
+    "pacgums": 42,                                  // [int] [>=0] (-1) default pacgum amount per level (-1=full)
+    "super_pacgums": 4,                             // [int] [<=pacgum] (4) default super pacgum amount per level
+    "timer": 90,                                    // [int] [>=1] (90) defaut timer per level in seconds
 
     /* === OPTIONAL LEVEL CONFIG === */
     # Level specific data (last chosen if underdefined, fallback chosen when undefined)
 
-    "levels": [                      // Any fallback data may be specifically set here
+    "levels": [                                     // Any fallback data may be specifically re-set here
         {
             "width": 10,
             "height": 10

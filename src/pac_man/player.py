@@ -32,7 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.current_tile: Tile_Pos = replace(start_pos)
         self.target_tile: Tile_Pos = replace(start_pos)
 
-        self.speed: int = 4
+        self.speed: int = round(2 * self.asset_cache.scale_factor)
 
         # Frame logic attributes
         self.current_frame = 0
