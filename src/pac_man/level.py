@@ -19,13 +19,20 @@ class Level:
         self.tile_matrix = self.hex_to_tile_matrix(hex_matrix)
         self.screen = screen
 
-        # NOTE: currently arbitrary
-        self.display_surface = pygame.Surface((
-            self.screen.get_width() - 2 * horizontal_padding,
-            self.screen.get_height() - 2 * vertical_padding,
-        ))
+        total_rows = len(self.tile_matrix)
+        total_cols = len(self.tile_matrix[0])
+
+        surface_w = int(total_cols * TILE_SIZE * self.asset_cache.scale_factor)
+        surface_h = int(total_rows * TILE_SIZE * self.asset_cache.scale_factor)
+
+        self.display_surface = pygame.Surface((surface_w, surface_h))
+
+        # self.display_surface = pygame.Surface((
+        #     self.screen.get_width() - 2 * horizontal_padding,
+        #     self.screen.get_height() - 2 * vertical_padding,
+        # ))
         self.position = pygame.Vector2(
-            horizontal_padding,
+            (self.screen.get_width() - surface_w) // 2,  # horizontal_padding,
             vertical_padding
         )
 
