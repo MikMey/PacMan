@@ -4,6 +4,7 @@ from .tile import Tile
 
 from dataclasses import replace
 import pygame
+import time
 
 
 class Player(pygame.sprite.Sprite):
@@ -192,21 +193,26 @@ class Player(pygame.sprite.Sprite):
         """
         if self.is_dying:
             return
+        # change target from matrix to global map coords
+        target_tile: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
 
-        target_pixel: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
-        target_pixel.x += self.subtile_size // 2
-        target_pixel.y += self.subtile_size // 2
+        # set pixel offset from topleft border
+        # target_tile.x += self.subtile_size // 2
+        # target_tile.y += self.subtile_size // 2
+        target_tile.x += 4
+        target_tile.y += 4
 
         # Continue if currently moving
-        if self.rect.x != target_pixel.x or self.rect.y != target_pixel.y:
-            if self.rect.x < target_pixel.x:
+        # print(self.rect.x, self.rect.y)
+        if self.rect.x != target_tile.x or self.rect.y != target_tile.y:
+            if self.rect.x < target_tile.x:
                 self.rect.x += self.speed
-            elif self.rect.x > target_pixel.x:
+            elif self.rect.x > target_tile.x:
                 self.rect.x -= self.speed
 
-            if self.rect.y < target_pixel.y:
+            if self.rect.y < target_tile.y:
                 self.rect.y += self.speed
-            elif self.rect.y > target_pixel.y:
+            elif self.rect.y > target_tile.y:
                 self.rect.y -= self.speed
 
         # Check if next target is availible if exactly in middle
