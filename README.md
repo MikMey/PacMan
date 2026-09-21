@@ -14,6 +14,29 @@ https://github.com/SaraFreitas-dev/MinilibX-42-Pyhton-Documentation/blob/main/ML
 
 # Details
 
+```mermaid
+flowchart TD
+    start([Start Program])
+    start_screen[Start Screen]
+    level[Playable Level]
+    win_screen[Win Screen]
+    lose_screen[Lose Screen]
+    finish([End Program])
+
+    start --> start_screen
+    start_screen -->|Enter| level
+    level -->|Loads new level| level
+    level -->|All levels beaten| win_screen
+    level -->|Ran out of lives| lose_screen
+    level -->|Esc| finish
+    win_screen -->|Enter| start_screen
+    win_screen -->|Esc| finish
+    lose_screen -->|Enter| start_screen
+    lose_screen -->|Esc| finish
+    start_screen -->|Esc| finish
+```
+
+
 ## Configuration
 
 ## Highscore
