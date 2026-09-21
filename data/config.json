@@ -28,8 +28,8 @@
 
     "levels": [                                     // Any fallback data may be specifically re-set here
         {
-            "width": 35,
-            "height": 11
+            "width": 30,
+            "height": 50
         }
     ]
 }
