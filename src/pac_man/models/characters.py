@@ -3,6 +3,7 @@ from enum import Enum
 from dataclasses import dataclass, replace
 from typing import Type, Callable
 
+import logging
 import pygame
 import numpy as np
 
@@ -35,6 +36,8 @@ class Character(ABC, pygame.sprite.Sprite):
 			character_name: CharacterName
 			):
 		super().__init__()
+
+		self.log = logging.getLogger('PacMan')
 
 		self.name = character_name.value
 
@@ -133,6 +136,40 @@ class Character(ABC, pygame.sprite.Sprite):
 
 		return False
 
+	def _update_frame(self, dt: float) -> None:
+		"""Update player frame.
+
+		Parameters
+		----------
+		dt : float
+			Delta Time between loop pass.
+
+		"""
+		self.animation_timer += dt
+
+		if self.animation_timer >= self.animation_speed:
+			self.animation_timer = 0.0
+			self.current_frame = (self.current_frame + 1) % self.max_frame
+			self.set_image()
+
+	@abstractmethod
+	def _update_position(self, tile_matrix) -> None:
+		pass
+
+	def update(self, dt: float, tile_matrix: list[list[Tile]]) -> None:
+		"""Update player frame and position every frame.
+
+		Parameters
+		----------
+		dt : float
+			Delta Time between loop pass.
+		tile_matrix : list[list[Tile]]
+			Full matrix of Tiles to look up wall states in.
+
+		"""
+		self._update_frame(dt)
+		self._update_position(tile_matrix)
+
 	@abstractmethod
 	def set_image(self) -> None:
 		pass
@@ -140,11 +177,5 @@ class Character(ABC, pygame.sprite.Sprite):
 
 	@abstractmethod
 	def kill() -> None:
-		pass
-
-
-	@abstractmethod
-	def update() -> None:
-		"""called with pygame.sprite.Group().update"""
 		pass
 
