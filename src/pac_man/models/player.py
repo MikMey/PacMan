@@ -1,5 +1,6 @@
 from dataclasses import replace
 import time
+from enum import Enum
 
 import pygame
 
@@ -7,9 +8,15 @@ from ..utils import Tile_Pos, Pixel_Pos, Direction
 from ..render import SpriteSheetCache
 
 from .tile import Tile
+from .characters import Character, CharacterName
+
+class PlayerState(Enum):
+	ALIVE = 0
+	DEAD = 1
+	RESPAWNING = 2
 
 
-class Player(pygame.sprite.Sprite):
+class Player(Character):
     """Deals with player logic."""
 
     def __init__(
@@ -19,78 +26,40 @@ class Player(pygame.sprite.Sprite):
             subtile_size: int
             ) -> None:
         """Initialize positioning and animation logic."""
-        super().__init__()
-        self.asset_cache = asset_cache
-        self.subtile_size: int = subtile_size
-        self.tile_size: int = subtile_size * 3
-
-        # Game logic attributes
-        self.is_dying: bool = False
-
-        # Movement attributes
-        self.current_dir: Direction = Direction()
+        super().__init__(
+            asset_cache=asset_cache,
+            start_pos=start_pos,
+            subtile_size=subtile_size,
+            character_name=CharacterName.PACMAN
+            )
+        self.state = PlayerState.ALIVE
+        
         self.buffered_dir: Direction = Direction()
-
-        self.current_tile: Tile_Pos = replace(start_pos)
-        self.target_tile: Tile_Pos = replace(start_pos)
 
         self.speed: int = int(round(2 * self.asset_cache.scale_factor))
 
-        # Frame logic attributes
-        self.current_frame = 0
-        self.max_frame = -1
-        self.animation_speed = 0.1
-        self.animation_timer = 0.0
-        self.set_current_image()
-
-        # Location logic
-        self.rect: pygame.Rect = self.image.get_rect()
-        self.rect.topleft = (
-            start_pos.x * self.tile_size + self.subtile_size // 2,
-            start_pos.y * self.tile_size + self.subtile_size // 2
-        )
-
-    def kill(self) -> None:
-        """Starts death animation."""
-
-        self.is_dying = True
-        self.animation_timer = 0.0
-
-    def _dir_to_string(self, dir: Direction) -> str:
-        """Converts :obj:`Direction` to string. Defaults to RIGHT.
-
-        Parameters
-        ----------
-        dir : Direction
-            Direction class to be converted.
-
-        Returns
-        -------
-        str
-            String indicating direction (TOP, RIGHT, LEFT, BOTTOM).
-
-        """
-        if dir.vert == 1:
-            return "BOTTOM"
-        elif dir.vert == -1:
-            return "TOP"
-        elif dir.hori == -1:
-            return "LEFT"
-        return "RIGHT"
-
-    def set_current_image(self) -> None:
+    def set_image(self) -> None:
         """Get correct sprite data based on context."""
         if self.is_dying:
-            frames = self.asset_cache.get_anim("PACMAN-DEATH")
+            frames = self.asset_cache.get_anim(
+                self.name + "DEATH"
+            )
         elif self.current_dir.is_still():
             frames = self.asset_cache.get_anim(
-                "PACMAN-" + self._dir_to_string(self.buffered_dir))
+                self.name + self._dir_to_string(self.buffered_dir)
+            )
         else:
             frames = self.asset_cache.get_anim(
-                "PACMAN-" + self._dir_to_string(self.current_dir))
+                self.name + self._dir_to_string(self.current_dir)
+            )
 
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
+
+    def kill(self) -> None:
+        """Starts death animation."""
+        self.is_dying = True
+        self.animation_timer = 0.0
 
     def handle_input(self, keys: pygame.key.ScancodeWrapper) -> None:
         """Handle WASD and arrow key input.
@@ -113,45 +82,6 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_KP1]:
             self.kill()
 
-    def _is_wall(self, direction: Direction,
-                 tile_matrix: list[list[Tile]]) -> bool:
-        """Checks if next tile would be blocked.
-
-        Parameters
-        ----------
-        direction : Direction
-            Direction currently attempted to go to.
-        tile_matrix : list[list[Tile]]
-            Full matrix of Tiles to look up wall states in.
-
-        Returns
-        -------
-        bool
-            True if wall or border is in the way, False otherwise.
-
-        """
-        # if direction.is_still():
-        #     return False
-
-        next_tile = replace(self.current_tile)
-        next_tile.x += self.current_dir.hori
-        next_tile.y += self.current_dir.vert
-
-        if not (0 <= next_tile.y < len(tile_matrix) and
-                0 <= next_tile.x < len(tile_matrix[0])):
-            return True
-
-        tile = tile_matrix[self.current_tile.y][self.current_tile.x]
-        if direction.vert == -1 and tile.is_top_closed:
-            return True
-        if direction.hori == 1 and tile.is_right_closed:
-            return True
-        if direction.vert == 1 and tile.is_bottom_closed:
-            return True
-        if direction.hori == -1 and tile.is_left_closed:
-            return True
-
-        return False
 
     def update(self, dt: float, tile_matrix: list[list[Tile]]) -> None:
         """Update player frame and position every frame.
@@ -181,7 +111,7 @@ class Player(pygame.sprite.Sprite):
         if self.animation_timer >= self.animation_speed:
             self.animation_timer = 0.0
             self.current_frame = (self.current_frame + 1) % self.max_frame
-            self.set_current_image()
+            self.set_image()
 
     def _update_position(self, tile_matrix: list[list[Tile]]) -> None:
         """Update player position if possible.
