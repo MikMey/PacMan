@@ -37,6 +37,28 @@ class Ghost(Character):
 
 		self.state: GhostState = GhostState.ROAMING
 
+	def set_image(self):
+		if self.state == GhostState.RESPAWNING:
+			frames = self.asset_cache.get_anim(
+				self.name + 'RESPAWN' #TODO match to correct strings
+            )
+		elif self.state == GhostState.FLEEING:
+			frames = self.asset_cache.get_anim(
+				self.name + "FLEE-" + self._dir_to_string(self.current_dir)
+            )
+		else:
+			frames = self.asset_cache.get_anim(
+                self.name + self._dir_to_string(self.current_dir)
+            )
+		self.max_frame = len(frames)
+		self.image = frames[self.current_frame]
+
+	def kill():
+		pass
+
+	def _update_position(self, tile_matrix) -> None:
+		pass
+
 	def blinky():
 		"""Direct chase; flee top right"""
 		pass
