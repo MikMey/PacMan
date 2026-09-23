@@ -1,6 +1,6 @@
-NAME := src/pacman/pac-man.py
-SOURCE := ./src/pacman/
-PYTHON ?= python3
+NAME := src.pac_man
+SOURCE := ./src/pac_man/
+PYTHON ?= python3 -m
 FLAKE8 := uv run -m flake8
 FLAKE8_FLAGS := --count --show-source --filename [./*.py]
 MYPY := uv run mypy
@@ -16,7 +16,7 @@ install:
 	$(UV_VENV)
 
 run:
-	uv run $(PYTHON) -m $(NAME) $(CONFIG)
+	uv run $(PYTHON) $(NAME) $(CONFIG)
 
 lint:
 	$(FLAKE8) $(FLAKE8_FLAGS) $(SOURCE)*.py

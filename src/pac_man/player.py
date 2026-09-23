@@ -4,6 +4,7 @@ from .tile import Tile
 
 from dataclasses import replace
 import pygame
+import time
 
 
 class Player(pygame.sprite.Sprite):
@@ -13,14 +14,13 @@ class Player(pygame.sprite.Sprite):
             self,
             asset_cache: SpriteSheetCache,
             start_pos: Tile_Pos,
-            subtile_size: int,
-            subtile_mult: int
+            subtile_size: int
             ) -> None:
         """Initialize positioning and animation logic."""
         super().__init__()
         self.asset_cache = asset_cache
         self.subtile_size: int = subtile_size
-        self.tile_size: int = subtile_size * subtile_mult
+        self.tile_size: int = subtile_size * 3
 
         # Game logic attributes
         self.is_dying: bool = False
@@ -32,7 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.current_tile: Tile_Pos = replace(start_pos)
         self.target_tile: Tile_Pos = replace(start_pos)
 
-        self.speed: int = round(2 * self.asset_cache.scale_factor)
+        self.speed: int = int(round(2 * self.asset_cache.scale_factor))
 
         # Frame logic attributes
         self.current_frame = 0
@@ -41,11 +41,11 @@ class Player(pygame.sprite.Sprite):
         self.animation_timer = 0.0
         self.set_current_image()
 
-        # Needed by pygame
+        # Location logic
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.topleft = (
-            self.current_tile.x * self.tile_size + self.subtile_size // 2,
-            self.current_tile.y * self.tile_size + self.subtile_size // 2
+            start_pos.x * self.tile_size + self.subtile_size // 2,
+            start_pos.y * self.tile_size + self.subtile_size // 2
         )
 
     def kill(self) -> None:
@@ -99,13 +99,13 @@ class Player(pygame.sprite.Sprite):
             Keys pressed in last loop pass.
 
         """
-        if keys[pygame.K_UP] or keys[pygame.K_w]:
+        if keys[pygame.K_UP] or keys[pygame.K_w] and self.current_dir.vert != -1:
             self.buffered_dir.set(0, -1)
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and self.current_dir.hori != 1:
             self.buffered_dir.set(1, 0)
-        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
+        elif keys[pygame.K_DOWN] or keys[pygame.K_s] and self.current_dir.vert != 1:
             self.buffered_dir.set(0, 1)
-        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        elif keys[pygame.K_LEFT] or keys[pygame.K_a] and self.current_dir.hori != -1:
             self.buffered_dir.set(-1, 0)
 
         if keys[pygame.K_KP1]:
@@ -128,8 +128,8 @@ class Player(pygame.sprite.Sprite):
             True if wall or border is in the way, False otherwise.
 
         """
-        if direction.is_still():
-            return False
+        # if direction.is_still():
+        #     return False
 
         next_tile = replace(self.current_tile)
         next_tile.x += self.current_dir.hori
@@ -140,13 +140,13 @@ class Player(pygame.sprite.Sprite):
             return True
 
         tile = tile_matrix[self.current_tile.y][self.current_tile.x]
-        if self.buffered_dir.vert == -1 and tile.is_top_closed:
+        if direction.vert == -1 and tile.is_top_closed:
             return True
-        if self.buffered_dir.hori == 1 and tile.is_right_closed:
+        if direction.hori == 1 and tile.is_right_closed:
             return True
-        if self.buffered_dir.vert == 1 and tile.is_bottom_closed:
+        if direction.vert == 1 and tile.is_bottom_closed:
             return True
-        if self.buffered_dir.hori == -1 and tile.is_left_closed:
+        if direction.hori == -1 and tile.is_left_closed:
             return True
 
         return False
@@ -192,21 +192,24 @@ class Player(pygame.sprite.Sprite):
         """
         if self.is_dying:
             return
+        # change target from matrix to global map coords
+        target_tile: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
 
-        target_pixel: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
-        target_pixel.x += self.subtile_size // 2
-        target_pixel.y += self.subtile_size // 2
+        # set pixel offset from topleft border
+        target_tile.x += self.subtile_size // 2
+        target_tile.y += self.subtile_size // 2
 
         # Continue if currently moving
-        if self.rect.x != target_pixel.x or self.rect.y != target_pixel.y:
-            if self.rect.x < target_pixel.x:
+        # print(self.rect.x, self.rect.y)
+        if self.rect.x != target_tile.x or self.rect.y != target_tile.y:
+            if self.rect.x < target_tile.x:
                 self.rect.x += self.speed
-            elif self.rect.x > target_pixel.x:
+            elif self.rect.x > target_tile.x:
                 self.rect.x -= self.speed
 
-            if self.rect.y < target_pixel.y:
+            if self.rect.y < target_tile.y:
                 self.rect.y += self.speed
-            elif self.rect.y > target_pixel.y:
+            elif self.rect.y > target_tile.y:
                 self.rect.y -= self.speed
 
         # Check if next target is availible if exactly in middle
@@ -214,9 +217,9 @@ class Player(pygame.sprite.Sprite):
             self.current_tile.x = self.target_tile.x
             self.current_tile.y = self.target_tile.y
 
-            if (not self.buffered_dir.is_still() and
-                    not self._is_wall(self.buffered_dir, tile_matrix)):
+            if not self.buffered_dir.is_still() and not self._is_wall(self.buffered_dir, tile_matrix):
                 self.current_dir = replace(self.buffered_dir)
+
             elif self._is_wall(self.current_dir, tile_matrix):
                 self.current_dir.set(0, 0)
 

@@ -108,9 +108,8 @@ class Level:
 
         self.pacman = Player(
             asset_cache=self.asset_cache,
-            start_pos=Tile_Pos(1, 1),
-            subtile_size=tile_factory._sub_w,
-            subtile_mult=3
+            start_pos=Tile_Pos(0, 0),
+            subtile_size=tile_factory._sub_w
         )
         self.player_group.add(self.pacman)
 
