@@ -1,10 +1,11 @@
 
 import pygame
 from random import randrange
+import functools
 
 from ..utils import Tile_Pos
 from ..render import SpriteSheetCache, Hud
-from ..models import TileSpriteFactory, Tile, StaticSpriteElement,TILE_SIZE, SUBTILE_SIZE, Player
+from ..models import TileSpriteFactory, Tile, GhostPersonality, StaticSpriteElement,TILE_SIZE, SUBTILE_SIZE, Player, Ghost
 
 
 class Level:
@@ -22,11 +23,11 @@ class Level:
         self.screen = screen
         self.hud = hud
 
-        total_rows = len(self.tile_matrix)
-        total_cols = len(self.tile_matrix[0])
+        self.total_rows = len(self.tile_matrix)
+        self.total_cols = len(self.tile_matrix[0])
 
-        surface_w = int(total_cols * TILE_SIZE * self.asset_cache.scale_factor)
-        surface_h = int(total_rows * TILE_SIZE * self.asset_cache.scale_factor)
+        surface_w = int(self.total_cols * TILE_SIZE * self.asset_cache.scale_factor)
+        surface_h = int(self.total_rows * TILE_SIZE * self.asset_cache.scale_factor)
 
         self.display_surface = pygame.Surface((surface_w, surface_h))
 
@@ -39,6 +40,7 @@ class Level:
         self.gum_group = pygame.sprite.Group()  # Pacgums and such
         self.fruit_group = pygame.sprite.Group()  # Decorative Fruits
         self.player_group = pygame.sprite.Group()  # Pacman
+        self.ghost_group = pygame.sprite.Group() # Ghosts
 
         self.populate_sprite_groups()
 
@@ -47,6 +49,29 @@ class Level:
         """Converts MazeGenerator hex numbers to tile classes matrix."""
         return [[Tile.from_hex_state(hex) for hex in row]
                 for row in hex_matrix]
+
+    def init_ghost_group(self, subtile_size) -> None:
+
+        PrepGhost = functools.partial(Ghost, asset_cache=self.asset_cache, subtile_size=subtile_size)
+
+        self.inky: Ghost = PrepGhost(
+            start_pos=Tile_Pos(0, 0),
+            ghost_peronality=GhostPersonality.INKY
+        )
+        self.clyde: Ghost = PrepGhost(
+            start_pos=Tile_Pos(self.total_cols - 1, 0),
+            ghost_peronality=GhostPersonality.CLYDE
+        )
+        self.blinky: Ghost = PrepGhost(
+            start_pos=Tile_Pos(0, self.total_rows - 1),
+            ghost_peronality=GhostPersonality.BLINKY
+        )
+        self.pinky: Ghost = PrepGhost(
+            start_pos=Tile_Pos(self.total_cols - 1, self.total_rows - 1),
+            ghost_peronality=GhostPersonality.PINKY
+        )
+
+        self.ghost_group.add(self.pinky, self.inky, self.blinky, self.clyde)
 
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
@@ -118,13 +143,14 @@ class Level:
                         x=x * 3,
                         y=y * 3 + 1
                     ))
-
+        subtile_size = tile_factory._sub_w
         self.pacman = Player(
             asset_cache=self.asset_cache,
             start_pos=Tile_Pos(0, 0),
-            subtile_size=tile_factory._sub_w
+            subtile_size=subtile_size
         )
         self.player_group.add(self.pacman)
+        self.init_ghost_group(subtile_size)
 
     def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
@@ -139,6 +165,7 @@ class Level:
         self.pacman.handle_input(keys)
 
         self.player_group.update(dt, self.tile_matrix)
+        self.ghost_group.update(dt, self.tile_matrix)
 
         possible_collisions = pygame.sprite.spritecollide(
             self.pacman,  # type: ignore
@@ -166,5 +193,6 @@ class Level:
         self.gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)
+        self.ghost_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)
