@@ -1,10 +1,11 @@
+
 import pygame
+from random import randrange
 
 from ..utils import Tile_Pos
 from ..render import SpriteSheetCache, Hud
+from ..models import TileSpriteFactory, Tile, StaticSpriteElement,TILE_SIZE, SUBTILE_SIZE, Player
 
-from ..models.tile import (TileSpriteFactory, Tile, StaticSpriteElement, TILE_SIZE)
-from ..models.player import Player
 
 class Level:
     """Sprite and loop logic for the main game level."""
@@ -29,21 +30,15 @@ class Level:
 
         self.display_surface = pygame.Surface((surface_w, surface_h))
 
-        # self.display_surface = pygame.Surface((
-        #     self.screen.get_width() - 2 * horizontal_padding,
-        #     self.screen.get_height() - 2 * vertical_padding,
-        # ))
         self.position = pygame.Vector2(
             (self.screen.get_width() - surface_w) // 2,  # horizontal_padding,
             vertical_padding
         )
 
-        # Tiles without pacgums
-        self.tile_group = pygame.sprite.Group()
-        # Pacgums and such
-        self.gum_group = pygame.sprite.Group()
-        # Pacman
-        self.player_group = pygame.sprite.Group()
+        self.tile_group = pygame.sprite.Group()  # Tiles without pacgums
+        self.gum_group = pygame.sprite.Group()  # Pacgums and such
+        self.fruit_group = pygame.sprite.Group()  # Decorative Fruits
+        self.player_group = pygame.sprite.Group()  # Pacman
 
         self.populate_sprite_groups()
 
@@ -77,10 +72,22 @@ class Level:
                     x=x,
                     y=y
                 ))
-                if not (main_tile.is_top_closed and
+                if (main_tile.is_top_closed and
                         main_tile.is_right_closed and
                         main_tile.is_bottom_closed and
                         main_tile.is_left_closed):
+                    rand_fruit = self.asset_cache.get_static(
+                                 f"FRUIT-{randrange(8)}")
+                    self.fruit_group.add(StaticSpriteElement.from_pixel(
+                        rand_fruit,
+                        x=(x * self.asset_cache.scale_factor * TILE_SIZE +
+                           (self.asset_cache.scale_factor
+                            * SUBTILE_SIZE) // 2),
+                        y=(y * self.asset_cache.scale_factor * TILE_SIZE +
+                           (self.asset_cache.scale_factor
+                            * SUBTILE_SIZE) // 2),
+                    ))
+                else:
                     self.gum_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 1,
@@ -157,6 +164,7 @@ class Level:
         # self.display_surface.fill((140, 40, 40))
         self.tile_group.draw(self.display_surface)
         self.gum_group.draw(self.display_surface)
+        self.fruit_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)

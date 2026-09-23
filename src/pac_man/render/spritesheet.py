@@ -1,5 +1,5 @@
-from typing import Optional, Any
 import pathlib
+from typing import Optional, Any
 
 from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, ValidationError
 from pydantic_core import InitErrorDetails
@@ -7,6 +7,8 @@ import pygame
 
 
 DEFAULT_FILE_PATH = "./data/spritesheet.bmp"
+SHEET_OFFSET_X = 200
+SHEET_OFFSET_Y = 186
 
 
 class SpriteRect(BaseModel):
@@ -173,60 +175,17 @@ class SpriteSheetCache(BaseModel):
         self.cache_new("SUPER-PACGUM", 136, 28, 8)
 
         # Fruits
-        self.cache_new("FRUIT-0", 1, 117, 16)
-        self.cache_new("FRUIT-1", 18, 117, 16)
-        self.cache_new("FRUIT-2", 35, 117, 16)
-        self.cache_new("FRUIT-3", 52, 117, 16)
-        self.cache_new("FRUIT-4", 69, 117, 16)
-        self.cache_new("FRUIT-5", 86, 117, 16)
+        self.cache_new("FRUIT-0", 401, 489, 16)  # Cherry
+        self.cache_new("FRUIT-1", 618, 489, 16)  # Strawberry
+        self.cache_new("FRUIT-2", 835, 489, 16)  # Orange
+        self.cache_new("FRUIT-3", 452, 489, 16)  # Apple
+        self.cache_new("FRUIT-4", 69, 675, 16)  # Melon
+        self.cache_new("FRUIT-5", 286, 675, 16)  # Starship
+        self.cache_new("FRUIT-6", 503, 675, 16)  # Bell
+        self.cache_new("FRUIT-7", 520, 675, 16)  # Key
 
         # Numbers, Letters and Special Characters
-        text_scale = self._text_scale_factor
-        self.cache_new("CHAR-0", 1, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-1", 10, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-2", 19, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-3", 28, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-4", 37, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-5", 46, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-6", 55, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-7", 64, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-8", 73, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-9", 82, 19, 8, scale_factor=text_scale)
-
-        self.cache_new("CHAR-A", 1, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-B", 10, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-C", 19, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-D", 28, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-E", 37, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-F", 46, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-G", 55, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-H", 64, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-I", 73, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-J", 82, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-K", 91, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-L", 100, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-M", 109, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-N", 1, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-O", 10, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-P", 19, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-Q", 28, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-R", 37, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-S", 46, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-T", 55, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-U", 64, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-V", 73, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-W", 82, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-X", 91, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-Y", 100, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-Z", 109, 37, 8, scale_factor=text_scale)
-
-        self.cache_new("CHAR-/", 91, 10, 8, scale_factor=text_scale)
-        self.cache_new("CHAR--", 100, 10, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-.", 109, 10, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-\"", 91, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-!", 109, 19, 8, scale_factor=text_scale)
-
-        self.cache_new("CHAR-COPYRIGHT", 100, 19, 8, scale_factor=text_scale)
+        self.bake_text_offset(0)
 
         # === ANIMATED TILES === #
 
@@ -257,6 +216,73 @@ class SpriteSheetCache(BaseModel):
              (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
             size=16
         )
+
+    def bake_text_offset(self, offset: int) -> None:
+        """Pick a global text and number color.
+
+        Parameters
+        ----------
+        offset : int
+            Offset in the tile sheet (0-19).
+
+        """
+        text_scale = self._text_scale_factor
+
+        def cache_text(name: str, x: int, y: int) -> None:
+            """Helper to cache the text with correct offset"""
+            self.cache_new(
+                name,
+                x + SHEET_OFFSET_X * (offset % 5),
+                y + SHEET_OFFSET_Y * (offset // 5),
+                8,
+                scale_factor=text_scale
+            )
+
+        cache_text("CHAR-0", 1, 19)
+        cache_text("CHAR-1", 10, 19)
+        cache_text("CHAR-2", 19, 19)
+        cache_text("CHAR-3", 28, 19)
+        cache_text("CHAR-4", 37, 19)
+        cache_text("CHAR-5", 46, 19)
+        cache_text("CHAR-6", 55, 19)
+        cache_text("CHAR-7", 64, 19)
+        cache_text("CHAR-8", 73, 19)
+        cache_text("CHAR-9", 82, 19)
+
+        cache_text("CHAR-A", 1, 28)
+        cache_text("CHAR-B", 10, 28)
+        cache_text("CHAR-C", 19, 28)
+        cache_text("CHAR-D", 28, 28)
+        cache_text("CHAR-E", 37, 28)
+        cache_text("CHAR-F", 46, 28)
+        cache_text("CHAR-G", 55, 28)
+        cache_text("CHAR-H", 64, 28)
+        cache_text("CHAR-I", 73, 28)
+        cache_text("CHAR-J", 82, 28)
+        cache_text("CHAR-K", 91, 28)
+        cache_text("CHAR-L", 100, 28)
+        cache_text("CHAR-M", 109, 28)
+        cache_text("CHAR-N", 1, 37)
+        cache_text("CHAR-O", 10, 37)
+        cache_text("CHAR-P", 19, 37)
+        cache_text("CHAR-Q", 37, 37)
+        cache_text("CHAR-R", 37, 37)
+        cache_text("CHAR-S", 46, 37)
+        cache_text("CHAR-T", 55, 37)
+        cache_text("CHAR-U", 64, 37)
+        cache_text("CHAR-V", 73, 37)
+        cache_text("CHAR-W", 82, 37)
+        cache_text("CHAR-X", 91, 37)
+        cache_text("CHAR-Y", 100, 37)
+        cache_text("CHAR-Z", 109, 37)
+
+        cache_text("CHAR-/", 91, 10)
+        cache_text("CHAR--", 100, 10)
+        cache_text("CHAR-.", 109, 10)
+        cache_text("CHAR-\"", 91, 19)
+        cache_text("CHAR-!", 109, 19)
+
+        cache_text("CHAR-COPYRIGHT", 100, 19)
 
     def cache_new(self, name: str, x: int, y: int, size: int,
                   flip_x: bool = False, flip_y: bool = False,
