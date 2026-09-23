@@ -7,7 +7,7 @@ from .main_menu import MainMenu
 from .death_screen import DeathScreen
 from .win_screen import WinScreen
 
-class LoopStates(Enum):
+class LoopStates():
 	MAIN_MENU = 0
 	GAME_LOOP = 1
 	DEATH_SCREEN = 2
@@ -15,8 +15,33 @@ class LoopStates(Enum):
 	END_GAME = 4
 	NEW_LEVEL = 5
 
+	def __init__(self):
+		self._state = LoopStates.MAIN_MENU
+
+	def main_menu(self):
+		self._state = LoopStates.MAIN_MENU
+
+	def game_loop(self):
+		self._state = LoopStates.GAME_LOOP
+
+	def death_screen(self):
+		self._state = LoopStates.DEATH_SCREEN
+
+	def win_screen(self):
+		self._state = LoopStates.WIN_SCREEN
+
+	def end_game(self):
+		self._state = LoopStates.END_GAME
+
+	def new_level(self):
+		self._state = LoopStates.NEW_LEVEL
+
+	def get_state(self):
+		return self._state
+
+
 class LoopMachine():
-	state: LoopStates = LoopStates.MAIN_MENU
+	state: LoopStates = LoopStates()
 
 	def __init__(self, config):
 		self.config = config
@@ -28,19 +53,16 @@ class LoopMachine():
 	def run_gameloop(self, asset_cache):
 		log = logging.getLogger('PacMan')
 		while True:
-			match self.state:
+			match self.state.get_state():
 
 				case LoopStates.MAIN_MENU:
 					log.debug('Enter MainMenu')
-					self.state = LoopStates.GAME_LOOP
-					continue
 					self.main_menu.run()
+					self.state.new_level()
 
 				case LoopStates.GAME_LOOP:
 					log.debug('Enter GameLoop')
-					self.game_loop.load_level(asset_cache)
-					self.game_loop.run()
-					self.state = LoopStates.END_GAME
+					self.game_loop.run(self.state)
 
 				case LoopStates.DEATH_SCREEN:
 					log.debug('Enter DeathScreen')
@@ -55,7 +77,9 @@ class LoopMachine():
 					return
 
 				case LoopStates.NEW_LEVEL:
+					self.game_loop.load_level(asset_cache)
 					log.debug('Enter NewLevel')
+					self.state.game_loop()
 
 
 
