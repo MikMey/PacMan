@@ -47,7 +47,6 @@ class Game:
         pygame.display.set_caption("Pac-Man")
         self.clock = pygame.time.Clock()
 
-    # NOTE: Currently not level specific
     def load_level(self, asset_cache: SpriteSheetCache) -> None:
 
         hex_matrix = MazeGenerator(
@@ -66,6 +65,7 @@ class Game:
             hex_matrix=hex_matrix,
             asset_cache=asset_cache,
             screen=self.screen,
+            hud=self.hud,
             horizontal_padding=self.horizontal_padding,
             vertical_padding=self.vertical_padding
         )
@@ -80,7 +80,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
 
-            self.screen.fill((100, 50, 255))
+            # self.screen.fill((100, 50, 255))
             self.hud.loop(dt)
             self.level.loop(dt)
 
