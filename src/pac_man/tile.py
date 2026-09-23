@@ -210,9 +210,9 @@ class StaticSpriteElement(pygame.sprite.Sprite):
     ----------
     image : pygame.Surface
         Image to be drawn on screen.
-    x : int
+    x : float
         On screen posiition (times its on width).
-    y : int
+    y : float
         On screen posiition (times its on height).
 
     """
@@ -228,16 +228,16 @@ class StaticSpriteElement(pygame.sprite.Sprite):
 
     @classmethod
     def from_pixel(cls, image: pygame.Surface,
-                   x: int, y: int) -> "StaticSpriteElement":
+                   x: float, y: float) -> "StaticSpriteElement":
         """_summary_
 
         Parameters
         ----------
         surface : pygame.Surface
             _description_
-        x : int
+        x : float
             _description_
-        y : int
+        y : float
             _description_
 
         """
@@ -245,7 +245,7 @@ class StaticSpriteElement(pygame.sprite.Sprite):
 
     @classmethod
     def from_relative(cls, image: pygame.Surface,
-                      x: int, y: int) -> "StaticSpriteElement":
+                      x: float, y: float) -> "StaticSpriteElement":
 
         return cls(image=image, rect=image.get_rect(topleft=(
             x * image.get_width(),

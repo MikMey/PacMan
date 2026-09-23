@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict, ValidationError
+from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, ValidationError
 from pydantic_core import InitErrorDetails
 from typing import Optional, Any
 import pygame
@@ -72,16 +72,20 @@ class SpriteSheetCache(BaseModel):
 
     """
     sheet_surface: pygame.Surface
-    scale_factor: float  # = Field(ge=1)
+    scale_factor: float
 
     reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
     reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)
+
+    _text_scale_factor: float = PrivateAttr()
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initializes default cache."""
         super().__init__(*args, **kwargs)
+
+        self._text_scale_factor = self.scale_factor * 0.8
 
         self._init_default_cache()
 
@@ -168,51 +172,52 @@ class SpriteSheetCache(BaseModel):
         self.cache_new("SUPER-PACGUM", 136, 28, 8)
 
         # Numbers, Letters and Special Characters
-        self.cache_new("CHAR-0", 1, 19, 8)
-        self.cache_new("CHAR-1", 10, 19, 8)
-        self.cache_new("CHAR-2", 19, 19, 8)
-        self.cache_new("CHAR-3", 28, 19, 8)
-        self.cache_new("CHAR-4", 37, 19, 8)
-        self.cache_new("CHAR-5", 46, 19, 8)
-        self.cache_new("CHAR-6", 55, 19, 8)
-        self.cache_new("CHAR-7", 64, 19, 8)
-        self.cache_new("CHAR-8", 73, 19, 8)
-        self.cache_new("CHAR-9", 82, 19, 8)
+        text_scale = self._text_scale_factor
+        self.cache_new("CHAR-0", 1, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-1", 10, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-2", 19, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-3", 28, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-4", 37, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-5", 46, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-6", 55, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-7", 64, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-8", 73, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-9", 82, 19, 8, scale_factor=text_scale)
 
-        self.cache_new("CHAR-A", 1, 28, 8)
-        self.cache_new("CHAR-B", 10, 28, 8)
-        self.cache_new("CHAR-C", 19, 28, 8)
-        self.cache_new("CHAR-D", 28, 28, 8)
-        self.cache_new("CHAR-E", 37, 28, 8)
-        self.cache_new("CHAR-F", 46, 28, 8)
-        self.cache_new("CHAR-G", 55, 28, 8)
-        self.cache_new("CHAR-H", 64, 28, 8)
-        self.cache_new("CHAR-I", 73, 28, 8)
-        self.cache_new("CHAR-J", 82, 28, 8)
-        self.cache_new("CHAR-K", 91, 28, 8)
-        self.cache_new("CHAR-L", 100, 28, 8)
-        self.cache_new("CHAR-M", 109, 28, 8)
-        self.cache_new("CHAR-N", 1, 37, 8)
-        self.cache_new("CHAR-O", 10, 37, 8)
-        self.cache_new("CHAR-P", 19, 37, 8)
-        self.cache_new("CHAR-Q", 28, 37, 8)
-        self.cache_new("CHAR-R", 37, 37, 8)
-        self.cache_new("CHAR-S", 46, 37, 8)
-        self.cache_new("CHAR-T", 55, 37, 8)
-        self.cache_new("CHAR-U", 64, 37, 8)
-        self.cache_new("CHAR-V", 73, 37, 8)
-        self.cache_new("CHAR-W", 82, 37, 8)
-        self.cache_new("CHAR-X", 91, 37, 8)
-        self.cache_new("CHAR-Y", 100, 37, 8)
-        self.cache_new("CHAR-Z", 109, 37, 8)
+        self.cache_new("CHAR-A", 1, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-B", 10, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-C", 19, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-D", 28, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-E", 37, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-F", 46, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-G", 55, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-H", 64, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-I", 73, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-J", 82, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-K", 91, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-L", 100, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-M", 109, 28, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-N", 1, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-O", 10, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-P", 19, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-Q", 28, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-R", 37, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-S", 46, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-T", 55, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-U", 64, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-V", 73, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-W", 82, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-X", 91, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-Y", 100, 37, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-Z", 109, 37, 8, scale_factor=text_scale)
 
-        self.cache_new("CHAR-/", 91, 10, 8)
-        self.cache_new("CHAR--", 100, 10, 8)
-        self.cache_new("CHAR-.", 109, 10, 8)
-        self.cache_new("CHAR-\"", 91, 19, 8)
-        self.cache_new("CHAR-!", 109, 19, 8)
+        self.cache_new("CHAR-/", 91, 10, 8, scale_factor=text_scale)
+        self.cache_new("CHAR--", 100, 10, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-.", 109, 10, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-\"", 91, 19, 8, scale_factor=text_scale)
+        self.cache_new("CHAR-!", 109, 19, 8, scale_factor=text_scale)
 
-        self.cache_new("CHAR-COPYRIGHT", 100, 19, 8)
+        self.cache_new("CHAR-COPYRIGHT", 100, 19, 8, scale_factor=text_scale)
 
         # === ANIMATED TILES === #
 
@@ -246,7 +251,8 @@ class SpriteSheetCache(BaseModel):
 
     def cache_new(self, name: str, x: int, y: int, size: int,
                   flip_x: bool = False, flip_y: bool = False,
-                  scale: float = 1.0) -> None:
+                  scale: float = 1.0,
+                  scale_factor: Optional[float] = None) -> None:
         """Cache a non-moving sprite asset under a name.
 
         Parameters
@@ -272,8 +278,10 @@ class SpriteSheetCache(BaseModel):
             frames=[SpriteRect(x=x, y=y, w=size, h=size)],
             flip_x=flip_x,
             flip_y=flip_y,
-            scale=(self.scale_factor * scale,
-                   self.scale_factor * scale)
+            scale=(scale * (scale_factor if scale_factor is not
+                            None else self.scale_factor),
+                   scale * (scale_factor if scale_factor is not
+                            None else self.scale_factor))
         ))
 
     def cache_new_anim(self, name: str,

@@ -2,6 +2,7 @@ from .structures import Tile_Pos
 from .spritesheet import SpriteSheetCache
 from .tile import (TileSpriteFactory, Tile, StaticSpriteElement, TILE_SIZE)
 from .player import Player
+from .hud import Hud
 
 import pygame
 
@@ -12,12 +13,14 @@ class Level:
     def __init__(self, hex_matrix: list[list[int]],
                  asset_cache: SpriteSheetCache,
                  screen: pygame.Surface,
+                 hud: Hud,
                  horizontal_padding: int,
                  vertical_padding: int) -> None:
         """Create sprites that are needed in level."""
         self.asset_cache = asset_cache
         self.tile_matrix = self.hex_to_tile_matrix(hex_matrix)
         self.screen = screen
+        self.hud = hud
 
         total_rows = len(self.tile_matrix)
         total_cols = len(self.tile_matrix[0])
@@ -152,6 +155,7 @@ class Level:
                 items_eaten.append(item)
 
         for item in items_eaten:
+            self.hud.add_score(1)
             item.kill()
 
         # self.display_surface.fill((140, 40, 40))
