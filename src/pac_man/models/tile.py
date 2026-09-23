@@ -9,6 +9,44 @@ from ..render import SpriteSheetCache
 SUBTILE_SIZE = 8
 TILE_SIZE = SUBTILE_SIZE * 3
 
+class Tile(BaseModel):
+    """Metadata of tile walls and items (not holding sprite data).
+
+    Parameters
+    ----------
+    is_top_closed : bool
+        True if there is a wall to the north of tile.
+    is_right_closed : bool
+        True if there is a wall to the east of tile.
+    is_bottom_closed : bool
+        True if there is a wall to the south of tile.
+    is_left_closed : bool
+        True if there is a wall to the west of tile.
+
+    """
+    is_top_closed: bool
+    is_right_closed: bool
+    is_bottom_closed: bool
+    is_left_closed: bool
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @classmethod
+    def from_hex_state(cls, hex: int) -> "Tile":
+        """Converts MazeGenerator hex values to class flags.
+
+        Parameters
+        ----------
+        hex : int
+            Hex value to be converted.
+
+        """
+        return cls(
+            is_top_closed=bool(hex & 0b0001),
+            is_right_closed=bool(hex & 0b0010),
+            is_bottom_closed=bool(hex & 0b0100),
+            is_left_closed=bool(hex & 0b1000),
+        )
 
 class TileSpriteFactory(BaseModel):
     """Creates tiles from tile data (separated for performance).
@@ -254,44 +292,6 @@ class StaticSpriteElement(pygame.sprite.Sprite):
         )))
 
 
-class Tile(BaseModel):
-    """Metadata of tile walls and items (not holding sprite data).
-
-    Parameters
-    ----------
-    is_top_closed : bool
-        True if there is a wall to the north of tile.
-    is_right_closed : bool
-        True if there is a wall to the east of tile.
-    is_bottom_closed : bool
-        True if there is a wall to the south of tile.
-    is_left_closed : bool
-        True if there is a wall to the west of tile.
-
-    """
-    is_top_closed: bool
-    is_right_closed: bool
-    is_bottom_closed: bool
-    is_left_closed: bool
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    @classmethod
-    def from_hex_state(cls, hex: int) -> "Tile":
-        """Converts MazeGenerator hex values to class flags.
-
-        Parameters
-        ----------
-        hex : int
-            Hex value to be converted.
-
-        """
-        return cls(
-            is_top_closed=bool(hex & 0b0001),
-            is_right_closed=bool(hex & 0b0010),
-            is_bottom_closed=bool(hex & 0b0100),
-            is_left_closed=bool(hex & 0b1000),
-        )
 
 # SUBTILE_SIZE = 8
 
