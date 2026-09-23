@@ -40,9 +40,9 @@ class Level:
         )
 
         # Tiles without pacgums
-        self.bg_group = pygame.sprite.Group()
+        self.tile_group = pygame.sprite.Group()
         # Pacgums and such
-        self.item_group = pygame.sprite.Group()
+        self.gum_group = pygame.sprite.Group()
         # Pacman
         self.player_group = pygame.sprite.Group()
 
@@ -65,7 +65,7 @@ class Level:
             for x in range(len(self.tile_matrix[y])):
                 main_tile = self.tile_matrix[y][x]
 
-                self.bg_group.add(StaticSpriteElement.from_relative(
+                self.tile_group.add(StaticSpriteElement.from_relative(
                     tile_factory.from_tile(
                         main_tile=main_tile,
                         top_tile=self.tile_matrix[y-1][x] if y > 0 else None,
@@ -78,32 +78,36 @@ class Level:
                     x=x,
                     y=y
                 ))
-                self.item_group.add(StaticSpriteElement.from_relative(
-                    tile_factory.get_item(tile=main_tile),
-                    x=x * 3 + 1,
-                    y=y * 3 + 1
-                ))
+                if not (main_tile.is_top_closed and
+                        main_tile.is_right_closed and
+                        main_tile.is_bottom_closed and
+                        main_tile.is_left_closed):
+                    self.gum_group.add(StaticSpriteElement.from_relative(
+                        tile_factory.get_item(tile=main_tile),
+                        x=x * 3 + 1,
+                        y=y * 3 + 1
+                    ))
 
                 if not main_tile.is_top_closed:
-                    self.item_group.add(StaticSpriteElement.from_relative(
+                    self.gum_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 1,
                         y=y * 3
                     ))
                 if not main_tile.is_right_closed:
-                    self.item_group.add(StaticSpriteElement.from_relative(
+                    self.gum_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 2,
                         y=y * 3 + 1
                     ))
                 if not main_tile.is_bottom_closed:
-                    self.item_group.add(StaticSpriteElement.from_relative(
+                    self.gum_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3 + 1,
                         y=y * 3 + 2
                     ))
                 if not main_tile.is_left_closed:
-                    self.item_group.add(StaticSpriteElement.from_relative(
+                    self.gum_group.add(StaticSpriteElement.from_relative(
                         tile_factory.get_item(tile=main_tile),
                         x=x * 3,
                         y=y * 3 + 1
@@ -131,15 +135,9 @@ class Level:
 
         self.player_group.update(dt, self.tile_matrix)
 
-        # items_eaten = pygame.sprite.spritecollide(
-        #     self.pacman, self.item_group, True)  # type: ignore
-
-        # if items_eaten:
-        #     pass
-
         possible_collisions = pygame.sprite.spritecollide(
             self.pacman,  # type: ignore
-            self.item_group,
+            self.gum_group,
             False
         )
 
@@ -159,8 +157,8 @@ class Level:
             item.kill()
 
         # self.display_surface.fill((140, 40, 40))
-        self.bg_group.draw(self.display_surface)
-        self.item_group.draw(self.display_surface)
+        self.tile_group.draw(self.display_surface)
+        self.gum_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)

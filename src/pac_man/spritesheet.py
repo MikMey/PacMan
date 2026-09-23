@@ -171,6 +171,14 @@ class SpriteSheetCache(BaseModel):
         self.cache_new("PACGUM", 136, 10, 8)
         self.cache_new("SUPER-PACGUM", 136, 28, 8)
 
+        # Fruits
+        self.cache_new("FRUIT-0", 1, 117, 16)
+        self.cache_new("FRUIT-1", 18, 117, 16)
+        self.cache_new("FRUIT-2", 35, 117, 16)
+        self.cache_new("FRUIT-3", 52, 117, 16)
+        self.cache_new("FRUIT-4", 69, 117, 16)
+        self.cache_new("FRUIT-5", 86, 117, 16)
+
         # Numbers, Letters and Special Characters
         text_scale = self._text_scale_factor
         self.cache_new("CHAR-0", 1, 19, 8, scale_factor=text_scale)

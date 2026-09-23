@@ -80,7 +80,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
 
-            self.screen.fill((100, 50, 255))
+            # self.screen.fill((100, 50, 255))
             self.hud.loop(dt)
             self.level.loop(dt)
 

@@ -16,22 +16,34 @@ class Hud:
         """Create sprites that are needed in level."""
         self.asset_cache = asset_cache
         self.screen = screen
+        self.vertical_padding = vertical_padding
 
         # Value Logic
         self.score = 0
-        self.high_score = 0
+        self.high_score = 100
+        self.lives = 3
 
         # Display Logic
         self.top_display = pygame.Surface((
-            screen.get_width(),
-            vertical_padding
+            screen.get_width(), vertical_padding
         ))
-        self.position = pygame.Vector2(0, 0)
+        self.top_position = pygame.Vector2(
+            0, 0
+        )
+
+        self.bottom_display = pygame.Surface((
+            screen.get_width(), vertical_padding
+        ))
+        self.bottom_position = pygame.Vector2(
+            0, screen.get_height() - vertical_padding
+        )
 
         # Text and numbers
-        self.text_group = pygame.sprite.Group()
         self.score_element: StaticSpriteElement
         self.high_score_element: StaticSpriteElement
+        self.text_group = pygame.sprite.Group()
+
+        self.lives_group = pygame.sprite.Group()
 
         self.populate_sprite_groups()
 
@@ -39,28 +51,56 @@ class Hud:
         """Add sprites needed in level to sprite groups."""
         self.text_factory = TextSpriteFactory(assets=self.asset_cache)
 
+        # Top Display
         high_score_surface = self.text_factory.from_string(s="high score")
         self.text_group.add(StaticSpriteElement.from_pixel(
             high_score_surface,
             x=(self.screen.get_width() * 0.75 -
                high_score_surface.get_width() // 2),
-            y=0
+            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor / 2
         ))
 
         self.high_score_element = StaticSpriteElement.from_pixel(
             self.text_factory.from_string(s=str(self.high_score)),
             x=(self.screen.get_width() * 0.75 -
-               high_score_surface.get_width() // 2),
-            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor
+               high_score_surface.get_width() // 6),
+            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor * 1.5
         )
         self.text_group.add(self.high_score_element)
 
         self.score_element = StaticSpriteElement.from_pixel(
             self.text_factory.from_string(s=str(self.score)),
             x=(self.screen.get_width() * 0.25),
-            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor
+            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor * 1.5
         )
         self.text_group.add(self.score_element)
+
+        # Bottom Display
+        self.update_lives(self.lives)
+        # self.live_sprite = self.asset_cache.get_anim("PACMAN-LEFT")[3]
+        # self.lives_group.add(StaticSpriteElement.from_pixel(
+        #     self.live_sprite,
+        #     x=((self.vertical_padding / 2) -
+        #        (self.live_sprite.get_height() / 2)),
+        #     y=((self.vertical_padding / 2) -
+        #        (self.live_sprite.get_height() / 2))
+        # ))
+
+    def update_lives(self, new_lives: int) -> None:
+        self.lives = new_lives
+
+        live_sprite = self.asset_cache.get_anim("PACMAN-LEFT")[3]
+        self.lives_group.empty()
+
+        for i in range(self.lives):
+            self.lives_group.add(StaticSpriteElement.from_pixel(
+                live_sprite,
+                x=(self.vertical_padding / 2 -
+                    live_sprite.get_height() / 2 +
+                    i * live_sprite.get_height()),
+                y=(self.vertical_padding / 2 -
+                    live_sprite.get_height() / 2)
+            ))
 
     def add_score(self, addend: int) -> None:
         """Updates the score and maybe the highscore image.
@@ -90,8 +130,10 @@ class Hud:
 
         """
 
-        self.top_display.fill((50, 0, 0))
-
+        # self.top_display.fill((50, 0, 0))
         self.text_group.draw(self.top_display)
+        self.screen.blit(self.top_display, self.top_position)
 
-        self.screen.blit(self.top_display, self.position)
+        # self.bottom_display.fill((120, 0, 43))
+        self.lives_group.draw(self.bottom_display)
+        self.screen.blit(self.bottom_display, self.bottom_position)
