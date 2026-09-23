@@ -67,7 +67,7 @@ class SpriteSheetCache(BaseModel):
     ----------
     reg_static : dict[str, pygame.Surface]
         Dictionary of all non-moving assets. Empty on initialization.
-    reg_static : dict[str, list[pygame.Surface]]
+    reg_anim : dict[str, list[pygame.Surface]]
         Dictionary of all moving assets. Empty on initialization.
 
     """
