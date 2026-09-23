@@ -71,7 +71,7 @@ class GameLoop(State):
             vertical_padding=self.vertical_padding
         )
 
-    def run(self) -> None:
+    def run(self, state) -> None:
 
         running = True
         while running:
@@ -79,6 +79,7 @@ class GameLoop(State):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    state.end_game()
                     running = False
 
             # self.screen.fill((100, 50, 255))
