@@ -1,5 +1,7 @@
 from enum import Enum
 
+import logging
+
 from .game_loop import GameLoop
 from .main_menu import MainMenu
 from .death_screen import DeathScreen
@@ -16,19 +18,27 @@ class LoopMachine():
 	state: LoopStates = LoopStates.MAIN_MENU
 
 	def __init__(self):
-		pass
+		self.game_loop = GameLoop()
+		self.main_menu = MainMenu()
+		self.death_screen = DeathScreen()
+		self.win_screen = WinScreen()
 
 	def run_gameloop(self):
+		log = logging.getLogger('PacMan')
 		while True:
 			match self.state:
 				case LoopStates.MAIN_MENU:
-					self._main_menu()
+					log.debug('Enter MainMenu')
+					self.main_menu.run()
 				case LoopStates.GAME_LOOP:
-					self._game_loop()
+					log.debug('Enter GameLoop')
+					self.game_loop.run()
 				case LoopStates.DEATH_SCREEN:
-					self._death_screen()
+					log.debug('Enter DeathScreen')
+					self.death_screen.run()
 				case LoopStates.WIN_SCREEN:
-					self._win_screen()
+					log.debug('Enter WinScreen')
+					self.win_screen.run()
 				case LoopStates.END_GAME:
 					return
 
