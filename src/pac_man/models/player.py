@@ -82,37 +82,6 @@ class Player(Character):
         if keys[pygame.K_KP1]:
             self.kill()
 
-
-    def update(self, dt: float, tile_matrix: list[list[Tile]]) -> None:
-        """Update player frame and position every frame.
-
-        Parameters
-        ----------
-        dt : float
-            Delta Time between loop pass.
-        tile_matrix : list[list[Tile]]
-            Full matrix of Tiles to look up wall states in.
-
-        """
-        self._update_frame(dt)
-        self._update_position(tile_matrix)
-
-    def _update_frame(self, dt: float) -> None:
-        """Update player frame.
-
-        Parameters
-        ----------
-        dt : float
-            Delta Time between loop pass.
-
-        """
-        self.animation_timer += dt
-
-        if self.animation_timer >= self.animation_speed:
-            self.animation_timer = 0.0
-            self.current_frame = (self.current_frame + 1) % self.max_frame
-            self.set_image()
-
     def _update_position(self, tile_matrix: list[list[Tile]]) -> None:
         """Update player position if possible.
 
