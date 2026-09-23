@@ -1,10 +1,10 @@
-from .structures import Tile_Pos
+import pygame
+
+from ..models import SUBTILE_SIZE, StaticSpriteElement
+
 from .spritesheet import SpriteSheetCache
-from .tile import SUBTILE_SIZE, StaticSpriteElement
-from .player import Player
 from .text import TextSpriteFactory
 
-import pygame
 
 
 class Hud:

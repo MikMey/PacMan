@@ -1,10 +1,12 @@
-from .structures import Tile_Pos, Pixel_Pos, Direction
-from .spritesheet import SpriteSheetCache
-from .tile import Tile
-
 from dataclasses import replace
-import pygame
 import time
+
+import pygame
+
+from ..utils import Tile_Pos, Pixel_Pos, Direction
+from ..render import SpriteSheetCache
+
+from .tile import Tile
 
 
 class Player(pygame.sprite.Sprite):

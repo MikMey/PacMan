@@ -1,7 +1,6 @@
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
-
 @dataclass(slots=True)
 class Pixel_Pos:
     """Pixel position of spritesheet or screen.

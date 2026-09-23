@@ -1,11 +1,10 @@
-from .structures import Tile_Pos
-from .spritesheet import SpriteSheetCache
-from .tile import (TileSpriteFactory, Tile, StaticSpriteElement, TILE_SIZE)
-from .player import Player
-from .hud import Hud
-
 import pygame
 
+from ..utils import Tile_Pos
+from ..render import SpriteSheetCache, Hud
+
+from ..models.tile import (TileSpriteFactory, Tile, StaticSpriteElement, TILE_SIZE)
+from ..models.player import Player
 
 class Level:
     """Sprite and loop logic for the main game level."""

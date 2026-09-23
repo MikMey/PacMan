@@ -1,8 +1,9 @@
-from .spritesheet import SpriteSheetCache
+from typing import Any, Optional
 
 from pydantic import BaseModel, PrivateAttr, ConfigDict
-from typing import Any, Optional
 import pygame
+
+from ..render import SpriteSheetCache
 
 
 SUBTILE_SIZE = 8

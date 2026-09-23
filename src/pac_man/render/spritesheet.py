@@ -1,8 +1,9 @@
+from typing import Optional, Any
+import pathlib
+
 from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, ValidationError
 from pydantic_core import InitErrorDetails
-from typing import Optional, Any
 import pygame
-import pathlib
 
 
 DEFAULT_FILE_PATH = "./data/spritesheet.bmp"
