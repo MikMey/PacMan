@@ -69,6 +69,8 @@ class Character(ABC, pygame.sprite.Sprite):
 			start_pos.y * self.tile_size + self.subtile_size // 2
 		)
 
+		self.speed: int = int(round(2 * self.asset_cache.scale_factor))
+
 
 	def init_image(self):
 		frames = self.asset_cache.get_anim(
@@ -97,7 +99,7 @@ class Character(ABC, pygame.sprite.Sprite):
 			return 'RIGHT'
 		return DIRECTION[key]
 
-	def _is_wall(self, direction: Direction,
+	def _is_wall(self, direction: tuple,
 				 tile_matrix: list[list[Tile]]) -> bool:
 		"""Checks if next tile would be blocked.
 
@@ -117,22 +119,22 @@ class Character(ABC, pygame.sprite.Sprite):
 		# if direction.is_still():
 		#	 return False
 
-		next_tile = replace(self.current_tile)
-		next_tile.x += self.current_dir.hori
-		next_tile.y += self.current_dir.vert
+		# next_tile = replace(self.current_tile)
+		# next_tile.x += self.current_dir.hori
+		# next_tile.y += self.current_dir.vert
 
-		if not (0 <= next_tile.y < len(tile_matrix) and
-				0 <= next_tile.x < len(tile_matrix[0])):
-			return True
+		# if not (0 <= next_tile.y < len(tile_matrix) and
+		# 		0 <= next_tile.x < len(tile_matrix[0])):
+		# 	return True
 
 		tile: Tile = tile_matrix[self.current_tile.y][self.current_tile.x]
-		if direction.vert == -1 and tile.is_top_closed:
+		if direction[1] == -1 and tile.is_top_closed:
 			return True
-		if direction.hori == 1 and tile.is_right_closed:
+		if direction[0] == 1 and tile.is_right_closed:
 			return True
-		if direction.vert == 1 and tile.is_bottom_closed:
+		if direction[1] == 1 and tile.is_bottom_closed:
 			return True
-		if direction.hori == -1 and tile.is_left_closed:
+		if direction[0] == -1 and tile.is_left_closed:
 			return True
 
 		return False
@@ -152,6 +154,29 @@ class Character(ABC, pygame.sprite.Sprite):
 			self.animation_timer = 0.0
 			self.current_frame = (self.current_frame + 1) % self.max_frame
 			self.set_image()
+
+	def _move_straight(self) -> bool:
+		# change target from matrix to global map coords
+		target_tile: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
+
+		# set pixel offset from topleft border
+		target_tile.x += self.subtile_size // 2
+		target_tile.y += self.subtile_size // 2
+
+		# Continue if currently moving
+		# print(self.rect.x, self.rect.y)
+		if self.rect.x != target_tile.x or self.rect.y != target_tile.y:
+			if self.rect.x < target_tile.x:
+				self.rect.x += self.speed
+			elif self.rect.x > target_tile.x:
+				self.rect.x -= self.speed
+
+			if self.rect.y < target_tile.y:
+				self.rect.y += self.speed
+			elif self.rect.y > target_tile.y:
+				self.rect.y -= self.speed
+			return True
+		return False
 
 	@abstractmethod
 	def _update_position(self, tile_matrix) -> None:
@@ -176,6 +201,7 @@ class Character(ABC, pygame.sprite.Sprite):
 			Full matrix of Tiles to look up wall states in.
 
 		"""
+		self.tile_matrix = tile_matrix
 		self._update_frame(dt)
 		self._update_position(tile_matrix)
 
