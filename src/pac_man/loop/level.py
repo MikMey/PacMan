@@ -20,6 +20,7 @@ class Level:
         """Create sprites that are needed in level."""
         self.asset_cache = asset_cache
         self.tile_matrix = self.hex_to_tile_matrix(hex_matrix)
+        Tile.set_matrix(self.tile_matrix)
         self.screen = screen
         self.hud = hud
 
@@ -166,7 +167,7 @@ class Level:
         self.pacman.handle_input(keys)
 
         self.player_group.update(dt, self.tile_matrix)
-        # self.ghost_group.update(dt, self.tile_matrix)
+        self.ghost_group.update(dt, self.tile_matrix)
 
         possible_collisions = pygame.sprite.spritecollide(
             self.pacman,  # type: ignore
@@ -194,6 +195,6 @@ class Level:
         self.gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)
-        # self.ghost_group.draw(self.display_surface)
+        self.ghost_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)
