@@ -1,4 +1,5 @@
 import pygame
+import logging
 
 from mazegenerator import MazeGenerator
 
@@ -56,6 +57,8 @@ class GameLoop(State):
                 self.config.levels[0].height
             )
         ).maze
+        # log = logging.getLogger('PacMan')
+        # log.debug(f'hex_matrix={hex_matrix}')
 
         self.hud = Hud(
             asset_cache=asset_cache,
