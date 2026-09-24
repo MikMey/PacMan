@@ -22,76 +22,6 @@ class Pixel_Pos:
         yield self.x
         yield self.y
 
-
-@dataclass(slots=True)
-class Tile_Pos:
-    """Tile position of game.
-
-    Attributes
-    ----------
-    x : int
-        Horizontal tile position.
-    y : int
-        Vertical tile position.
-
-    """
-    x: int = Field(default=0)
-    y: int = Field(default=0)
-
-    def to_pixel_pos(self, tile_size: int) -> Pixel_Pos:
-        """Returns new instance of multiplied Position."""
-        return Pixel_Pos(self.x * tile_size, self.y * tile_size)
-
-    def __iter__(self):
-        """Defines attribute order."""
-        yield self.x
-        yield self.y
-
-    def set(self, pos: tuple):
-        self.x = pos[0]
-        self.y = pos[1]
-
-    def get(self) -> tuple:
-        return (self.x, self.y)
-
-    def add(self, change: Tile_Pos | UnitVector):
-        self.x += change.x
-        self.y += change.y
-
-    def copy(self) -> Tile_Pos:
-        new_tile: Tile_Pos = Tile_Pos()
-        new_tile.set(self.get())
-        return(new_tile)
-
-    @staticmethod
-    def get_neighbour(tile: Tile_Pos, unit_vector: UnitVector) -> Tile_Pos:
-        new_tile: Tile_Pos = tile.copy()
-        new_tile.add(unit_vector)
-        return new_tile
-
-
-# UNUSED
-# @dataclass(slots=True)
-# class Size:
-#     """Pixel size of a sprite or surface.
-
-#     Attributes
-#     ----------
-#     width : int
-#         Horizontal pixel size.
-#     height : int
-#         Vertical pixel size.
-
-#     """
-#     width: int = Field(ge=0)
-#     height: int = Field(ge=0)
-
-#     def __iter__(self):
-#         """Defines attribute order."""
-#         yield self.width
-#         yield self.height
-
-
 @dataclass(slots=True)
 class UnitVector:
     """Negative Identity matrix for movement on tiles.
@@ -125,3 +55,73 @@ class UnitVector:
         """Defines attribute order."""
         yield self.x
         yield self.y
+
+@dataclass(slots=True)
+class Tile_Pos:
+    """Tile position of game.
+
+    Attributes
+    ----------
+    x : int
+        Horizontal tile position.
+    y : int
+        Vertical tile position.
+
+    """
+    x: int = Field(default=0)
+    y: int = Field(default=0)
+
+    def to_pixel_pos(self, tile_size: int) -> Pixel_Pos:
+        """Returns new instance of multiplied Position."""
+        return Pixel_Pos(self.x * tile_size, self.y * tile_size)
+
+    def __iter__(self):
+        """Defines attribute order."""
+        yield self.x
+        yield self.y
+
+    def set(self, pos: tuple):
+        self.x = pos[0]
+        self.y = pos[1]
+
+    def get(self) -> tuple:
+        return (self.x, self.y)
+
+    def add(self, change: "Tile_Pos | UnitVector"):
+        self.x += change.x
+        self.y += change.y
+
+    def copy(self) -> "Tile_Pos":
+        new_tile: Tile_Pos = Tile_Pos()
+        new_tile.set(self.get())
+        return(new_tile)
+
+    @staticmethod
+    def get_neighbour(tile: "Tile_Pos", unit_vector: UnitVector) -> "Tile_Pos":
+        new_tile: Tile_Pos = tile.copy()
+        new_tile.add(unit_vector)
+        return new_tile
+
+
+# UNUSED
+# @dataclass(slots=True)
+# class Size:
+#     """Pixel size of a sprite or surface.
+
+#     Attributes
+#     ----------
+#     width : int
+#         Horizontal pixel size.
+#     height : int
+#         Vertical pixel size.
+
+#     """
+#     width: int = Field(ge=0)
+#     height: int = Field(ge=0)
+
+#     def __iter__(self):
+#         """Defines attribute order."""
+#         yield self.width
+#         yield self.height
+
+
