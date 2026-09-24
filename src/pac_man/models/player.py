@@ -11,9 +11,9 @@ from .tile import Tile
 from .characters import Character, CharacterName
 
 class PlayerState(Enum):
-	ALIVE = 0
-	DEAD = 1
-	RESPAWNING = 2
+    ALIVE = 0
+    DEAD = 1
+    RESPAWNING = 2
 
 
 class Player(Character):

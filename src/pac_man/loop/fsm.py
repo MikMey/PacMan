@@ -8,78 +8,78 @@ from .death_screen import DeathScreen
 from .win_screen import WinScreen
 
 class LoopStates():
-	MAIN_MENU = 0
-	GAME_LOOP = 1
-	DEATH_SCREEN = 2
-	WIN_SCREEN = 3
-	END_GAME = 4
-	NEW_LEVEL = 5
+    MAIN_MENU = 0
+    GAME_LOOP = 1
+    DEATH_SCREEN = 2
+    WIN_SCREEN = 3
+    END_GAME = 4
+    NEW_LEVEL = 5
 
-	def __init__(self):
-		self._state = LoopStates.MAIN_MENU
+    def __init__(self):
+        self._state = LoopStates.MAIN_MENU
 
-	def main_menu(self):
-		self._state = LoopStates.MAIN_MENU
+    def main_menu(self):
+        self._state = LoopStates.MAIN_MENU
 
-	def game_loop(self):
-		self._state = LoopStates.GAME_LOOP
+    def game_loop(self):
+        self._state = LoopStates.GAME_LOOP
 
-	def death_screen(self):
-		self._state = LoopStates.DEATH_SCREEN
+    def death_screen(self):
+        self._state = LoopStates.DEATH_SCREEN
 
-	def win_screen(self):
-		self._state = LoopStates.WIN_SCREEN
+    def win_screen(self):
+        self._state = LoopStates.WIN_SCREEN
 
-	def end_game(self):
-		self._state = LoopStates.END_GAME
+    def end_game(self):
+        self._state = LoopStates.END_GAME
 
-	def new_level(self):
-		self._state = LoopStates.NEW_LEVEL
+    def new_level(self):
+        self._state = LoopStates.NEW_LEVEL
 
-	def get_state(self):
-		return self._state
+    def get_state(self):
+        return self._state
 
 
 class LoopMachine():
-	state: LoopStates = LoopStates()
+    state: LoopStates = LoopStates()
 
-	def __init__(self, config):
-		self.config = config
-		self.game_loop = GameLoop(config=config)
-		self.main_menu = MainMenu()
-		self.death_screen = DeathScreen()
-		self.win_screen = WinScreen()
+    def __init__(self, config):
+        self.config = config
+        self.game_loop = GameLoop(config=config)
+        self.main_menu = MainMenu()
+        self.death_screen = DeathScreen()
+        self.win_screen = WinScreen()
 
-	def run_gameloop(self, asset_cache):
-		log = logging.getLogger('PacMan')
-		while True:
-			match self.state.get_state():
+    def run_gameloop(self, asset_cache):
+        log = logging.getLogger('PacMan')
+        while True:
+            match self.state.get_state():
 
-				case LoopStates.MAIN_MENU:
-					log.debug('Enter MainMenu')
-					self.main_menu.run()
-					self.state.new_level()
+                case LoopStates.MAIN_MENU:
+                    log.debug('Enter MainMenu')
+                    self.main_menu.run()
+                    self.state.new_level()
 
-				case LoopStates.GAME_LOOP:
-					log.debug('Enter GameLoop')
-					self.game_loop.run(self.state)
+                case LoopStates.GAME_LOOP:
+                    log.debug('Enter GameLoop')
+                    self.game_loop.run(self.state)
 
-				case LoopStates.DEATH_SCREEN:
-					log.debug('Enter DeathScreen')
-					self.death_screen.run()
+                case LoopStates.DEATH_SCREEN:
+                    log.debug('Enter DeathScreen')
+                    self.death_screen.run()
 
-				case LoopStates.WIN_SCREEN:
-					log.debug('Enter WinScreen')
-					self.win_screen.run()
+                case LoopStates.WIN_SCREEN:
+                    log.debug('Enter WinScreen')
+                    self.win_screen.run()
 
-				case LoopStates.END_GAME:
-					log.debug('Enter Close')
-					return
+                case LoopStates.END_GAME:
+                    log.debug('Enter Close')
+                    return
 
-				case LoopStates.NEW_LEVEL:
-					self.game_loop.load_level(asset_cache)
-					log.debug('Enter NewLevel')
-					self.state.game_loop()
+                case LoopStates.NEW_LEVEL:
+                    self.game_loop.load_level(asset_cache)
+                    log.debug('Enter NewLevel')
+                    self.state.game_loop()
 
 
 

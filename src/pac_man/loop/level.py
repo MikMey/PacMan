@@ -166,7 +166,7 @@ class Level:
         self.pacman.handle_input(keys)
 
         self.player_group.update(dt, self.tile_matrix)
-        #self.ghost_group.update(dt, self.tile_matrix)
+        # self.ghost_group.update(dt, self.tile_matrix)
 
         possible_collisions = pygame.sprite.spritecollide(
             self.pacman,  # type: ignore
@@ -194,6 +194,6 @@ class Level:
         self.gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)
-        #self.ghost_group.draw(self.display_surface)
+        # self.ghost_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)
