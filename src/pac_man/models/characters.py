@@ -7,7 +7,7 @@ import logging
 import pygame
 import numpy as np
 
-from ..utils import Tile_Pos, Pixel_Pos, Direction
+from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
 
 from .tile import Tile
@@ -49,7 +49,7 @@ class Character(ABC, pygame.sprite.Sprite):
         self.is_dying = False
 
         # Movement attributes
-        self.current_dir: Direction = Direction()
+        self.current_dir: UnitVector = UnitVector(0, 0)
         
         self.current_tile: Tile_Pos = replace(start_pos)
         self.target_tile: Tile_Pos = replace(start_pos)
@@ -80,7 +80,7 @@ class Character(ABC, pygame.sprite.Sprite):
         self.image = frames[self.current_frame]
 
 
-    def _dir_to_string(self, dir: Direction) -> str:
+    def _dir_to_string(self, dir: UnitVector) -> str:
         """Converts :obj:`Direction` to string. Defaults to RIGHT.
 
         Parameters
@@ -94,13 +94,12 @@ class Character(ABC, pygame.sprite.Sprite):
             String indicating direction (TOP, RIGHT, LEFT, BOTTOM).
 
         """
-        key = (dir.hori, dir.vert)
+        key = dir.get()
         if key not in DIRECTION.keys():
             return 'RIGHT'
         return DIRECTION[key]
 
-    def _is_wall(self, direction: tuple,
-                 tile_matrix: list[list[Tile]]) -> bool:
+    def _is_wall(self, direction: tuple, tile: Tile) -> bool:
         """Checks if next tile would be blocked.
 
         Parameters
@@ -116,8 +115,8 @@ class Character(ABC, pygame.sprite.Sprite):
             True if wall or border is in the way, False otherwise.
 
         """
-        # if direction.is_still():
-        #     return False
+        if not any(direction):
+            return False
 
         # next_tile = replace(self.current_tile)
         # next_tile.x += self.current_dir.hori
@@ -127,7 +126,6 @@ class Character(ABC, pygame.sprite.Sprite):
         #         0 <= next_tile.x < len(tile_matrix[0])):
         #     return True
 
-        tile: Tile = tile_matrix[self.current_tile.y][self.current_tile.x]
         if direction[1] == -1 and tile.is_top_closed:
             return True
         if direction[0] == 1 and tile.is_right_closed:
