@@ -51,6 +51,7 @@ class Level:
                 for row in hex_matrix]
 
     def init_ghost_group(self, subtile_size) -> None:
+        """add instances of ghost class for each ghost to ghost_group"""
 
         PrepGhost = functools.partial(Ghost, asset_cache=self.asset_cache, subtile_size=subtile_size)
 
