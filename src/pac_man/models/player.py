@@ -4,7 +4,7 @@ from enum import Enum
 
 import pygame
 
-from ..utils import Tile_Pos, Pixel_Pos, Direction
+from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
 
 from .tile import Tile
@@ -34,7 +34,7 @@ class Player(Character):
             )
         self.state = PlayerState.ALIVE
         
-        self.buffered_dir: Direction = Direction()
+        self.buffered_dir: UnitVector = UnitVector()
 
         self.speed: int = int(round(2 * self.asset_cache.scale_factor))
 
@@ -69,14 +69,15 @@ class Player(Character):
             Keys pressed in last loop pass.
 
         """
-        if keys[pygame.K_UP] or keys[pygame.K_w] and self.current_dir.vert != -1:
-            self.buffered_dir.set(0, -1)
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and self.current_dir.hori != 1:
-            self.buffered_dir.set(1, 0)
-        elif keys[pygame.K_DOWN] or keys[pygame.K_s] and self.current_dir.vert != 1:
-            self.buffered_dir.set(0, 1)
-        elif keys[pygame.K_LEFT] or keys[pygame.K_a] and self.current_dir.hori != -1:
-            self.buffered_dir.set(-1, 0)
+
+        if keys[pygame.K_UP] or keys[pygame.K_w] and self.current_dir.y != -1:
+            self.buffered_dir.set((0, -1))
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and self.current_dir.x != 1:
+            self.buffered_dir.set((1, 0))
+        elif keys[pygame.K_DOWN] or keys[pygame.K_s] and self.current_dir.y != 1:
+            self.buffered_dir.set((0, 1))
+        elif keys[pygame.K_LEFT] or keys[pygame.K_a] and self.current_dir.x != -1:
+            self.buffered_dir.set((-1, 0))
 
         if keys[pygame.K_KP1]:
             self.kill()
@@ -88,14 +89,12 @@ class Player(Character):
         
         # Check if next target is availible if exactly in middle
         if not self._move_straight():
-            self.current_tile.x = self.target_tile.x
-            self.current_tile.y = self.target_tile.y
+            self.current_tile = self.target_tile.copy()
 
-            if not self.buffered_dir.is_still() and not self._is_wall((self.buffered_dir.hori, self.buffered_dir.vert), tile_matrix):
+            if not self.buffered_dir.is_still() and not self._is_wall(self.buffered_dir.get(), Tile.get_tile(self.current_tile)):
                 self.current_dir = replace(self.buffered_dir)
 
-            elif self._is_wall((self.current_dir.hori, self.current_dir.vert), tile_matrix):
-                self.current_dir.set(0, 0)
+            elif self._is_wall(self.current_dir.get(), Tile.get_tile(self.current_tile)):
+                self.current_dir.set((0, 0))
 
-            self.target_tile.x = self.current_tile.x + self.current_dir.hori
-            self.target_tile.y = self.current_tile.y + self.current_dir.vert
+            self.target_tile = Tile_Pos.get_neighbour(self.current_tile, self.current_dir)

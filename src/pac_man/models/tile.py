@@ -3,6 +3,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, PrivateAttr, ConfigDict
 import pygame
 
+from ..utils import Tile_Pos
 from ..render import SpriteSheetCache
 
 
@@ -29,6 +30,7 @@ class Tile(BaseModel):
     is_right_closed: bool
     is_bottom_closed: bool
     is_left_closed: bool
+    _matrix: list[list[Tile]] = []
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -48,6 +50,13 @@ class Tile(BaseModel):
             is_bottom_closed=bool(hex & 0b0100),
             is_left_closed=bool(hex & 0b1000),
         )
+
+    def set_matrix(matrix: list[list[Tile]]):
+        Tile._matrix = matrix
+
+    def get_tile(pos: Tile_Pos) -> Tile:
+        tile: Tile = Tile._matrix[pos.y][pos.x]
+        return tile
 
 
 class TileSpriteFactory(BaseModel):
