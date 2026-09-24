@@ -74,6 +74,32 @@ class Level:
 
         self.ghost_group.add(self.pinky, self.inky, self.blinky, self.clyde)
 
+    def reload_tile_sheet(self) -> None:
+        self.tile_group.empty()
+
+        tile_factory = TileSpriteFactory(assets=self.asset_cache)
+
+        maze_x = len(self.tile_matrix[0])
+        maze_y = len(self.tile_matrix)
+
+        for y in range(len(self.tile_matrix)):
+            for x in range(len(self.tile_matrix[y])):
+                main_tile = self.tile_matrix[y][x]
+
+                self.tile_group.add(StaticSpriteElement.from_relative(
+                    tile_factory.from_tile(
+                        main_tile=main_tile,
+                        top_tile=self.tile_matrix[y-1][x] if y > 0 else None,
+                        right_tile=(self.tile_matrix[y][x+1]
+                                    if x < maze_x-1 else None),
+                        bottom_tile=(self.tile_matrix[y+1][x]
+                                     if y < maze_y-1 else None),
+                        left_tile=self.tile_matrix[y][x-1] if x > 0 else None,
+                    ),
+                    x=x,
+                    y=y
+                ))
+
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
@@ -144,6 +170,7 @@ class Level:
                         x=x * 3,
                         y=y * 3 + 1
                     ))
+
         subtile_size = tile_factory._sub_w
         self.pacman = Player(
             asset_cache=self.asset_cache,

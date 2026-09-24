@@ -41,13 +41,17 @@ class Hud:
         self.score_element: StaticSpriteElement
         self.high_score_element: StaticSpriteElement
         self.text_group = pygame.sprite.Group()
-
         self.lives_group = pygame.sprite.Group()
 
         self.populate_sprite_groups()
 
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
+        self.score_element: StaticSpriteElement
+        self.high_score_element: StaticSpriteElement
+        self.text_group = pygame.sprite.Group()
+        self.lives_group = pygame.sprite.Group()
+
         self.text_factory = TextSpriteFactory(assets=self.asset_cache)
 
         # Top Display

@@ -84,12 +84,18 @@ class GameLoop(State):
             case pygame.K_KP7:
                 next = self.hud.asset_cache.text_color_offset + 1
                 self.hud.asset_cache.text_color_offset = next % 19
-
                 self.hud.asset_cache.bake_text_offset(
                     self.hud.asset_cache.text_color_offset
                 )
-
                 self.hud.populate_sprite_groups()
+
+            case pygame.K_KP8:
+                next = self.hud.asset_cache.tile_color_offset + 1
+                self.hud.asset_cache.tile_color_offset = next % 19
+                self.hud.asset_cache.bake_tile_offset(
+                    self.hud.asset_cache.tile_color_offset
+                )
+                self.level.reload_tile_sheet()
 
     def run(self, state) -> None:
 

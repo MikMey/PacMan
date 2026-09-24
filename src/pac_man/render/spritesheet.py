@@ -80,7 +80,8 @@ class SpriteSheetCache(BaseModel):
     reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
     reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)
 
-    text_color_offset: int = 0
+    text_color_offset: int = 9
+    tile_color_offset: int = 8
 
     _text_scale_factor: float = PrivateAttr()
 
@@ -136,41 +137,8 @@ class SpriteSheetCache(BaseModel):
 
         # === STATIC TILES === #
 
-        # Border Tiles
-        self.cache_new("BORDER-TOP", 181, 19, 8)
-        self.cache_new("BORDER-RIGHT", 172, 10, 8)
-        self.cache_new("BORDER-BOTTOM", 181, 1, 8)
-        self.cache_new("BORDER-LEFT", 190, 10, 8)
-        self.cache_new("BORDER-TOP-RIGHT", 172, 28, 8)
-        self.cache_new("BORDER-TOP-LEFT", 145, 28, 8)
-        self.cache_new("BORDER-BOTTOM-RIGHT", 172, 55, 8)
-        self.cache_new("BORDER-BOTTOM-LEFT", 145, 55, 8)
-
-        # Border Tiles connectiong to Wall Tiles
-        self.cache_new("BORDER-TOP-WALL-RIGHT", 154, 28, 8)
-        self.cache_new("BORDER-TOP-WALL-LEFT", 163, 28, 8)
-        self.cache_new("BORDER-RIGHT-WALL-TOP", 172, 46, 8)
-        self.cache_new("BORDER-RIGHT-WALL-BOTTOM", 172, 37, 8)
-        self.cache_new("BORDER-BOTTOM-WALL-RIGHT", 154, 28, 8, flip_y=True)
-        self.cache_new("BORDER-BOTTOM-WALL-LEFT", 163, 28, 8, flip_y=True)
-        self.cache_new("BORDER-LEFT-WALL-TOP", 145, 46, 8)
-        self.cache_new("BORDER-LEFT-WALL-BOTTOM", 145, 37, 8)
-
-        # Wall Tiles
-        self.cache_new("WALL-TOP", 154, 19, 8)
-        self.cache_new("WALL-RIGHT", 145, 10, 8)
-        self.cache_new("WALL-BOTTOM", 154, 1, 8)
-        self.cache_new("WALL-LEFT", 163, 10, 8)
-        self.cache_new("WALL-TOP-RIGHT", 154, 46, 8)
-        self.cache_new("WALL-TOP-LEFT", 163, 46, 8)
-        self.cache_new("WALL-BOTTOM-RIGHT", 154, 37, 8)
-        self.cache_new("WALL-BOTTOM-LEFT", 163, 37, 8)
-
-        # Corner tiles (to round of ending walls)
-        self.cache_new("CORNER-TOP-RIGHT", 145, 19, 8)
-        self.cache_new("CORNER-TOP-LEFT", 163, 19, 8)
-        self.cache_new("CORNER-BOTTOM-RIGHT", 145, 1, 8)
-        self.cache_new("CORNER-BOTTOM-LEFT", 163, 1, 8)
+        # Tiles (Walls and Borders)
+        self.bake_tile_offset(self.tile_color_offset)
 
         # Tile Items
         self.cache_new("PACGUM", 136, 10, 8)
@@ -256,6 +224,60 @@ class SpriteSheetCache(BaseModel):
         self.cache_new_anim("GHOST-DEAD-LEFT", [(269, 269)], size=16)
         self.cache_new_anim("GHOST-DEAD-BOTTOM", [(235, 269)], size=16)
         self.cache_new_anim("GHOST-DEAD-TOP", [(303, 269)], size=16)
+
+    def bake_tile_offset(self, offset: int) -> None:
+
+        def cache_tile(name: str, x: int, y: int) -> None:
+            self.cache_new(
+                name,
+                x + SHEET_OFFSET_X * (offset % 5),
+                y + SHEET_OFFSET_Y * (offset // 5),
+                8
+            )
+
+        cache_tile("BORDER-TOP", 181, 19)
+        cache_tile("BORDER-RIGHT", 172, 10)
+        cache_tile("BORDER-BOTTOM", 181, 1)
+        cache_tile("BORDER-LEFT", 190, 10)
+        cache_tile("BORDER-TOP-RIGHT", 172, 28)
+        cache_tile("BORDER-TOP-LEFT", 145, 28)
+        cache_tile("BORDER-BOTTOM-RIGHT", 172, 55)
+        cache_tile("BORDER-BOTTOM-LEFT", 145, 55)
+
+        cache_tile("BORDER-TOP-WALL-RIGHT", 154, 28)
+        cache_tile("BORDER-TOP-WALL-LEFT", 163, 28)
+        cache_tile("BORDER-RIGHT-WALL-TOP", 172, 46)
+        cache_tile("BORDER-RIGHT-WALL-BOTTOM", 172, 37)
+        self.cache_new(
+            "BORDER-BOTTOM-WALL-RIGHT",
+            154 + SHEET_OFFSET_X * (offset % 5),
+            28 + SHEET_OFFSET_Y * (offset // 5),
+            8,
+            flip_y=True
+        )
+        self.cache_new(
+            "BORDER-BOTTOM-WALL-LEFT",
+            163 + SHEET_OFFSET_X * (offset % 5),
+            28 + SHEET_OFFSET_Y * (offset // 5),
+            8,
+            flip_y=True
+        )
+        cache_tile("BORDER-LEFT-WALL-TOP", 145, 46)
+        cache_tile("BORDER-LEFT-WALL-BOTTOM", 145, 37)
+
+        cache_tile("WALL-TOP", 154, 19)
+        cache_tile("WALL-RIGHT", 145, 10)
+        cache_tile("WALL-BOTTOM", 154, 1)
+        cache_tile("WALL-LEFT", 163, 10)
+        cache_tile("WALL-TOP-RIGHT", 154, 46)
+        cache_tile("WALL-TOP-LEFT", 163, 46)
+        cache_tile("WALL-BOTTOM-RIGHT", 154, 37)
+        cache_tile("WALL-BOTTOM-LEFT", 163, 37)
+
+        cache_tile("CORNER-TOP-RIGHT", 145, 19)
+        cache_tile("CORNER-TOP-LEFT", 163, 19)
+        cache_tile("CORNER-BOTTOM-RIGHT", 145, 1)
+        cache_tile("CORNER-BOTTOM-LEFT", 163, 1)
 
     def bake_text_offset(self, offset: int) -> None:
         """Pick a global text and number color.
