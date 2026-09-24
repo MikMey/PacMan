@@ -3,6 +3,7 @@ from typing import Callable
 import random
 import time
 from dataclasses import dataclass
+from typing import Optional
 
 from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
@@ -13,8 +14,44 @@ from .tile import Tile
 
 @dataclass
 class Bfs_Obj:
-    tile: Tile_Pos
+    pos: Tile_Pos
     cost: int
+    origin: Optional["Bfs_Obj"] = None
+
+    def get_neighbour(self) -> "list[Bfs_Obj]":
+        res: "list[Bfs_Obj]" = []
+        tile: Tile = Tile.get_tile(self.pos)
+        if not tile.is_bottom_closed:
+            obj = Bfs_Obj(
+                Tile_Pos(self.pos.x, self.pos.y + 1),
+                self.cost + 1,
+                origin=self
+                )
+            res.append(obj)
+        if not tile.is_top_closed:
+            obj = Bfs_Obj(
+                Tile_Pos(self.pos.x, self.pos.y - 1),
+                self.cost + 1,
+                origin=self
+                )
+            res.append(obj)
+        if not tile.is_right_closed:
+            obj = Bfs_Obj(
+                Tile_Pos(self.pos.x + 1, self.pos.y),
+                self.cost + 1,
+                origin=self
+                )
+            res.append(obj)
+        if not tile.is_left_closed:
+            obj = Bfs_Obj(
+                Tile_Pos(self.pos.x - 1, self.pos.y),
+                self.cost + 1,
+                origin=self
+                )
+            res.append(obj)
+        return res
+
+
 class GhostState(Enum):
     ROAMING = 0
     FLEEING = 1
@@ -53,11 +90,11 @@ class Ghost(Character):
     def set_image(self):
         if self.state == GhostState.RESPAWNING:
             frames = self.asset_cache.get_anim(
-                self.name + 'RESPAWN' #TODO match to correct strings
+                'GHOST-DEAD' + self._dir_to_string(self.current_dir)
             )
         elif self.state == GhostState.FLEEING:
             frames = self.asset_cache.get_anim(
-                self.name + "FLEE-" + self._dir_to_string(self.current_dir)
+                self.name + "SCARED"
             )
         else:
             frames = self.asset_cache.get_anim(
@@ -87,13 +124,13 @@ class Ghost(Character):
         if self.state == GhostState.ROAMING:
             self.log.debug('blinky call')
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [self.player.current_tile.x + 1, self.player.current_tile.y]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(self.player.current_tile.x + 1, self.player.current_tile.y)
                 )
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [len(self.tile_matrix[0]) - 1, 0]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(len(self.tile_matrix[0]) - 1, 0)
                 )
         else:
             pass
@@ -104,13 +141,13 @@ class Ghost(Character):
         if self.state == GhostState.ROAMING:
             self.log.debug('pinky call')
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [self.player.current_tile.x + 1, self.player.current_tile.y]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(self.player.current_tile.x + 1, self.player.current_tile.y)
                 )
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [0, 0]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(0, 0)
                 )
         else:
             pass
@@ -135,8 +172,8 @@ class Ghost(Character):
                 self.log.debug(f"turn={turn}")
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [len(self.tile_matrix[0]) - 1, len(self.tile_matrix) - 1]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(len(self.tile_matrix[0]) - 1, len(self.tile_matrix) - 1)
                 )
         else:
             pass
@@ -160,8 +197,8 @@ class Ghost(Character):
                     break
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [0, len(self.tile_matrix) - 1]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(0, len(self.tile_matrix) - 1)
                 )
         else:
             pass
@@ -173,15 +210,20 @@ class Ghost(Character):
         tiles: list[Bfs_Obj] = [new_target]
         queue: list = [new_target]
         while queue:
+            time.sleep(0.1)
+            self.log.debug(f'pos={pos} target={target}\n\n\tqueue={queue}\n\n\ttiles={tiles}')
             curr: Bfs_Obj = queue.pop(0)
-            neighbours: list[Bfs_Obj] = curr.get_neighbours()
-            queue.append(item for item in neighbours)
-            tiles.append(item for item in neighbours)
-            if pos in [obj.tile for obj in tiles]:
-                break
+            neighbours: list[Bfs_Obj] = curr.get_neighbour()
+            for item in neighbours:
+                queue.append(item)
+                tiles.append(item)
+            for obj in tiles:
+                if obj.pos == pos:
+                    queue = None
+                    break
         for obj in tiles:
-            if obj.tile == pos:
-                return obj.origin.tile
+            if obj.pos == pos:
+                return obj.origin.pos
         return None
 
         
