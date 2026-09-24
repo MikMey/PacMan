@@ -217,117 +217,43 @@ class SpriteSheetCache(BaseModel):
             size=16
         )
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST1-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST1-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "GHOST1-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST1-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST1-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # Shadow / Blinky (Red)
+        self.cache_new_anim("GHOST-1-RIGHT", [(1, 83), (18, 83)], size=16)
+        self.cache_new_anim("GHOST-1-LEFT", [(69, 83), (86, 83)], size=16)
+        self.cache_new_anim("GHOST-1-BOTTOM", [(35, 83), (52, 83)], size=16)
+        self.cache_new_anim("GHOST-1-TOP", [(103, 83), (120, 83)], size=16)
+        self.cache_new_anim("GHOST-1-SCARED",
+                            [(1, 168), (18, 168)], size=16)
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST2-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST2-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "GHOST2-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST2-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST2-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # Speedy / Pinky (Pink)
+        self.cache_new_anim("GHOST-2-RIGHT", [(201, 83), (218, 83)], size=16)
+        self.cache_new_anim("GHOST-2-LEFT", [(269, 83), (286, 83)], size=16)
+        self.cache_new_anim("GHOST-2-BOTTOM", [(235, 83), (252, 83)], size=16)
+        self.cache_new_anim("GHOST-2-TOP", [(303, 83), (320, 83)], size=16)
+        self.cache_new_anim("GHOST-2-SCARED",
+                            [(201, 168), (218, 168)], size=16)
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST3-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST3-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "GHOST3-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST3-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST3-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # Bashful / Inky (Cyan)
+        self.cache_new_anim("GHOST-3-RIGHT", [(401, 83), (418, 83)], size=16)
+        self.cache_new_anim("GHOST-3-LEFT", [(469, 83), (486, 83)], size=16)
+        self.cache_new_anim("GHOST-3-BOTTOM", [(435, 83), (452, 83)], size=16)
+        self.cache_new_anim("GHOST-3-TOP", [(503, 83), (520, 83)], size=16)
+        self.cache_new_anim("GHOST-3-SCARED",
+                            [(401, 168), (418, 168)], size=16)
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST4-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST4-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "GHOST4-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST4-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST4-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # Pokey / Clyde (Orange)
+        self.cache_new_anim("GHOST-4-RIGHT", [(601, 83), (618, 83)], size=16)
+        self.cache_new_anim("GHOST-4-LEFT", [(669, 83), (686, 83)], size=16)
+        self.cache_new_anim("GHOST-4-BOTTOM", [(635, 83), (652, 83)], size=16)
+        self.cache_new_anim("GHOST-4-TOP", [(703, 83), (720, 83)], size=16)
+        self.cache_new_anim("GHOST-4-SCARED",
+                            [(601, 168), (618, 168)], size=16)
+
+        # Dead Ghost (Invisisble)
+        self.cache_new_anim("GHOST-DEAD-RIGHT", [(201, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-LEFT", [(269, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-BOTTOM", [(235, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-TOP", [(303, 269)], size=16)
 
     def bake_text_offset(self, offset: int) -> None:
         """Pick a global text and number color.
