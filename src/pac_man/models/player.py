@@ -85,35 +85,16 @@ class Player(Character):
         
         if self.is_dying:
             return
-        # change target from matrix to global map coords
-        target_tile: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
-
-        # set pixel offset from topleft border
-        target_tile.x += self.subtile_size // 2
-        target_tile.y += self.subtile_size // 2
-
-        # Continue if currently moving
-        # print(self.rect.x, self.rect.y)
-        if self.rect.x != target_tile.x or self.rect.y != target_tile.y:
-            if self.rect.x < target_tile.x:
-                self.rect.x += self.speed
-            elif self.rect.x > target_tile.x:
-                self.rect.x -= self.speed
-
-            if self.rect.y < target_tile.y:
-                self.rect.y += self.speed
-            elif self.rect.y > target_tile.y:
-                self.rect.y -= self.speed
-
+        
         # Check if next target is availible if exactly in middle
-        else:
+        if not self._move_straight():
             self.current_tile.x = self.target_tile.x
             self.current_tile.y = self.target_tile.y
 
-            if not self.buffered_dir.is_still() and not self._is_wall(self.buffered_dir, tile_matrix):
+            if not self.buffered_dir.is_still() and not self._is_wall((self.buffered_dir.hori, self.buffered_dir.vert), tile_matrix):
                 self.current_dir = replace(self.buffered_dir)
 
-            elif self._is_wall(self.current_dir, tile_matrix):
+            elif self._is_wall((self.current_dir.hori, self.current_dir.vert), tile_matrix):
                 self.current_dir.set(0, 0)
 
             self.target_tile.x = self.current_tile.x + self.current_dir.hori
