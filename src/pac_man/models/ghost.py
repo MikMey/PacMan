@@ -27,7 +27,7 @@ class Ghost(Character):
 			ghost_peronality: GhostPersonality,
             subtile_size: int
             ) -> None:
-
+		
 		super().__init__(
             asset_cache=asset_cache,
             start_pos=start_pos,

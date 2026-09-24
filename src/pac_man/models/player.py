@@ -25,7 +25,7 @@ class Player(Character):
             start_pos: Tile_Pos,
             subtile_size: int
             ) -> None:
-        """Initialize positioning and animation logic."""
+        
         super().__init__(
             asset_cache=asset_cache,
             start_pos=start_pos,
@@ -39,7 +39,6 @@ class Player(Character):
         self.speed: int = int(round(2 * self.asset_cache.scale_factor))
 
     def set_image(self) -> None:
-        """Get correct sprite data based on context."""
         if self.is_dying:
             frames = self.asset_cache.get_anim(
                 self.name + "DEATH"
@@ -57,7 +56,7 @@ class Player(Character):
         self.image = frames[self.current_frame]
 
     def kill(self) -> None:
-        """Starts death animation."""
+        
         self.is_dying = True
         self.animation_timer = 0.0
 
@@ -83,14 +82,7 @@ class Player(Character):
             self.kill()
 
     def _update_position(self, tile_matrix: list[list[Tile]]) -> None:
-        """Update player position if possible.
-
-        Parameters
-        ----------
-        tile_matrix : list[list[Tile]]
-            Full matrix of Tiles to look up wall states in.
-
-        """
+        
         if self.is_dying:
             return
         # change target from matrix to global map coords

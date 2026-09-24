@@ -27,6 +27,7 @@ class CharacterName(Enum):
 	CLYDE = 'GHOST4-'
 
 class Character(ABC, pygame.sprite.Sprite):
+	"""Character Parent Class"""
 
 	def __init__(
 			self,
@@ -154,6 +155,14 @@ class Character(ABC, pygame.sprite.Sprite):
 
 	@abstractmethod
 	def _update_position(self, tile_matrix) -> None:
+		"""Update player position if possible.
+
+		Parameters
+		----------
+		tile_matrix : list[list[Tile]]
+			Full matrix of Tiles to look up wall states in.
+
+		"""
 		pass
 
 	def update(self, dt: float, tile_matrix: list[list[Tile]]) -> None:
@@ -172,10 +181,12 @@ class Character(ABC, pygame.sprite.Sprite):
 
 	@abstractmethod
 	def set_image(self) -> None:
+		"""Get correct sprite data based on context."""
 		pass
 
 
 	@abstractmethod
 	def kill() -> None:
+		"""Starts death animation."""
 		pass
 
