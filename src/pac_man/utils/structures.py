@@ -1,3 +1,4 @@
+
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
@@ -34,8 +35,8 @@ class Tile_Pos:
         Vertical tile position.
 
     """
-    x: int
-    y: int
+    x: int = Field(default=0)
+    y: int = Field(default=0)
 
     def to_pixel_pos(self, tile_size: int) -> Pixel_Pos:
         """Returns new instance of multiplied Position."""
@@ -45,6 +46,29 @@ class Tile_Pos:
         """Defines attribute order."""
         yield self.x
         yield self.y
+
+    def set(self, pos: tuple):
+        self.x = pos[0]
+        self.y = pos[1]
+
+    def get(self) -> tuple:
+        return (self.x, self.y)
+
+    def add(self, change: Tile_Pos | UnitVector):
+        self.x += change.x
+        self.y += change.y
+
+    def copy(self) -> Tile_Pos:
+        new_tile: Tile_Pos = Tile_Pos()
+        new_tile.set(self.get())
+        return(new_tile)
+
+    @staticmethod
+    def get_neighbour(tile: Tile_Pos, unit_vector: UnitVector) -> Tile_Pos:
+        new_tile: Tile_Pos = tile.copy()
+        new_tile.add(unit_vector)
+        return new_tile
+
 
 # UNUSED
 # @dataclass(slots=True)
@@ -69,30 +93,35 @@ class Tile_Pos:
 
 
 @dataclass(slots=True)
-class Direction:
+class UnitVector:
     """Negative Identity matrix for movement on tiles.
 
     Attributes
     ----------
-    hori : int
+    x : int
         Movement on the X-Axis (-1, 0, 1).
-    vert : int
+    y : int
         Movement on the Y-Axis (-1, 0, 1).
 
     """
-    hori: int = Field(ge=-1, le=1, default=0)
-    vert: int = Field(ge=-1, le=1, default=0)
+    x: int = Field(ge=-1, le=1, default=0)
+    y: int = Field(ge=-1, le=1, default=0)
 
-    def set(self, hori: int, vert: int) -> None:
+    def set(self, direction: tuple = (0, 0))-> None:
         """Sets new direction."""
-        self.hori = hori
-        self.vert = vert
+        if not direction:
+            raise ValueError("'direction' attr is None")
+        self.x = direction[0]
+        self.y = direction[1]
+
+    def get(self) -> tuple:
+        return (self.x, self.y)
 
     def is_still(self) -> bool:
         """True if hori and vert are zero, False otherwise."""
-        return self.hori == 0 and self.vert == 0
+        return self.x == 0 and self.y == 0
 
     def __iter__(self):
         """Defines attribute order."""
-        yield self.hori
-        yield self.vert
+        yield self.x
+        yield self.y
