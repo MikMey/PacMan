@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from typing import Any, Optional, ClassVar
+from dataclasses import dataclass
 
 from pydantic import BaseModel, PrivateAttr, ConfigDict
 import pygame
@@ -10,7 +11,8 @@ from ..render import SpriteSheetCache
 SUBTILE_SIZE = 8
 TILE_SIZE = SUBTILE_SIZE * 3
 
-class Tile(BaseModel):
+@dataclass
+class Tile:
     """Metadata of tile walls and items (not holding sprite data).
 
     Parameters
@@ -25,35 +27,57 @@ class Tile(BaseModel):
         True if there is a wall to the west of tile.
 
     """
+    #for sprite
     is_top_closed: bool
     is_right_closed: bool
     is_bottom_closed: bool
     is_left_closed: bool
-    _matrix: list[list[Tile]] = []
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    #for movement
+    x: int
+    y: int
+
+    top: "Optional[Tile]" = None
+    right: "Optional[Tile]" = None
+    left: "Optional[Tile]" = None
+    bottom: "Optional[Tile]" = None
+    cost: Optional[int] = -1
+
+    _matrix: ClassVar[list[list["Tile"]]] = []
+
+    def create_reference(self):
+        if not self.is_top_closed:
+            self.top = Tile._matrix[self.y - 1][self.x]
+        if not self.is_bottom_closed:
+            self.bottom = Tile._matrix[self.y + 1][self.x]
+        if not self.is_left_closed:
+            self.left = Tile._matrix[self.y][self.x - 1]
+        if not self.is_right_closed:
+            self.right = Tile._matrix[self.y][self.x + 1]
 
     @classmethod
-    def from_hex_state(cls, hex: int) -> "Tile":
+    def create(cls, value: int, x: int, y: int) -> "Tile":
         """Converts MazeGenerator hex values to class flags.
 
         Parameters
         ----------
-        hex : int
+        value : int
             Hex value to be converted.
 
         """
         return cls(
-            is_top_closed=bool(hex & 0b0001),
-            is_right_closed=bool(hex & 0b0010),
-            is_bottom_closed=bool(hex & 0b0100),
-            is_left_closed=bool(hex & 0b1000),
+            x=x,
+            y=y,
+            is_top_closed=bool(value & 0b0001),
+            is_right_closed=bool(value & 0b0010),
+            is_bottom_closed=bool(value & 0b0100),
+            is_left_closed=bool(value & 0b1000),
         )
 
-    def set_matrix(matrix: list[list[Tile]]):
+    def set_matrix(matrix: list[list["Tile"]]):
         Tile._matrix = matrix
 
-    def get_tile(pos: Tile_Pos) -> Tile:
+    def get_tile(pos: Tile_Pos) -> "Tile":
         tile: Tile = Tile._matrix[pos.y][pos.x]
         return tile
 
@@ -85,9 +109,11 @@ class TileSpriteFactory(BaseModel):
 
     def from_tile(
             self, main_tile: Tile,
-            top_tile: Optional[Tile], right_tile: Optional[Tile],
-            bottom_tile: Optional[Tile], left_tile: Optional[Tile]
-            ) -> pygame.Surface:
+            top_tile: Optional[Tile],
+            right_tile: Optional[Tile],
+            bottom_tile: Optional[Tile],
+            left_tile: Optional[Tile]
+        ) -> pygame.Surface:
         """Get baked tile surface from tile data and its neighbors.
 
         Parameters
