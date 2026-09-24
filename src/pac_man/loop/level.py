@@ -53,7 +53,7 @@ class Level:
     def init_ghost_group(self, subtile_size) -> None:
         """add instances of ghost class for each ghost to ghost_group"""
 
-        PrepGhost = functools.partial(Ghost, asset_cache=self.asset_cache, subtile_size=subtile_size)
+        PrepGhost = functools.partial(Ghost, asset_cache=self.asset_cache, subtile_size=subtile_size, player=self.pacman)
 
         self.inky: Ghost = PrepGhost(
             start_pos=Tile_Pos(0, 0),
@@ -166,7 +166,7 @@ class Level:
         self.pacman.handle_input(keys)
 
         self.player_group.update(dt, self.tile_matrix)
-        self.ghost_group.update(dt, self.tile_matrix)
+        #self.ghost_group.update(dt, self.tile_matrix)
 
         possible_collisions = pygame.sprite.spritecollide(
             self.pacman,  # type: ignore
@@ -194,6 +194,6 @@ class Level:
         self.gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)
-        self.ghost_group.draw(self.display_surface)
+        #self.ghost_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)
