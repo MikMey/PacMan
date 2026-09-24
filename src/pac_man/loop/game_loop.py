@@ -71,6 +71,26 @@ class GameLoop(State):
             vertical_padding=self.vertical_padding
         )
 
+    def handle_input(self, key_event: pygame.event.Event) -> None:
+        """Handle Cheats and color cycling.
+
+        Parameters
+        ----------
+        key_event : pygame.event.Event
+            Event of the KEYDOWN type which holds the held key.
+
+        """
+        match key_event.key:
+            case pygame.K_KP7:
+                next = self.hud.asset_cache.text_color_offset + 1
+                self.hud.asset_cache.text_color_offset = next % 19
+
+                self.hud.asset_cache.bake_text_offset(
+                    self.hud.asset_cache.text_color_offset
+                )
+
+                self.hud.populate_sprite_groups()
+
     def run(self, state) -> None:
 
         running = True
@@ -81,6 +101,9 @@ class GameLoop(State):
                 if event.type == pygame.QUIT:
                     state.end_game()
                     running = False
+
+                elif event.type == pygame.KEYDOWN:
+                    self.handle_input(event)
 
             # self.screen.fill((100, 50, 255))
             self.hud.loop(dt)

@@ -80,6 +80,8 @@ class SpriteSheetCache(BaseModel):
     reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
     reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)
 
+    text_color_offset: int = 0
+
     _text_scale_factor: float = PrivateAttr()
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -185,7 +187,7 @@ class SpriteSheetCache(BaseModel):
         self.cache_new("FRUIT-7", 520, 675, 16)  # Key
 
         # Numbers, Letters and Special Characters
-        self.bake_text_offset(0)
+        self.bake_text_offset(self.text_color_offset)
 
         # === ANIMATED TILES === #
 
