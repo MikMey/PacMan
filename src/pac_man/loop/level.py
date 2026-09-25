@@ -20,7 +20,7 @@ class Level:
         """Create sprites that are needed in level."""
         self.asset_cache = asset_cache
         self.tile_matrix = self.create_tile_matrix(hex_matrix)
-        Tile.set_matrix(self.tile_matrix)
+        
         self.screen = screen
         self.hud = hud
 
@@ -50,10 +50,15 @@ class Level:
             hex_matrix: list[list[int]]
         ) -> list[list[Tile]]:
         """Converts MazeGenerator hex numbers to tile classes matrix."""
-        matrix = []
+        matrix: list[list[Tile]] = []
         for y, row in enumerate(hex_matrix):
+            matrix.append([])
             for x, item in enumerate(row):
-                matrix.append(Tile.create(item, x, y))
+                matrix[y].append(Tile.create(item, x, y))
+        Tile.set_matrix(matrix)
+        for row in matrix:
+            for item in row:
+                item.create_reference()
         return matrix
 
     def init_ghost_group(self, subtile_size) -> None:
