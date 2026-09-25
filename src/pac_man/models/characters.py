@@ -21,10 +21,10 @@ DIRECTION = {
 
 class CharacterName(Enum):
     PACMAN = 'PACMAN-'
-    BLINKY = 'GHOST1-'
-    PINKY = 'GHOST2-'
-    INKY = 'GHOST3-'
-    CLYDE = 'GHOST4-'
+    BLINKY = 'GHOST-1-'
+    PINKY = 'GHOST-2-'
+    INKY = 'GHOST-3-'
+    CLYDE = 'GHOST-4-'
 
 class Character(ABC, pygame.sprite.Sprite):
     """Character Parent Class"""

@@ -3,6 +3,7 @@ from typing import Callable
 import random
 import time
 from dataclasses import dataclass
+from typing import Optional
 
 from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
@@ -11,10 +12,6 @@ from .characters import CharacterName, Character
 from .player import Player
 from .tile import Tile
 
-@dataclass
-class Bfs_Obj:
-    tile: Tile_Pos
-    cost: int
 class GhostState(Enum):
     ROAMING = 0
     FLEEING = 1
@@ -53,11 +50,11 @@ class Ghost(Character):
     def set_image(self):
         if self.state == GhostState.RESPAWNING:
             frames = self.asset_cache.get_anim(
-                self.name + 'RESPAWN' #TODO match to correct strings
+                'GHOST-DEAD' + self._dir_to_string(self.current_dir)
             )
         elif self.state == GhostState.FLEEING:
             frames = self.asset_cache.get_anim(
-                self.name + "FLEE-" + self._dir_to_string(self.current_dir)
+                self.name + "SCARED"
             )
         else:
             frames = self.asset_cache.get_anim(
@@ -87,13 +84,13 @@ class Ghost(Character):
         if self.state == GhostState.ROAMING:
             self.log.debug('blinky call')
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [self.player.current_tile.x + 1, self.player.current_tile.y]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(self.player.current_tile.x + 1, self.player.current_tile.y)
                 )
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [len(self.tile_matrix[0]) - 1, 0]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(len(self.tile_matrix[0]) - 1, 0)
                 )
         else:
             pass
@@ -104,13 +101,13 @@ class Ghost(Character):
         if self.state == GhostState.ROAMING:
             self.log.debug('pinky call')
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [self.player.current_tile.x + 1, self.player.current_tile.y]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(self.player.current_tile.x + 1, self.player.current_tile.y)
                 )
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [0, 0]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(0, 0)
                 )
         else:
             pass
@@ -135,8 +132,8 @@ class Ghost(Character):
                 self.log.debug(f"turn={turn}")
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [len(self.tile_matrix[0]) - 1, len(self.tile_matrix) - 1]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(len(self.tile_matrix[0]) - 1, len(self.tile_matrix) - 1)
                 )
         else:
             pass
@@ -160,8 +157,8 @@ class Ghost(Character):
                     break
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
-                [self.current_tile.x, self.current_tile.y],
-                [0, len(self.tile_matrix) - 1]
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(0, len(self.tile_matrix) - 1)
                 )
         else:
             pass
@@ -169,19 +166,25 @@ class Ghost(Character):
 
     def bfs(self, pos: Tile_Pos, target: Tile_Pos):
         self.log.debug('bfs call')
-        new_target: Bfs_Obj = Bfs_Obj(target, 0)
-        tiles: list[Bfs_Obj] = [new_target]
-        queue: list = [new_target]
+        curr: Tile = Tile.get_tile(target)
+        curr.cost = 0
+        queue: list[Tile] = [curr]
         while queue:
-            curr: Bfs_Obj = queue.pop(0)
-            neighbours: list[Bfs_Obj] = curr.get_neighbours()
-            queue.append(item for item in neighbours)
-            tiles.append(item for item in neighbours)
-            if pos in [obj.tile for obj in tiles]:
-                break
-        for obj in tiles:
-            if obj.tile == pos:
-                return obj.origin.tile
-        return None
+            curr: Tile = queue.pop(0)
+            for neighbour in curr.neighbours:
+                if neighbour.cost != -1:
+                    continue
+                neighbour.cost = curr.cost + 1
+                if (neighbour.x, neighbour.y) == pos.get():
+                    queue = []
+                    break
+                queue.append(neighbour)
+        location: Tile = Tile.get_tile(pos)
+        direction: UnitVector = None
+        for neighbour in location.neighbours:
+            if neighbour.cost == location.cost - 1:
+                direction.set(
+                    (location.x + neighbour.x, location.y + neighbour.y)
+                )
+        return direction
 
-        

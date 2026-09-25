@@ -119,5 +119,3 @@ class GameLoop(State):
             self.level.loop(dt)
 
             pygame.display.flip()
-
-        pygame.quit()

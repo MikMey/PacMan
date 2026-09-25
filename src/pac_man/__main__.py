@@ -41,18 +41,18 @@ def main() -> int:
         console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 
-    loop_machine = LoopMachine(config=config)
+    with LoopMachine(config=config) as loop_machine:
 
-    try:
-        asset_cache = SpriteSheetCache.from_default_file_path(
-            scale_factor=loop_machine.game_loop.scale_factor
-        )
-    except ValidationError as e:
-        console.print(str(e), style="red", markup=False, highlight=False)
-        return 1
+        try:
+            asset_cache = SpriteSheetCache.from_default_file_path(
+                scale_factor=loop_machine.game_loop.scale_factor
+            )
+        except ValidationError as e:
+            console.print(str(e), style="red", markup=False, highlight=False)
+            return 1
 
 
-    loop_machine.run_gameloop(asset_cache=asset_cache)
+        loop_machine.run_gameloop(asset_cache=asset_cache)
 
     return 0
 
