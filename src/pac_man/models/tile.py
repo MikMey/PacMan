@@ -41,19 +41,28 @@ class Tile:
     right: "Optional[Tile]" = None
     left: "Optional[Tile]" = None
     bottom: "Optional[Tile]" = None
+
+    neighbours: Optional[list["Tile"]] = None
+
     cost: Optional[int] = -1
 
     _matrix: ClassVar[list[list["Tile"]]] = []
 
     def create_reference(self):
         if not self.is_top_closed:
+            print(self.x, self.y)
             self.top = Tile._matrix[self.y - 1][self.x]
         if not self.is_bottom_closed:
+            print(self.x, self.y)
             self.bottom = Tile._matrix[self.y + 1][self.x]
         if not self.is_left_closed:
+            print(self.x, self.y)
             self.left = Tile._matrix[self.y][self.x - 1]
         if not self.is_right_closed:
+            print(self.x, self.y)
             self.right = Tile._matrix[self.y][self.x + 1]
+        temp = [self.left, self.right, self.top, self.bottom]
+        self.neighbours = [item for item in temp if item is not None]
 
     @classmethod
     def create(cls, value: int, x: int, y: int) -> "Tile":
