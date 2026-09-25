@@ -1,12 +1,90 @@
-from .spritesheet import SpriteSheetCache
+from typing import Any, Optional, ClassVar
+from dataclasses import dataclass
 
 from pydantic import BaseModel, PrivateAttr, ConfigDict
-from typing import Any, Optional
 import pygame
+
+from ..utils import Tile_Pos
+from ..render import SpriteSheetCache
 
 
 SUBTILE_SIZE = 8
 TILE_SIZE = SUBTILE_SIZE * 3
+
+@dataclass
+class Tile:
+    """Metadata of tile walls and items (not holding sprite data).
+
+    Parameters
+    ----------
+    is_top_closed : bool
+        True if there is a wall to the north of tile.
+    is_right_closed : bool
+        True if there is a wall to the east of tile.
+    is_bottom_closed : bool
+        True if there is a wall to the south of tile.
+    is_left_closed : bool
+        True if there is a wall to the west of tile.
+
+    """
+    #for sprite
+    is_top_closed: bool
+    is_right_closed: bool
+    is_bottom_closed: bool
+    is_left_closed: bool
+
+    #for movement
+    x: int
+    y: int
+
+    top: "Optional[Tile]" = None
+    right: "Optional[Tile]" = None
+    left: "Optional[Tile]" = None
+    bottom: "Optional[Tile]" = None
+
+    neighbours: Optional[list["Tile"]] = None
+
+    cost: Optional[int] = -1
+
+    _matrix: ClassVar[list[list["Tile"]]] = []
+
+    def create_reference(self):
+        if not self.is_top_closed:
+            self.top = Tile._matrix[self.y - 1][self.x]
+        if not self.is_bottom_closed:
+            self.bottom = Tile._matrix[self.y + 1][self.x]
+        if not self.is_left_closed:
+            self.left = Tile._matrix[self.y][self.x - 1]
+        if not self.is_right_closed:
+            self.right = Tile._matrix[self.y][self.x + 1]
+        temp = [self.left, self.right, self.top, self.bottom]
+        self.neighbours = [item for item in temp if item is not None]
+
+    @classmethod
+    def create(cls, value: int, x: int, y: int) -> "Tile":
+        """Converts MazeGenerator hex values to class flags.
+
+        Parameters
+        ----------
+        value : int
+            Hex value to be converted.
+
+        """
+        return cls(
+            x=x,
+            y=y,
+            is_top_closed=bool(value & 0b0001),
+            is_right_closed=bool(value & 0b0010),
+            is_bottom_closed=bool(value & 0b0100),
+            is_left_closed=bool(value & 0b1000),
+        )
+
+    def set_matrix(matrix: list[list["Tile"]]):
+        Tile._matrix = matrix
+
+    def get_tile(pos: Tile_Pos) -> "Tile":
+        tile: Tile = Tile._matrix[pos.y][pos.x]
+        return tile
 
 
 class TileSpriteFactory(BaseModel):
@@ -36,9 +114,11 @@ class TileSpriteFactory(BaseModel):
 
     def from_tile(
             self, main_tile: Tile,
-            top_tile: Optional[Tile], right_tile: Optional[Tile],
-            bottom_tile: Optional[Tile], left_tile: Optional[Tile]
-            ) -> pygame.Surface:
+            top_tile: Optional[Tile],
+            right_tile: Optional[Tile],
+            bottom_tile: Optional[Tile],
+            left_tile: Optional[Tile]
+        ) -> pygame.Surface:
         """Get baked tile surface from tile data and its neighbors.
 
         Parameters
@@ -251,111 +331,3 @@ class StaticSpriteElement(pygame.sprite.Sprite):
             x * image.get_width(),
             y * image.get_height()
         )))
-
-
-class Tile(BaseModel):
-    """Metadata of tile walls and items (not holding sprite data).
-
-    Parameters
-    ----------
-    is_top_closed : bool
-        True if there is a wall to the north of tile.
-    is_right_closed : bool
-        True if there is a wall to the east of tile.
-    is_bottom_closed : bool
-        True if there is a wall to the south of tile.
-    is_left_closed : bool
-        True if there is a wall to the west of tile.
-
-    """
-    is_top_closed: bool
-    is_right_closed: bool
-    is_bottom_closed: bool
-    is_left_closed: bool
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    @classmethod
-    def from_hex_state(cls, hex: int) -> "Tile":
-        """Converts MazeGenerator hex values to class flags.
-
-        Parameters
-        ----------
-        hex : int
-            Hex value to be converted.
-
-        """
-        return cls(
-            is_top_closed=bool(hex & 0b0001),
-            is_right_closed=bool(hex & 0b0010),
-            is_bottom_closed=bool(hex & 0b0100),
-            is_left_closed=bool(hex & 0b1000),
-        )
-
-# SUBTILE_SIZE = 8
-
-
-# class Tile(BaseModel):
-
-#     closed_state: int = Field(ge=0, lt=16)
-#     screen: ScreenBuffer
-
-#     def is_dir_walled(self, direction: str) -> bool:
-
-#         dir = direction.lower()[0]
-
-#         match dir:
-#             case 'n' | 't':
-#                 return bool(self.closed_state & 0b0001)
-#             case 'e' | 'r':
-#                 return bool(self.closed_state & 0b0010)
-#             case 's' | 'b':
-#                 return bool(self.closed_state & 0b0100)
-#             case 'w' | 'l':
-#                 return bool(self.closed_state & 0b1000)
-#             case _:
-#                 raise ValueError(f"Direction {direction!r} not recognized")
-
-#     def display(self, pos: Position, scale: int = 6) -> None:
-
-#         self.screen.draw("VOID", Position(
-#             pos.x + 0 * scale * SUBTILE_SIZE,
-#             pos.y + 0 * scale * SUBTILE_SIZE), scale)
-#         to_draw = "VOID"
-#         if self.is_dir_walled("top"):
-#             to_draw = "B-T"
-#         self.screen.draw(to_draw, Position(
-#             pos.x + 1 * scale * SUBTILE_SIZE,
-#             pos.x + 0 * scale * SUBTILE_SIZE), scale)
-#         self.screen.draw("VOID", Position(
-#             pos.x + 2 * scale * SUBTILE_SIZE,
-#             pos.x + 0 * scale * SUBTILE_SIZE), scale)
-
-#         to_draw = "VOID"
-#         if self.is_dir_walled("lft"):
-#             to_draw = "B-L"
-#         self.screen.draw(to_draw, Position(
-#             pos.x + 0 * scale * SUBTILE_SIZE,
-#             pos.x + 1 * scale * SUBTILE_SIZE), scale)
-#         self.screen.draw("VOID", Position(
-#             pos.x + 1 * scale * SUBTILE_SIZE,
-#             pos.x + 1 * scale * SUBTILE_SIZE), scale)
-#         to_draw = "VOID"
-#         if self.is_dir_walled("rgt"):
-#             to_draw = "B-R"
-#         self.screen.draw(to_draw, Position(
-#             pos.x + 2 * scale * SUBTILE_SIZE,
-#             pos.x + 1 * scale * SUBTILE_SIZE), scale)
-
-#         self.screen.draw("VOID", Position(
-#             pos.x + 0 * scale * SUBTILE_SIZE,
-#             pos.x + 2 * scale * SUBTILE_SIZE), scale)
-#         to_draw = "VOID"
-#         if self.is_dir_walled("btm"):
-#             to_draw = "B-B"
-#         self.screen.draw(to_draw, Position(
-#             pos.x + 1 * scale * SUBTILE_SIZE,
-#             pos.x + 2 * scale * SUBTILE_SIZE), scale)
-#         self.screen.draw("VOID", Position(
-#             pos.x + 2 * scale * SUBTILE_SIZE,
-#             pos.x + 2 * scale * SUBTILE_SIZE), scale)

@@ -1,14 +1,16 @@
-from .configuration import Config
-from .hud import Hud
-from .level import Level
-from .tile import TILE_SIZE
-from .spritesheet import SpriteSheetCache
+import pygame
+import logging
 
 from mazegenerator import MazeGenerator
-import pygame
 
+from ..utils import Config
+from ..render import Hud, SpriteSheetCache
+from ..models import TILE_SIZE
 
-class Game:
+from .level import Level
+from .states import State
+
+class GameLoop(State):
 
     def __init__(self, config: Config) -> None:
 
@@ -55,6 +57,8 @@ class Game:
                 self.config.levels[0].height
             )
         ).maze
+        # log = logging.getLogger('PacMan')
+        # log.debug(f'hex_matrix={hex_matrix}')
 
         self.hud = Hud(
             asset_cache=asset_cache,
@@ -70,7 +74,33 @@ class Game:
             vertical_padding=self.vertical_padding
         )
 
-    def loop(self) -> None:
+    def handle_input(self, key_event: pygame.event.Event) -> None:
+        """Handle Cheats and color cycling.
+
+        Parameters
+        ----------
+        key_event : pygame.event.Event
+            Event of the KEYDOWN type which holds the held key.
+
+        """
+        match key_event.key:
+            case pygame.K_KP7:
+                next = self.hud.asset_cache.text_color_offset + 1
+                self.hud.asset_cache.text_color_offset = next % 19
+                self.hud.asset_cache.bake_text_offset(
+                    self.hud.asset_cache.text_color_offset
+                )
+                self.hud.populate_sprite_groups()
+
+            case pygame.K_KP8:
+                next = self.hud.asset_cache.tile_color_offset + 1
+                self.hud.asset_cache.tile_color_offset = next % 19
+                self.hud.asset_cache.bake_tile_offset(
+                    self.hud.asset_cache.tile_color_offset
+                )
+                self.level.reload_tile_sheet()
+
+    def run(self, state) -> None:
 
         running = True
         while running:
@@ -78,12 +108,14 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    state.end_game()
                     running = False
+
+                elif event.type == pygame.KEYDOWN:
+                    self.handle_input(event)
 
             # self.screen.fill((100, 50, 255))
             self.hud.loop(dt)
             self.level.loop(dt)
 
             pygame.display.flip()
-
-        pygame.quit()

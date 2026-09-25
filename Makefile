@@ -5,8 +5,8 @@ FLAKE8 := uv run -m flake8
 FLAKE8_FLAGS := --count --show-source --filename [./*.py]
 MYPY := uv run mypy
 MYPY_FLAGS := --warn-return-any \
-			  --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
-			  --check-untyped-defs
+				--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
+				--check-untyped-defs
 UV_VENV := uv sync
 CONFIG ?= data/config.json
 

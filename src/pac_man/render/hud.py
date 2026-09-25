@@ -1,10 +1,9 @@
-from .structures import Tile_Pos
-from .spritesheet import SpriteSheetCache
-from .tile import SUBTILE_SIZE, StaticSpriteElement
-from .player import Player
-from .text import TextSpriteFactory
-
 import pygame
+
+from ..models import SUBTILE_SIZE, StaticSpriteElement
+
+from .spritesheet import SpriteSheetCache
+from .text import TextSpriteFactory
 
 
 class Hud:
@@ -42,13 +41,17 @@ class Hud:
         self.score_element: StaticSpriteElement
         self.high_score_element: StaticSpriteElement
         self.text_group = pygame.sprite.Group()
-
         self.lives_group = pygame.sprite.Group()
 
         self.populate_sprite_groups()
 
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
+        self.score_element: StaticSpriteElement
+        self.high_score_element: StaticSpriteElement
+        self.text_group = pygame.sprite.Group()
+        self.lives_group = pygame.sprite.Group()
+
         self.text_factory = TextSpriteFactory(assets=self.asset_cache)
 
         # Top Display
@@ -77,14 +80,6 @@ class Hud:
 
         # Bottom Display
         self.update_lives(self.lives)
-        # self.live_sprite = self.asset_cache.get_anim("PACMAN-LEFT")[3]
-        # self.lives_group.add(StaticSpriteElement.from_pixel(
-        #     self.live_sprite,
-        #     x=((self.vertical_padding / 2) -
-        #        (self.live_sprite.get_height() / 2)),
-        #     y=((self.vertical_padding / 2) -
-        #        (self.live_sprite.get_height() / 2))
-        # ))
 
     def update_lives(self, new_lives: int) -> None:
         self.lives = new_lives

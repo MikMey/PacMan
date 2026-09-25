@@ -1,14 +1,13 @@
-from .configuration import Config
-from .spritesheet import SpriteSheetCache
-from .game import Game
+from datetime import timedelta
+import time
 
+import logging
 from pydantic import ValidationError
 from rich.console import Console
-import time
 
-from datetime import timedelta
-import logging
-import time
+from .utils import Config
+from .render import SpriteSheetCache
+from .loop import GameLoop, LoopMachine
 
 class ElapsedFormatter():
 
@@ -42,19 +41,18 @@ def main() -> int:
         console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 
-    game = Game(config=config)
+    with LoopMachine(config=config) as loop_machine:
 
-    try:
-        asset_cache = SpriteSheetCache.from_default_file_path(
-            scale_factor=game.scale_factor
-        )
-    except ValidationError as e:
-        console.print(str(e), style="red", markup=False, highlight=False)
-        return 1
+        try:
+            asset_cache = SpriteSheetCache.from_default_file_path(
+                scale_factor=loop_machine.game_loop.scale_factor
+            )
+        except ValidationError as e:
+            console.print(str(e), style="red", markup=False, highlight=False)
+            return 1
 
-    game.load_level(asset_cache=asset_cache)
 
-    game.loop()
+        loop_machine.run_gameloop(asset_cache=asset_cache)
 
     return 0
 
