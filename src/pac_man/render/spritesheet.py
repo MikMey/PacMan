@@ -80,6 +80,9 @@ class SpriteSheetCache(BaseModel):
     reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
     reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)
 
+    text_color_offset: int = 9
+    tile_color_offset: int = 8
+
     _text_scale_factor: float = PrivateAttr()
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -134,41 +137,8 @@ class SpriteSheetCache(BaseModel):
 
         # === STATIC TILES === #
 
-        # Border Tiles
-        self.cache_new("BORDER-TOP", 181, 19, 8)
-        self.cache_new("BORDER-RIGHT", 172, 10, 8)
-        self.cache_new("BORDER-BOTTOM", 181, 1, 8)
-        self.cache_new("BORDER-LEFT", 190, 10, 8)
-        self.cache_new("BORDER-TOP-RIGHT", 172, 28, 8)
-        self.cache_new("BORDER-TOP-LEFT", 145, 28, 8)
-        self.cache_new("BORDER-BOTTOM-RIGHT", 172, 55, 8)
-        self.cache_new("BORDER-BOTTOM-LEFT", 145, 55, 8)
-
-        # Border Tiles connectiong to Wall Tiles
-        self.cache_new("BORDER-TOP-WALL-RIGHT", 154, 28, 8)
-        self.cache_new("BORDER-TOP-WALL-LEFT", 163, 28, 8)
-        self.cache_new("BORDER-RIGHT-WALL-TOP", 172, 46, 8)
-        self.cache_new("BORDER-RIGHT-WALL-BOTTOM", 172, 37, 8)
-        self.cache_new("BORDER-BOTTOM-WALL-RIGHT", 154, 28, 8, flip_y=True)
-        self.cache_new("BORDER-BOTTOM-WALL-LEFT", 163, 28, 8, flip_y=True)
-        self.cache_new("BORDER-LEFT-WALL-TOP", 145, 46, 8)
-        self.cache_new("BORDER-LEFT-WALL-BOTTOM", 145, 37, 8)
-
-        # Wall Tiles
-        self.cache_new("WALL-TOP", 154, 19, 8)
-        self.cache_new("WALL-RIGHT", 145, 10, 8)
-        self.cache_new("WALL-BOTTOM", 154, 1, 8)
-        self.cache_new("WALL-LEFT", 163, 10, 8)
-        self.cache_new("WALL-TOP-RIGHT", 154, 46, 8)
-        self.cache_new("WALL-TOP-LEFT", 163, 46, 8)
-        self.cache_new("WALL-BOTTOM-RIGHT", 154, 37, 8)
-        self.cache_new("WALL-BOTTOM-LEFT", 163, 37, 8)
-
-        # Corner tiles (to round of ending walls)
-        self.cache_new("CORNER-TOP-RIGHT", 145, 19, 8)
-        self.cache_new("CORNER-TOP-LEFT", 163, 19, 8)
-        self.cache_new("CORNER-BOTTOM-RIGHT", 145, 1, 8)
-        self.cache_new("CORNER-BOTTOM-LEFT", 163, 1, 8)
+        # Tiles (Walls and Borders)
+        self.bake_tile_offset(self.tile_color_offset)
 
         # Tile Items
         self.cache_new("PACGUM", 136, 10, 8)
@@ -185,7 +155,7 @@ class SpriteSheetCache(BaseModel):
         self.cache_new("FRUIT-7", 520, 675, 16)  # Key
 
         # Numbers, Letters and Special Characters
-        self.bake_text_offset(0)
+        self.bake_text_offset(self.text_color_offset)
 
         # === ANIMATED TILES === #
 
@@ -217,117 +187,97 @@ class SpriteSheetCache(BaseModel):
             size=16
         )
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST1-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST1-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "GHOST1-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST1-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST1-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # Shadow / Blinky (Red)
+        self.cache_new_anim("GHOST-1-RIGHT", [(1, 83), (18, 83)], size=16)
+        self.cache_new_anim("GHOST-1-LEFT", [(69, 83), (86, 83)], size=16)
+        self.cache_new_anim("GHOST-1-BOTTOM", [(35, 83), (52, 83)], size=16)
+        self.cache_new_anim("GHOST-1-TOP", [(103, 83), (120, 83)], size=16)
+        self.cache_new_anim("GHOST-1-SCARED",
+                            [(1, 168), (18, 168)], size=16)
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST2-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST2-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "GHOST2-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST2-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST2-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # Speedy / Pinky (Pink)
+        self.cache_new_anim("GHOST-2-RIGHT", [(201, 83), (218, 83)], size=16)
+        self.cache_new_anim("GHOST-2-LEFT", [(269, 83), (286, 83)], size=16)
+        self.cache_new_anim("GHOST-2-BOTTOM", [(235, 83), (252, 83)], size=16)
+        self.cache_new_anim("GHOST-2-TOP", [(303, 83), (320, 83)], size=16)
+        self.cache_new_anim("GHOST-2-SCARED",
+                            [(201, 168), (218, 168)], size=16)
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST3-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST3-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "GHOST3-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST3-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST3-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # Bashful / Inky (Cyan)
+        self.cache_new_anim("GHOST-3-RIGHT", [(401, 83), (418, 83)], size=16)
+        self.cache_new_anim("GHOST-3-LEFT", [(469, 83), (486, 83)], size=16)
+        self.cache_new_anim("GHOST-3-BOTTOM", [(435, 83), (452, 83)], size=16)
+        self.cache_new_anim("GHOST-3-TOP", [(503, 83), (520, 83)], size=16)
+        self.cache_new_anim("GHOST-3-SCARED",
+                            [(401, 168), (418, 168)], size=16)
 
-        # Placeholder Ghost1 Sprites
-        self.cache_new_anim(
-            "GHOST4-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
+        # Pokey / Clyde (Orange)
+        self.cache_new_anim("GHOST-4-RIGHT", [(601, 83), (618, 83)], size=16)
+        self.cache_new_anim("GHOST-4-LEFT", [(669, 83), (686, 83)], size=16)
+        self.cache_new_anim("GHOST-4-BOTTOM", [(635, 83), (652, 83)], size=16)
+        self.cache_new_anim("GHOST-4-TOP", [(703, 83), (720, 83)], size=16)
+        self.cache_new_anim("GHOST-4-SCARED",
+                            [(601, 168), (618, 168)], size=16)
+
+        # Dead Ghost (Invisisble)
+        self.cache_new_anim("GHOST-DEAD-RIGHT", [(201, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-LEFT", [(269, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-BOTTOM", [(235, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-TOP", [(303, 269)], size=16)
+
+    def bake_tile_offset(self, offset: int) -> None:
+
+        def cache_tile(name: str, x: int, y: int) -> None:
+            self.cache_new(
+                name,
+                x + SHEET_OFFSET_X * (offset % 5),
+                y + SHEET_OFFSET_Y * (offset // 5),
+                8
+            )
+
+        cache_tile("BORDER-TOP", 181, 19)
+        cache_tile("BORDER-RIGHT", 172, 10)
+        cache_tile("BORDER-BOTTOM", 181, 1)
+        cache_tile("BORDER-LEFT", 190, 10)
+        cache_tile("BORDER-TOP-RIGHT", 172, 28)
+        cache_tile("BORDER-TOP-LEFT", 145, 28)
+        cache_tile("BORDER-BOTTOM-RIGHT", 172, 55)
+        cache_tile("BORDER-BOTTOM-LEFT", 145, 55)
+
+        cache_tile("BORDER-TOP-WALL-RIGHT", 154, 28)
+        cache_tile("BORDER-TOP-WALL-LEFT", 163, 28)
+        cache_tile("BORDER-RIGHT-WALL-TOP", 172, 46)
+        cache_tile("BORDER-RIGHT-WALL-BOTTOM", 172, 37)
+        self.cache_new(
+            "BORDER-BOTTOM-WALL-RIGHT",
+            154 + SHEET_OFFSET_X * (offset % 5),
+            28 + SHEET_OFFSET_Y * (offset // 5),
+            8,
+            flip_y=True
         )
-        self.cache_new_anim(
-            "GHOST4-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
+        self.cache_new(
+            "BORDER-BOTTOM-WALL-LEFT",
+            163 + SHEET_OFFSET_X * (offset % 5),
+            28 + SHEET_OFFSET_Y * (offset // 5),
+            8,
+            flip_y=True
         )
-        self.cache_new_anim(
-            "GHOST4-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "GHOST4-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "GHOST4-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-                (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        cache_tile("BORDER-LEFT-WALL-TOP", 145, 46)
+        cache_tile("BORDER-LEFT-WALL-BOTTOM", 145, 37)
+
+        cache_tile("WALL-TOP", 154, 19)
+        cache_tile("WALL-RIGHT", 145, 10)
+        cache_tile("WALL-BOTTOM", 154, 1)
+        cache_tile("WALL-LEFT", 163, 10)
+        cache_tile("WALL-TOP-RIGHT", 154, 46)
+        cache_tile("WALL-TOP-LEFT", 163, 46)
+        cache_tile("WALL-BOTTOM-RIGHT", 154, 37)
+        cache_tile("WALL-BOTTOM-LEFT", 163, 37)
+
+        cache_tile("CORNER-TOP-RIGHT", 145, 19)
+        cache_tile("CORNER-TOP-LEFT", 163, 19)
+        cache_tile("CORNER-BOTTOM-RIGHT", 145, 1)
+        cache_tile("CORNER-BOTTOM-LEFT", 163, 1)
 
     def bake_text_offset(self, offset: int) -> None:
         """Pick a global text and number color.
