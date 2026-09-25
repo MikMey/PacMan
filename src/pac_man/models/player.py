@@ -36,7 +36,7 @@ class Player(Character):
         
         self.buffered_dir: UnitVector = UnitVector()
 
-        self.speed: int = int(round(2 * self.asset_cache.scale_factor))
+        self.speed: int = int(round(1.4 * self.asset_cache.scale_factor))
 
     def set_image(self) -> None:
         if self.is_dying:
