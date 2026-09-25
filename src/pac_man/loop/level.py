@@ -189,7 +189,7 @@ class Level:
             subtile_size=subtile_size
         )
         self.player_group.add(self.pacman)
-        # self.init_ghost_group(subtile_size)
+        self.init_ghost_group(subtile_size)
 
     def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
