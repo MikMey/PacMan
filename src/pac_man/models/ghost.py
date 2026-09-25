@@ -12,46 +12,6 @@ from .characters import CharacterName, Character
 from .player import Player
 from .tile import Tile
 
-@dataclass
-class Bfs_Obj:
-    pos: Tile_Pos
-    cost: int
-    origin: Optional["Bfs_Obj"] = None
-
-    def get_neighbour(self) -> "list[Bfs_Obj]":
-        res: "list[Bfs_Obj]" = []
-        tile: Tile = Tile.get_tile(self.pos)
-        if not tile.is_bottom_closed:
-            obj = Bfs_Obj(
-                Tile_Pos(self.pos.x, self.pos.y + 1),
-                self.cost + 1,
-                origin=self
-                )
-            res.append(obj)
-        if not tile.is_top_closed:
-            obj = Bfs_Obj(
-                Tile_Pos(self.pos.x, self.pos.y - 1),
-                self.cost + 1,
-                origin=self
-                )
-            res.append(obj)
-        if not tile.is_right_closed:
-            obj = Bfs_Obj(
-                Tile_Pos(self.pos.x + 1, self.pos.y),
-                self.cost + 1,
-                origin=self
-                )
-            res.append(obj)
-        if not tile.is_left_closed:
-            obj = Bfs_Obj(
-                Tile_Pos(self.pos.x - 1, self.pos.y),
-                self.cost + 1,
-                origin=self
-                )
-            res.append(obj)
-        return res
-
-
 class GhostState(Enum):
     ROAMING = 0
     FLEEING = 1
@@ -206,24 +166,25 @@ class Ghost(Character):
 
     def bfs(self, pos: Tile_Pos, target: Tile_Pos):
         self.log.debug('bfs call')
-        new_target: Bfs_Obj = Bfs_Obj(target, 0)
-        tiles: list[Bfs_Obj] = [new_target]
-        queue: list = [new_target]
+        curr: Tile = Tile.get_tile(target)
+        curr.cost = 0
+        queue: list[Tile] = [curr]
         while queue:
-            time.sleep(0.1)
-            self.log.debug(f'pos={pos} target={target}\n\n\tqueue={queue}\n\n\ttiles={tiles}')
-            curr: Bfs_Obj = queue.pop(0)
-            neighbours: list[Bfs_Obj] = curr.get_neighbour()
-            for item in neighbours:
-                queue.append(item)
-                tiles.append(item)
-            for obj in tiles:
-                if obj.pos == pos:
-                    queue = None
+            curr: Tile = queue.pop(0)
+            for neighbour in curr.neighbours:
+                if neighbour.cost != -1:
+                    continue
+                neighbour.cost = curr.cost + 1
+                if (neighbour.x, neighbour.y) == pos.get():
+                    queue = []
                     break
-        for obj in tiles:
-            if obj.pos == pos:
-                return obj.origin.pos
-        return None
+                queue.append(neighbour)
+        location: Tile = Tile.get_tile(pos)
+        direction: UnitVector = None
+        for neighbour in location.neighbours:
+            if neighbour.cost == location.cost - 1:
+                direction.set(
+                    (location.x + neighbour.x, location.y + neighbour.y)
+                )
+        return direction
 
-        
