@@ -86,7 +86,7 @@ class LoopMachine():
                     return
 
                 case LoopStates.NEW_LEVEL:
-                    self.game_loop.load_level(asset_cache)
+                    self.game_loop.load_level(asset_cache, self.config.levels[0].width, self.config.levels[0].height)
                     self.log.debug('Enter NewLevel')
                     self.state.game_loop()
 
