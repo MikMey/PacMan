@@ -1,0 +1,11 @@
+- Fix speed bricking game at different values
+- Make Ghosts kill player
+- include super pacgums
+- allow ghosts to be eaten
+- start menu
+- game over and win screen
+- leaderboard
+- level change
+- level time limit
+- cheat mode
+- pause menu
