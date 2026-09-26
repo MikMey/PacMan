@@ -1,6 +1,7 @@
 import pygame
 import logging
 
+
 from mazegenerator import MazeGenerator
 
 from ..utils import Config
@@ -11,74 +12,44 @@ from .level import Level
 from .states import State
 
 class GameLoop(State):
-
-    def init_screen(self) -> tuple:
-        screen_w = pygame.display.Info().current_w * 0.8
-        screen_h = pygame.display.Info().current_h * 0.8
-
-        self.screen = pygame.display.set_mode((screen_w, screen_h))
-        pygame.display.set_caption("Pac-Man")
-        self.clock = pygame.time.Clock()
-
-
-    def init_level_size(self, width, height, screen_w, screen_h):
-
-        level_cols = width
-        level_rows = height
-
-        raw_level_h = level_rows * TILE_SIZE
-        raw_level_w = level_cols * TILE_SIZE
-
-        max_level_w = int(screen_w * 0.8)
-        max_level_h = screen_h - (2 * TILE_SIZE)
-
-        self.scale_factor = min(
-            max_level_w // raw_level_w,
-            max_level_h // raw_level_h,
-            8,
+    """
+    Runs between main screen and win or loose,
+    handles level calling, score totaling and state changes
+    """
+    def __init__(self, config: Config, screen: pygame.Surface, clock: pygame.time.Clock) -> None:
+        self.config = config
+        self.screen = screen
+        self.clock = clock
+        self.load_level(
+            width=self.config.levels[0].width,
+            height=self.config.levels[0].height
         )
 
-        level_screen_w = int(raw_level_w * self.scale_factor)
-        level_screen_h = int(raw_level_h * self.scale_factor)
+    def load_level(self, width, height) -> None:
 
-        self.horizontal_padding = int(level_screen_w * 0.1)
-        self.vertical_padding = int(TILE_SIZE * self.scale_factor)
+        
+                hex_matrix = MazeGenerator(
+                    size=(
+                        width,
+                        height
+                    )
+                ).maze
+                # log = logging.getLogger('PacMan')
+                # log.debug(f'hex_matrix={hex_matrix}')
+        
+                self.level = Level(
+                    hex_matrix=hex_matrix,
+                    screen=self.screen,
+                    columns=width,
+                    rows=height
+                )
 
+                self.hud = Hud(
+                    asset_cache=self.level.asset_cache,
+                    screen=self.screen,
+                    vertical_padding=self.level.vertical_padding
+                )
 
-    def __init__(self, config: Config) -> None:
-        self.init_screen()
-        self.init_level_size(
-            config.levels[0].width,
-            config.levels[0].height,
-            self.screen.get_width(),
-            self.screen.get_height()
-        )
-
-
-    def load_level(self, asset_cache: SpriteSheetCache, width, height) -> None:
-
-        hex_matrix = MazeGenerator(
-            size=(
-                width,
-                height
-            )
-        ).maze
-        # log = logging.getLogger('PacMan')
-        # log.debug(f'hex_matrix={hex_matrix}')
-
-        self.hud = Hud(
-            asset_cache=asset_cache,
-            screen=self.screen,
-            vertical_padding=self.vertical_padding
-        )
-        self.level = Level(
-            hex_matrix=hex_matrix,
-            asset_cache=asset_cache,
-            screen=self.screen,
-            hud=self.hud,
-            horizontal_padding=self.horizontal_padding,
-            vertical_padding=self.vertical_padding
-        )
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
         """Handle Cheats and color cycling.
