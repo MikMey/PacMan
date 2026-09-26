@@ -14,7 +14,6 @@ class LoopStates():
     DEATH_SCREEN = 2
     WIN_SCREEN = 3
     END_GAME = 4
-    NEW_LEVEL = 5
 
     def __init__(self):
         self._state = LoopStates.MAIN_MENU
@@ -34,9 +33,6 @@ class LoopStates():
     def end_game(self):
         self._state = LoopStates.END_GAME
 
-    def new_level(self):
-        self._state = LoopStates.NEW_LEVEL
-
     def get_state(self):
         return self._state
 
@@ -50,7 +46,8 @@ class LoopMachine():
     def __enter__(self):
         self.log.info("context manager start")
         pygame.init()
-        self.game_loop = GameLoop(config=self.config)
+        self.init_screen()
+        self.game_loop = GameLoop(config=self.config, screen=self.screen, clock=self.clock)
         self.main_menu = MainMenu()
         self.death_screen = DeathScreen()
         self.win_screen = WinScreen()
@@ -60,14 +57,19 @@ class LoopMachine():
         pygame.quit()
         self.log.info("context manager end")
 
-    def run_gameloop(self, asset_cache):
+    def init_screen(self) -> tuple:
+        self.screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
+        pygame.display.set_caption("Pac-Man")
+        self.clock = pygame.time.Clock()
+
+    def run_gameloop(self):
         while True:
             match self.state.get_state():
 
                 case LoopStates.MAIN_MENU:
                     self.log.debug('Enter MainMenu')
                     self.main_menu.run()
-                    self.state.new_level()
+                    self.state.game_loop()
 
                 case LoopStates.GAME_LOOP:
                     self.log.debug('Enter GameLoop')
@@ -85,10 +87,6 @@ class LoopMachine():
                     self.log.debug('Enter Close')
                     return
 
-                case LoopStates.NEW_LEVEL:
-                    self.game_loop.load_level(asset_cache, self.config.levels[0].width, self.config.levels[0].height)
-                    self.log.debug('Enter NewLevel')
-                    self.state.game_loop()
 
 
 
