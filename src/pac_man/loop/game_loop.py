@@ -12,23 +12,25 @@ from .states import State
 
 class GameLoop(State):
 
-    def __init__(self, config: Config) -> None:
+    def init_screen(self) -> tuple:
+        screen_w = pygame.display.Info().current_w * 0.8
+        screen_h = pygame.display.Info().current_h * 0.8
 
-        self.config = config
+        self.screen = pygame.display.set_mode((screen_w, screen_h))
+        pygame.display.set_caption("Pac-Man")
+        self.clock = pygame.time.Clock()
 
-        pygame.init()
 
-        max_win_w = pygame.display.Info().current_w * 0.8
-        max_win_h = pygame.display.Info().current_h * 0.8
+    def init_level_size(self, width, height, screen_w, screen_h):
 
-        level_cols = config.levels[0].width
-        level_rows = config.levels[0].height
+        level_cols = width
+        level_rows = height
 
-        raw_level_w = level_cols * TILE_SIZE
         raw_level_h = level_rows * TILE_SIZE
+        raw_level_w = level_cols * TILE_SIZE
 
-        max_level_w = int(max_win_w * 0.8)
-        max_level_h = max_win_h - (2 * TILE_SIZE)
+        max_level_w = int(screen_w * 0.8)
+        max_level_h = screen_h - (2 * TILE_SIZE)
 
         self.scale_factor = min(
             max_level_w // raw_level_w,
@@ -42,19 +44,23 @@ class GameLoop(State):
         self.horizontal_padding = int(level_screen_w * 0.1)
         self.vertical_padding = int(TILE_SIZE * self.scale_factor)
 
-        screen_w = level_screen_w + (2 * self.horizontal_padding)
-        screen_h = level_screen_h + (2 * self.vertical_padding)
 
-        self.screen = pygame.display.set_mode((screen_w, screen_h))
-        pygame.display.set_caption("Pac-Man")
-        self.clock = pygame.time.Clock()
+    def __init__(self, config: Config) -> None:
+        self.init_screen()
+        self.init_level_size(
+            config.levels[0].width,
+            config.levels[0].height,
+            self.screen.get_width(),
+            self.screen.get_height()
+        )
 
-    def load_level(self, asset_cache: SpriteSheetCache) -> None:
+
+    def load_level(self, asset_cache: SpriteSheetCache, width, height) -> None:
 
         hex_matrix = MazeGenerator(
             size=(
-                self.config.levels[0].width,
-                self.config.levels[0].height
+                width,
+                height
             )
         ).maze
         # log = logging.getLogger('PacMan')
