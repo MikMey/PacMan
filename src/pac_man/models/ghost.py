@@ -158,12 +158,18 @@ class Ghost(Character):
             if random.randint(0,2):
                 while True:
                     turn = TURN_LEFT[turn]
+                    if turn == self.current_dir.get():
+                        self.current_dir.set(TURN_REV[turn])
+                        break
                     if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != TURN_REV[self.current_dir.get()]:
                         self.current_dir.set(turn)
                         break
             else:
                 while True:
                     turn = TURN_RIGHT[turn]
+                    if turn == self.current_dir.get():
+                        self.current_dir.set(TURN_REV[turn])
+                        break
                     if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != TURN_REV[self.current_dir.get()]:
                         self.current_dir.set(turn)
                         break
