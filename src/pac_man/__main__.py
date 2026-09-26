@@ -14,7 +14,7 @@ class ElapsedFormatter():
     def __init__(self):
         self.start_time = time.time()
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord):
         elapsed_seconds = record.created - self.start_time
         #using timedelta here for convenient default formatting
         elapsed = timedelta(seconds = elapsed_seconds)
@@ -42,17 +42,7 @@ def main() -> int:
         return 1
 
     with LoopMachine(config=config) as loop_machine:
-
-        try:
-            asset_cache = SpriteSheetCache.from_default_file_path(
-                scale_factor=loop_machine.game_loop.scale_factor
-            )
-        except ValidationError as e:
-            console.print(str(e), style="red", markup=False, highlight=False)
-            return 1
-
-
-        loop_machine.run_gameloop(asset_cache=asset_cache)
+        loop_machine.run_gameloop()
 
     return 0
 
