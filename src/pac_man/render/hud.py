@@ -7,6 +7,7 @@ from .text import TextSpriteFactory
 
 
 class Hud:
+    score = 0
 
     def __init__(self,
                  asset_cache: SpriteSheetCache,
@@ -18,7 +19,7 @@ class Hud:
         self.vertical_padding = vertical_padding
 
         # Value Logic
-        self.score = 0
+        # self.score = 0
         self.high_score = 100
         self.lives = 3
 
@@ -97,7 +98,7 @@ class Hud:
                     live_sprite.get_height() / 2)
             ))
 
-    def add_score(self, addend: int) -> None:
+    def add_score(self) -> None:
         """Updates the score and maybe the highscore image.
 
         Parameters
@@ -106,12 +107,11 @@ class Hud:
             Number of points to be added to score.
 
         """
-        self.score += addend
         self.score_element.image = self.text_factory.from_string(
-            s=str(self.score))
+            s=str(Hud.score))
 
-        if self.score > self.high_score:
-            self.high_score = self.score
+        if Hud.score > self.high_score:
+            self.high_score = Hud.score
             self.high_score_element.image = self.text_factory.from_string(
                 s=str(self.high_score))
 
@@ -124,7 +124,7 @@ class Hud:
             Delta time used for updating sprites.
 
         """
-
+        self.add_score()
         # self.top_display.fill((50, 0, 0))
         self.text_group.draw(self.top_display)
         self.screen.blit(self.top_display, self.top_position)
