@@ -3,6 +3,12 @@ import pygame
 from random import randrange
 import functools
 
+import logging
+from pydantic import ValidationError
+from rich.console import Console
+
+from mazegenerator import MazeGenerator
+
 from ..utils import Tile_Pos
 from ..render import SpriteSheetCache, Hud
 from ..models import TileSpriteFactory, Tile, GhostPersonality, StaticSpriteElement,TILE_SIZE, SUBTILE_SIZE, Player, Ghost
@@ -11,39 +17,73 @@ from ..models import TileSpriteFactory, Tile, GhostPersonality, StaticSpriteElem
 class Level:
     """Sprite and loop logic for the main game level."""
 
-    def __init__(self, hex_matrix: list[list[int]],
-                 asset_cache: SpriteSheetCache,
-                 screen: pygame.Surface,
-                 hud: Hud,
-                 horizontal_padding: int,
-                 vertical_padding: int) -> None:
+    def __init__(self,
+                hex_matrix: list[list[int]],
+                screen: pygame.Surface,
+                columns: int,
+                rows: int,
+                ) -> None:
         """Create sprites that are needed in level."""
-        self.asset_cache = asset_cache
+        self.log = logging.getLogger('PacMan')
         self.tile_matrix = self.create_tile_matrix(hex_matrix)
         
         self.screen = screen
-        self.hud = hud
 
-        self.total_rows = len(self.tile_matrix)
-        self.total_cols = len(self.tile_matrix[0])
-
-        surface_w = int(self.total_cols * TILE_SIZE * self.asset_cache.scale_factor)
-        surface_h = int(self.total_rows * TILE_SIZE * self.asset_cache.scale_factor)
-
-        self.display_surface = pygame.Surface((surface_w, surface_h))
-
-        self.position = pygame.Vector2(
-            (self.screen.get_width() - surface_w) // 2,  # horizontal_padding,
-            vertical_padding
+        self.init_level_size(
+            columns,
+            rows,
+            self.screen.get_width(),
+            self.screen.get_height()
         )
 
-        self.tile_group = pygame.sprite.Group()  # Tiles without pacgums
-        self.gum_group = pygame.sprite.Group()  # Pacgums and such
-        self.fruit_group = pygame.sprite.Group()  # Decorative Fruits
-        self.player_group = pygame.sprite.Group()  # Pacman
-        self.ghost_group = pygame.sprite.Group() # Ghosts
+        self.rows = rows
+        self.columns = columns
+
 
         self.populate_sprite_groups()
+
+    def init_level_size(self, columns: int, rows: int, screen_w: int, screen_h: int):
+            """
+            Initialize level scaling and size
+            """
+    
+            raw_level_h = rows * TILE_SIZE
+            raw_level_w = columns * TILE_SIZE
+    
+            max_level_w = int(screen_w * 0.8)
+            max_level_h = screen_h - (2 * TILE_SIZE)
+    
+            self.scale_factor = min(
+                max_level_w // raw_level_w,
+                max_level_h // raw_level_h,
+                8,
+            )
+
+            try:
+                self.asset_cache: SpriteSheetCache = SpriteSheetCache.from_default_file_path(
+                    scale_factor=self.scale_factor
+                )
+            except ValidationError as e:
+                console = Console()
+                console.print(str(e), style="red", markup=False, highlight=False)
+                return 1
+    
+            level_screen_w = int(raw_level_w * self.scale_factor)
+            level_screen_h = int(raw_level_h * self.scale_factor)
+    
+            self.horizontal_padding = int(level_screen_w * 0.1)
+            self.vertical_padding = int(TILE_SIZE * self.scale_factor)
+
+            surface_w = int(columns * TILE_SIZE * self.asset_cache.scale_factor)
+            surface_h = int(rows * TILE_SIZE * self.asset_cache.scale_factor)
+    
+            self.display_surface = pygame.Surface((surface_w, surface_h))
+
+            self.position = pygame.Vector2(
+                (self.screen.get_width() - surface_w) // 2,  # horizontal_padding,
+                self.vertical_padding
+            )
+
 
     def create_tile_matrix(
             self,
@@ -71,15 +111,15 @@ class Level:
             ghost_peronality=GhostPersonality.INKY
         )
         self.clyde: Ghost = PrepGhost(
-            start_pos=Tile_Pos(self.total_cols - 1, 0),
+            start_pos=Tile_Pos(self.columns - 1, 0),
             ghost_peronality=GhostPersonality.CLYDE
         )
         self.blinky: Ghost = PrepGhost(
-            start_pos=Tile_Pos(0, self.total_rows - 1),
+            start_pos=Tile_Pos(0, self.rows - 1),
             ghost_peronality=GhostPersonality.BLINKY
         )
         self.pinky: Ghost = PrepGhost(
-            start_pos=Tile_Pos(self.total_cols - 1, self.total_rows - 1),
+            start_pos=Tile_Pos(self.columns - 1, self.rows - 1),
             ghost_peronality=GhostPersonality.PINKY
         )
 
@@ -113,6 +153,13 @@ class Level:
 
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
+
+        self.tile_group: pygame.sprite.Group = pygame.sprite.Group()  # Tiles without pacgums
+        self.gum_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacgums and such
+        self.fruit_group: pygame.sprite.Group = pygame.sprite.Group()  # Decorative Fruits
+        self.player_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacman
+        self.ghost_group: pygame.sprite.Group = pygame.sprite.Group() # Ghosts
+
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
 
         maze_x = len(self.tile_matrix[0])
@@ -135,10 +182,8 @@ class Level:
                     x=x,
                     y=y
                 ))
-                if (main_tile.is_top_closed and
-                        main_tile.is_right_closed and
-                        main_tile.is_bottom_closed and
-                        main_tile.is_left_closed):
+                if main_tile.neighbours == []:
+                    # self.log.debug(f"neigh={main_tile.neighbours}")
                     rand_fruit = self.asset_cache.get_static(
                                  f"FRUIT-{randrange(8)}")
                     self.fruit_group.add(StaticSpriteElement.from_pixel(
@@ -224,7 +269,7 @@ class Level:
                 items_eaten.append(item)
 
         for item in items_eaten:
-            self.hud.add_score(1)
+            Hud.score += 1
             item.kill()
 
         # self.display_surface.fill((140, 40, 40))
