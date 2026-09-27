@@ -11,7 +11,7 @@ from mazegenerator import MazeGenerator
 
 from ..utils import Tile_Pos
 from ..render import SpriteSheetCache, Hud
-from ..models import TileSpriteFactory, Tile, GhostPersonality, StaticSpriteElement,TILE_SIZE, SUBTILE_SIZE, Player, Ghost
+from ..models import TileSpriteFactory, Tile, GhostPersonality, StaticSpriteElement,TILE_SIZE, SUBTILE_SIZE, Player, Ghost, GhostState, PlayerState
 
 
 class Level:
@@ -234,6 +234,41 @@ class Level:
         self.player_group.add(self.pacman)
         self.init_ghost_group(subtile_size)
 
+    def check_collission(self, obj):
+        possible_collisions = pygame.sprite.spritecollide(
+            self.pacman,  # type: ignore
+            obj,
+            False
+        )
+
+        eat_radius = 5 * self.asset_cache.scale_factor
+
+        for item in possible_collisions:
+            dx = self.pacman.rect.centerx - item.rect.centerx
+            dy = self.pacman.rect.centery - item.rect.centery
+            distance_squared = (dx ** 2) + (dy ** 2)
+
+            if distance_squared < (eat_radius ** 2):
+                return item
+
+    def collission_logic(self):
+
+        #superpacgum
+
+        #ghost
+        # item: Ghost = self.check_collission(self.ghost_group)
+        # if item.state == GhostState.ROAMING:
+        #     self.pacman.state = PlayerState.DEAD
+        # elif item.state == GhostState.FLEEING:
+        #     item.state = GhostState.RESPAWNING
+
+        #pacgum
+        item = self.check_collission(self.gum_group)
+        if item:
+            Hud.score += 1
+            item.kill()
+
+
     def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
 
@@ -249,26 +284,7 @@ class Level:
         self.player_group.update(dt, self.tile_matrix)
         self.ghost_group.update(dt, self.tile_matrix)
 
-        possible_collisions = pygame.sprite.spritecollide(
-            self.pacman,  # type: ignore
-            self.gum_group,
-            False
-        )
-
-        items_eaten = []
-        eat_radius = 5 * self.asset_cache.scale_factor
-
-        for item in possible_collisions:
-            dx = self.pacman.rect.centerx - item.rect.centerx
-            dy = self.pacman.rect.centery - item.rect.centery
-            distance_squared = (dx ** 2) + (dy ** 2)
-
-            if distance_squared < (eat_radius ** 2):
-                items_eaten.append(item)
-
-        for item in items_eaten:
-            Hud.score += 1
-            item.kill()
+        self.collission_logic()
 
         # self.display_surface.fill((140, 40, 40))
         self.tile_group.draw(self.display_surface)
