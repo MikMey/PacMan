@@ -47,7 +47,7 @@ class Ghost(Character):
         self.state: GhostState = GhostState.ROAMING
         # TODO bricks at: 5, 7, 9, 10, 11, 13, 14, 15, 17 and greater
         self.speed: int = int(round(1.5 * self.asset_cache.scale_factor))
-        self.log.debug(f"speed={self.speed}")
+        # self.log.debug(f"speed={self.speed}")
 
 
         self.current_dir.set((0,1))
