@@ -20,14 +20,9 @@ class GameLoop(State):
         self.config = config
         self.screen = screen
         self.clock = clock
-        self.load_level(
-            width=self.config.levels[0].width,
-            height=self.config.levels[0].height
-        )
 
     def load_level(self, width, height) -> None:
 
-        
                 hex_matrix = MazeGenerator(
                     size=(
                         width,
@@ -80,19 +75,34 @@ class GameLoop(State):
     def run(self, state) -> None:
 
         running = True
-        while running:
-            dt = self.clock.tick(60) / 1000.0
+        for level in range(self.config.level_count):
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    state.end_game()
-                    running = False
+            if running == False:
+                 break
 
-                elif event.type == pygame.KEYDOWN:
-                    self.handle_input(event)
+            self.load_level(
+                width=self.config.levels[level].width,
+                height=self.config.levels[level].height
+            )
 
-            # self.screen.fill((100, 50, 255))
-            self.hud.loop(dt)
-            self.level.loop(dt)
+            next_level = False
+            while running and not next_level:
+                dt = self.clock.tick(60) / 1000.0
 
-            pygame.display.flip()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        state.end_game()
+                        running = False
+
+                    elif event.type == pygame.KEYDOWN:
+                        self.handle_input(event)
+
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                         next_level = True
+
+
+                # self.screen.fill((100, 50, 255))
+                self.hud.loop(dt)
+                self.level.loop(dt)
+
+                pygame.display.flip()
