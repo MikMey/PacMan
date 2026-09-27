@@ -9,4 +9,4 @@
 - make sure pygame clears screen before render next level/screen
 - level time limit
 - cheat mode
-- pause menu
+- show details on pause
