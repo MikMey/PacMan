@@ -25,9 +25,12 @@ class Level:
                 ) -> None:
         """Create sprites that are needed in level."""
         self.log = logging.getLogger('PacMan')
-        self.tile_matrix = self.create_tile_matrix(hex_matrix)
-        
+
         self.screen = screen
+        self.rows = rows
+        self.columns = columns
+
+        self.tile_matrix = self.create_tile_matrix(hex_matrix)
 
         self.init_level_size(
             columns,
@@ -35,10 +38,6 @@ class Level:
             self.screen.get_width(),
             self.screen.get_height()
         )
-
-        self.rows = rows
-        self.columns = columns
-
 
         self.populate_sprite_groups()
 
@@ -83,7 +82,6 @@ class Level:
                 (self.screen.get_width() - surface_w) // 2,  # horizontal_padding,
                 self.vertical_padding
             )
-
 
     def create_tile_matrix(
             self,
