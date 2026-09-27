@@ -73,7 +73,7 @@ class LoopMachine():
 
                 case LoopStates.GAME_LOOP:
                     self.log.debug('Enter GameLoop')
-                    self.game_loop.run(self.state)
+                    self.game_loop.run()
 
                 case LoopStates.DEATH_SCREEN:
                     self.log.debug('Enter DeathScreen')
