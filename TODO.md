@@ -5,7 +5,8 @@
 - start menu
 - game over and win screen
 - leaderboard
-- level change
+- level wait on enter for button press
+- make sure pygame clears screen before render next level/screen
 - level time limit
 - cheat mode
 - pause menu
