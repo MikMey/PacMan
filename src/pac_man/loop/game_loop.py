@@ -1,6 +1,6 @@
 import pygame
 import logging
-
+import sys
 
 from mazegenerator import MazeGenerator
 
@@ -72,12 +72,33 @@ class GameLoop(State):
                 )
                 self.level.reload_tile_sheet()
 
-    def run(self, state) -> None:
+            case pygame.K_RETURN:
+                self.event['next_level'] = True
 
-        running = True
+            case pygame.K_ESCAPE:
+                while True:
+                    if [event for event in pygame.event.get() if event.type == pygame.KEYDOWN] != []:
+                        break
+
+    def handle_event(self) -> None:
+        for pygame_event in pygame.event.get():
+            if pygame_event.type == pygame.QUIT:
+                sys.exit()
+
+            elif pygame_event.type == pygame.KEYDOWN:
+                self.handle_input(pygame_event)
+
+
+    def run(self) -> None:
+
+        self.event = {
+            'running': True,
+            'next_level': False
+        }
+
         for level in range(self.config.level_count):
 
-            if running == False:
+            if self.event['running'] == False:
                  break
 
             self.load_level(
@@ -85,21 +106,12 @@ class GameLoop(State):
                 height=self.config.levels[level].height
             )
 
-            next_level = False
-            while running and not next_level:
+            self.event['next_level'] = False
+            while self.event['running'] and not self.event['next_level']:
+                    
                 dt = self.clock.tick(60) / 1000.0
 
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        state.end_game()
-                        running = False
-
-                    elif event.type == pygame.KEYDOWN:
-                        self.handle_input(event)
-
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                         next_level = True
-
+                self.handle_event()
 
                 # self.screen.fill((100, 50, 255))
                 self.hud.loop(dt)
