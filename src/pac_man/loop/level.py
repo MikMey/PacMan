@@ -22,6 +22,7 @@ class Level:
                 screen: pygame.Surface,
                 columns: int,
                 rows: int,
+                pacman: Player
                 ) -> None:
         """Create sprites that are needed in level."""
         self.log = logging.getLogger('PacMan')
@@ -29,6 +30,7 @@ class Level:
         self.screen = screen
         self.rows = rows
         self.columns = columns
+        self.pacman = pacman
 
         self.tile_matrix = self.create_tile_matrix(hex_matrix)
 
@@ -155,7 +157,7 @@ class Level:
         self.tile_group: pygame.sprite.Group = pygame.sprite.Group()  # Tiles without pacgums
         self.gum_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacgums and such
         self.fruit_group: pygame.sprite.Group = pygame.sprite.Group()  # Decorative Fruits
-        self.player_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacman
+
         self.ghost_group: pygame.sprite.Group = pygame.sprite.Group() # Ghosts
 
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
@@ -225,14 +227,8 @@ class Level:
                         y=y * 3 + 1
                     ))
 
-        subtile_size = tile_factory._sub_w
-        self.pacman = Player(
-            asset_cache=self.asset_cache,
-            start_pos=Tile_Pos(0, 0),
-            subtile_size=subtile_size
-        )
-        self.player_group.add(self.pacman)
-        self.init_ghost_group(subtile_size)
+        self.subtile_size = tile_factory._sub_w
+        self.init_ghost_group(self.subtile_size)
 
     def check_collission(self, obj):
         possible_collisions = pygame.sprite.spritecollide(
@@ -256,11 +252,12 @@ class Level:
         #superpacgum
 
         #ghost
-        # item: Ghost = self.check_collission(self.ghost_group)
-        # if item.state == GhostState.ROAMING:
-        #     self.pacman.state = PlayerState.DEAD
-        # elif item.state == GhostState.FLEEING:
-        #     item.state = GhostState.RESPAWNING
+        item: Ghost = self.check_collission(self.ghost_group)
+        if item:
+            if item.state == GhostState.ROAMING:
+                self.pacman.state = PlayerState.DEAD
+            elif item.state == GhostState.FLEEING:
+                item.state = GhostState.RESPAWNING
 
         #pacgum
         item = self.check_collission(self.gum_group)
@@ -269,7 +266,7 @@ class Level:
             item.kill()
 
 
-    def loop(self, dt: float) -> None:
+    def loop(self, dt: float, player_group: pygame.sprite.Group) -> None:
         """Update and display loop to be run every frame.
 
         Parameters
@@ -278,11 +275,9 @@ class Level:
             Delta time used for updating sprites.
 
         """
-        keys = pygame.key.get_pressed()
-        self.pacman.handle_input(keys)
 
-        self.player_group.update(dt, self.tile_matrix)
         self.ghost_group.update(dt, self.tile_matrix)
+        player_group.update(dt, self.tile_matrix)
 
         self.collission_logic()
 
@@ -290,7 +285,7 @@ class Level:
         self.tile_group.draw(self.display_surface)
         self.gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
-        self.player_group.draw(self.display_surface)
+        player_group.draw(self.display_surface)
         self.ghost_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)
