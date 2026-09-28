@@ -1,12 +1,11 @@
 - Fix speed bricking game at different values
-- Make Ghosts kill player
 - include super pacgums
 - allow ghosts to be eaten
 - start menu
 - game over and win screen
 - leaderboard
-- level wait on enter for button press
 - make sure pygame clears screen before render next level/screen
 - level time limit
 - cheat mode
 - show details on pause
+- reset various attributes upon level chaneg for player
