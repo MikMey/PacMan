@@ -82,6 +82,7 @@ class SpriteSheetCache(BaseModel):
 
     text_color_offset: int = 9
     tile_color_offset: int = 8
+    pacman_color_offset: int = 1
 
     _text_scale_factor: float = PrivateAttr()
 
@@ -159,33 +160,34 @@ class SpriteSheetCache(BaseModel):
 
         # === ANIMATED TILES === #
 
-        # Pacman Sprites
-        self.cache_new_anim(
-            "PACMAN-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "PACMAN-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
-            size=16, flip_x=True
-        )
-        self.cache_new_anim(
-            "PACMAN-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16
-        )
-        self.cache_new_anim(
-            "PACMAN-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
-            size=16, flip_y=True
-        )
-        self.cache_new_anim(
-            "PACMAN-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-             (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
-            size=16
-        )
+        # # Pacman Sprites
+        # self.cache_new_anim(
+        #     "PACMAN-RIGHT",
+        #     [(103, 168), (103, 151), (103, 134), (103, 151)],
+        #     size=16
+        # )
+        # self.cache_new_anim(
+        #     "PACMAN-LEFT",
+        #     [(103, 168), (103, 151), (103, 134), (103, 151)],
+        #     size=16, flip_x=True
+        # )
+        # self.cache_new_anim(
+        #     "PACMAN-BOTTOM",
+        #     [(103, 168), (120, 151), (120, 134), (120, 151)],
+        #     size=16
+        # )
+        # self.cache_new_anim(
+        #     "PACMAN-TOP",
+        #     [(103, 168), (120, 151), (120, 134), (120, 151)],
+        #     size=16, flip_y=True
+        # )
+        # self.cache_new_anim(
+        #     "PACMAN-DEATH",
+        #     [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
+        #      (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
+        #     size=16
+        # )
+        self.bake_pacman_offset(self.pacman_color_offset)
 
         # Shadow / Blinky (Red)
         self.cache_new_anim("GHOST-1-RIGHT", [(1, 83), (18, 83)], size=16)
@@ -345,6 +347,48 @@ class SpriteSheetCache(BaseModel):
         cache_text("CHAR-!", 109, 19)
 
         cache_text("CHAR-COPYRIGHT", 100, 19)
+
+    def bake_pacman_offset(self, offset: int) -> None:
+
+        def cache_pacman(name: str,
+                         pos: list[tuple[int, int]],
+                         flip_x: bool = False,
+                         flip_y: bool = False) -> None:
+            self.cache_new_anim(
+                name,
+                [
+                    (p[0] + SHEET_OFFSET_X * (offset % 5),
+                     p[1] + SHEET_OFFSET_Y * (offset // 5)) for p in pos
+                ],
+                16,
+                flip_x=flip_x,
+                flip_y=flip_y
+            )
+
+        # Pacman Sprites
+        cache_pacman(
+            "PACMAN-RIGHT",
+            [(103, 168), (103, 151), (103, 134), (103, 151)],
+        )
+        cache_pacman(
+            "PACMAN-LEFT",
+            [(103, 168), (103, 151), (103, 134), (103, 151)],
+            flip_x=True
+        )
+        cache_pacman(
+            "PACMAN-BOTTOM",
+            [(103, 168), (120, 151), (120, 134), (120, 151)],
+        )
+        cache_pacman(
+            "PACMAN-TOP",
+            [(103, 168), (120, 151), (120, 134), (120, 151)],
+            flip_y=True
+        )
+        cache_pacman(
+            "PACMAN-DEATH",
+            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
+             (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)]
+        )
 
     def cache_new(self, name: str, x: int, y: int, size: int,
                   flip_x: bool = False, flip_y: bool = False,
