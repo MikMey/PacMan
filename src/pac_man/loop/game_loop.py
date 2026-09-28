@@ -4,9 +4,9 @@ import sys
 
 from mazegenerator import MazeGenerator
 
-from ..utils import Config
+from ..utils import Config, Tile_Pos
 from ..render import Hud, SpriteSheetCache
-from ..models import TILE_SIZE
+from ..models import TILE_SIZE, Player, PlayerState, SUBTILE_SIZE
 
 from .level import Level
 from .states import State
@@ -20,6 +20,10 @@ class GameLoop(State):
         self.config = config
         self.screen = screen
         self.clock = clock
+
+        self.player_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacman
+        self.pacman = Player()
+        self.player_group.add(self.pacman)
 
     def load_level(self, width, height) -> None:
 
@@ -36,13 +40,20 @@ class GameLoop(State):
                     hex_matrix=hex_matrix,
                     screen=self.screen,
                     columns=width,
-                    rows=height
+                    rows=height,
+                    pacman=self.pacman
                 )
 
                 self.hud = Hud(
                     asset_cache=self.level.asset_cache,
                     screen=self.screen,
                     vertical_padding=self.level.vertical_padding
+                )
+
+                self.pacman.late_init(
+                    asset_cache=self.level.asset_cache,
+                    start_pos=Tile_Pos(width // 2, height // 2),
+                    subtile_size=self.level.subtile_size
                 )
 
 
@@ -93,13 +104,16 @@ class GameLoop(State):
 
         self.event = {
             'running': True,
-            'next_level': False
+            'next_level': False,
+            'pause': True
         }
 
         for level in range(self.config.level_count):
 
             if self.event['running'] == False:
                  break
+
+            self.event['pause'] = True
 
             self.load_level(
                 width=self.config.levels[level].width,
@@ -115,6 +129,10 @@ class GameLoop(State):
 
                 # self.screen.fill((100, 50, 255))
                 self.hud.loop(dt)
-                self.level.loop(dt)
+                self.level.loop(dt, self.player_group)
 
                 pygame.display.flip()
+
+                while self.event['pause']:
+                    if [event for event in pygame.event.get() if event.type == pygame.KEYDOWN] != []:
+                        self.event['pause'] = False
