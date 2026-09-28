@@ -8,7 +8,7 @@ from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
 
 from .tile import Tile
-from .characters import Character, CharacterName
+from .characters import Character, CharacterName, DIRECTION_REVERSE
 
 class PlayerState(Enum):
     ALIVE = 0
@@ -19,27 +19,20 @@ class PlayerState(Enum):
 class Player(Character):
     """Deals with player logic."""
 
-    def __init__(
-            self,
-            asset_cache: SpriteSheetCache,
-            start_pos: Tile_Pos,
-            subtile_size: int
-            ) -> None:
+    def __init__(self) -> None:
         
         super().__init__(
-            asset_cache=asset_cache,
-            start_pos=start_pos,
-            subtile_size=subtile_size,
-            character_name=CharacterName.PACMAN
+            character_name=CharacterName.PACMAN,
+            speed_mult=1.5
             )
         self.state = PlayerState.ALIVE
         
         self.buffered_dir: UnitVector = UnitVector()
 
-        self.speed: int = int(round(2 * self.asset_cache.scale_factor))
+        
 
     def set_image(self) -> None:
-        if self.is_dying:
+        if self.state == PlayerState.DEAD:
             frames = self.asset_cache.get_anim(
                 self.name + "DEATH"
             )
@@ -82,11 +75,18 @@ class Player(Character):
         if keys[pygame.K_KP1]:
             self.kill()
 
-    def _update_position(self, tile_matrix: list[list[Tile]]) -> None:
-        
-        if self.is_dying:
+    def _update_position(self) -> None:
+
+        if self.state == PlayerState.DEAD:
             return
-        
+
+        keys = pygame.key.get_pressed()
+        self.handle_input(keys)
+
+        if self.current_dir.get() != (0,0) and self.buffered_dir.get() == DIRECTION_REVERSE[self.current_dir.get()]:
+            self.current_dir = self.buffered_dir
+            self.target_tile = self.current_tile
+
         # Check if next target is availible if exactly in middle
         if not self._move_straight():
             self.current_tile = self.target_tile.copy()
