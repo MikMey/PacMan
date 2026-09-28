@@ -8,7 +8,7 @@ from typing import Optional
 from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
 
-from .characters import CharacterName, Character
+from .characters import CharacterName, Character, DIRECTION_REVERSE
 from .player import Player
 from .tile import Tile
 
@@ -36,19 +36,20 @@ class Ghost(Character):
             ) -> None:
 
         super().__init__(
+            character_name=CharacterName[ghost_peronality.name],
+            speed_mult=0.8
+            )
+
+        self.late_init(
             asset_cache=asset_cache,
             start_pos=start_pos,
             subtile_size=subtile_size,
-            character_name=CharacterName[ghost_peronality.name]
-            )
+        )
 
         self.ghost_name = ghost_peronality
         self.player: Player = player
         self.state: GhostState = GhostState.ROAMING
-        # TODO bricks at: 5, 7, 9, 10, 11, 13, 14, 15, 17 and greater
-        self.speed: int = int(round(1.5 * self.asset_cache.scale_factor))
-        # self.log.debug(f"speed={self.speed}")
-
+        
 
         self.current_dir.set((0,1))
 
@@ -71,7 +72,7 @@ class Ghost(Character):
     def kill():
         pass
 
-    def _update_position(self, tile_matrix) -> None:
+    def _update_position(self) -> None:
         # self.log.debug(f'update call name={self.ghost_name.value}')
         # self.current_dir.set((0, 1))
         if not self._move_straight():
@@ -143,12 +144,7 @@ class Ghost(Character):
             (-1,0): (0,1),
             (0,-1): (-1,0)
         }
-        TURN_REV = {
-            (1,0): (-1,0),
-            (0,1): (0,-1),
-            (-1,0): (1,0),
-            (0,-1): (0,1)
-        }
+        
         if self.state == GhostState.ROAMING:
             if random.randint(0,2) == 0 and not self._is_wall(self.current_dir.get(), Tile.get_tile(self.current_tile)):
                 return
@@ -159,18 +155,18 @@ class Ghost(Character):
                 while True:
                     turn = TURN_LEFT[turn]
                     if turn == self.current_dir.get():
-                        self.current_dir.set(TURN_REV[turn])
+                        self.current_dir.set(DIRECTION_REVERSE[turn])
                         break
-                    if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != TURN_REV[self.current_dir.get()]:
+                    if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != DIRECTION_REVERSE[self.current_dir.get()]:
                         self.current_dir.set(turn)
                         break
             else:
                 while True:
                     turn = TURN_RIGHT[turn]
                     if turn == self.current_dir.get():
-                        self.current_dir.set(TURN_REV[turn])
+                        self.current_dir.set(DIRECTION_REVERSE[turn])
                         break
-                    if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != TURN_REV[self.current_dir.get()]:
+                    if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != DIRECTION_REVERSE[self.current_dir.get()]:
                         self.current_dir.set(turn)
                         break
                 # self.log.debug(f"turn={turn}")
