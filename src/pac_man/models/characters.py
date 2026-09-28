@@ -12,6 +12,13 @@ from ..render import SpriteSheetCache
 
 from .tile import Tile
 
+DIRECTION_REVERSE = {
+    (1,0): (-1,0),
+    (0,1): (0,-1),
+    (-1,0): (1,0),
+    (0,-1): (0,1)
+}
+
 DIRECTION = {
     (0, -1): 'TOP',
     (0, 1): 'BOTTOM',
@@ -31,34 +38,36 @@ class Character(ABC, pygame.sprite.Sprite):
 
     def __init__(
             self,
-            asset_cache: SpriteSheetCache,
-            start_pos: Tile_Pos,
-            subtile_size: int,
-            character_name: CharacterName
+            character_name: CharacterName,
+            speed_mult: float
             ):
         super().__init__()
 
         self.log = logging.getLogger('PacMan')
-
+        self.speed_mult = speed_mult
         self.name = character_name.value
-
-        self.asset_cache = asset_cache
-        self.subtile_size: int = subtile_size
-        self.tile_size: int = subtile_size * 3
-
-        self.is_dying = False
 
         # Movement attributes
         self.current_dir: UnitVector = UnitVector(0, 0)
-        
-        self.current_tile: Tile_Pos = replace(start_pos)
-        self.target_tile: Tile_Pos = replace(start_pos)
 
         # Frame logic attributes
         self.current_frame = 0
         self.max_frame = -1
         self.animation_speed = 0.1
         self.animation_timer = 0.0
+
+    def late_init(
+            self,
+            asset_cache: SpriteSheetCache,
+            start_pos: Tile_Pos,
+            subtile_size: int,
+        ):
+        self.asset_cache = asset_cache
+        self.subtile_size: int = subtile_size
+        self.tile_size: int = subtile_size * 3
+
+        self.current_tile: Tile_Pos = replace(start_pos)
+        self.target_tile: Tile_Pos = replace(start_pos)
 
         self.init_image()
 
@@ -69,8 +78,9 @@ class Character(ABC, pygame.sprite.Sprite):
             start_pos.y * self.tile_size + self.subtile_size // 2
         )
 
-        self.speed: int = int(round(2 * self.asset_cache.scale_factor))
-
+        # TODO bricks at: 5, 7, 9, 10, 11, 13, 14, 15, 17 and greater
+        self.speed: int = int(round(self.speed_mult * self.asset_cache.scale_factor))
+        # self.log.debug(f"speed={self.speed}")
 
     def init_image(self):
         frames = self.asset_cache.get_anim(
@@ -201,7 +211,7 @@ class Character(ABC, pygame.sprite.Sprite):
         """
         self.tile_matrix = tile_matrix
         self._update_frame(dt)
-        self._update_position(tile_matrix)
+        self._update_position()
 
     @abstractmethod
     def set_image(self) -> None:
