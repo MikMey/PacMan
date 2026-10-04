@@ -21,10 +21,6 @@ class GameLoop(State):
         self.screen = screen
         self.clock = clock
 
-        self.player_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacman
-        self.pacman = Player()
-        self.player_group.add(self.pacman)
-
     def load_level(self, width, height) -> None:
 
                 hex_matrix = MazeGenerator(
@@ -40,20 +36,13 @@ class GameLoop(State):
                     hex_matrix=hex_matrix,
                     screen=self.screen,
                     columns=width,
-                    rows=height,
-                    pacman=self.pacman
+                    rows=height
                 )
 
                 self.hud = Hud(
                     asset_cache=self.level.asset_cache,
                     screen=self.screen,
                     vertical_padding=self.level.vertical_padding
-                )
-
-                self.pacman.late_init(
-                    asset_cache=self.level.asset_cache,
-                    start_pos=Tile_Pos(width // 2, height // 2),
-                    subtile_size=self.level.subtile_size
                 )
 
 
@@ -122,14 +111,14 @@ class GameLoop(State):
 
             self.event['next_level'] = False
             while self.event['running'] and not self.event['next_level']:
-                    
+
                 dt = self.clock.tick(60) / 1000.0
 
                 self.handle_event()
 
                 # self.screen.fill((100, 50, 255))
+                self.level.loop(dt)
                 self.hud.loop(dt)
-                self.level.loop(dt, self.player_group)
 
                 pygame.display.flip()
 
