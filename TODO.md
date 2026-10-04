@@ -2,7 +2,6 @@
 ## Movement
 
 ## Logic
-- screen wait for input after player death respawn
 - increase ghost touch radius
 
 ## Visual
@@ -14,8 +13,7 @@
 - include super pacgums
 - allow ghosts to be eaten
 - start menu
-- game over and win screen
+- game over screen
 - leaderboard
 - cheat mode
 - show details on pause
-- deduct life on player death

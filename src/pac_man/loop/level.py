@@ -99,7 +99,7 @@ class Level:
                 item.create_reference()
         return matrix
 
-    def init_ghost_group(self) -> None:
+    def init_characters(self) -> None:
         """add instances of ghost class for each ghost to ghost_group"""
 
         self.player_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacman
@@ -236,7 +236,7 @@ class Level:
                     ))
 
         self.subtile_size = tile_factory._sub_w
-        self.init_ghost_group()
+        self.init_characters()
 
     def check_collission(self, obj):
         possible_collisions = pygame.sprite.spritecollide(
@@ -274,23 +274,19 @@ class Level:
             Hud.score += 1
             item.kill()
 
-    def handle_player_state(self, dt):
-        if self.pacman.state == PlayerState.DEAD:
-            self.delta_start += 1
-            if self.delta_start - 75 >= self.start_tick:
-                self.start_tick = 0
-                self.delta_start = 0
-                self.pacman.state = PlayerState.RESPAWNING
+    # def handle_player_state(self, dt):
+    #     if self.pacman.state == PlayerState.DEAD:
+    #         self.delta_start += 1
+    #         if self.delta_start - 75 >= self.start_tick:
+    #             self.start_tick = 0
+    #             self.delta_start = 0
+    #             self.pacman.state = PlayerState.RESPAWNING
 
-        elif self.pacman.state == PlayerState.RESPAWNING:
-            self.delta_start += 1
-            if self.delta_start - 60 >= self.start_tick:
-                self.init_ghost_group()
+    #     elif self.pacman.state == PlayerState.RESPAWNING:
+    #         self.delta_start += 1
+    #         if self.delta_start - 60 >= self.start_tick:
+    #             self.init_ghost_group()
 
-        elif self.pacman.state == PlayerState.ALIVE:
-            self.delta_start = 0
-            self.ghost_group.update(dt, self.tile_matrix)
-            self.collission_logic()
 
     def render(self):
         # self.display_surface.fill((140, 40, 40))
@@ -302,8 +298,9 @@ class Level:
 
         self.screen.blit(self.display_surface, self.position)
 
-    def loop(self, dt: float) -> None:
-        """Update and display loop to be run every frame.
+    def loop(self, dt: float) -> bool:
+        """
+        Update and display loop to be run every frame.
 
         Parameters
         ----------
@@ -312,9 +309,12 @@ class Level:
 
         """
 
-        self.handle_player_state(dt)
-
+        # self.handle_player_state(dt)
+        self.ghost_group.update(dt, self.tile_matrix)
         self.player_group.update(dt, self.tile_matrix)
+        self.collission_logic()
         self.render()
+
+        return self.pacman.state == PlayerState.ALIVE
 
 

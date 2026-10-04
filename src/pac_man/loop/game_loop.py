@@ -26,11 +26,13 @@ class GameLoop(State):
     handles level calling, score totaling and state changes
     """
     def __init__(self, config: Config, screen: pygame.Surface, clock: pygame.time.Clock) -> None:
+        self.log = logging.getLogger('PacMan')
         self.config = config
         self.screen = screen
         self.clock = clock
 
     def load_level(self, width, height) -> None:
+        """Clear screen, get matrix, init hud and level, draw"""
 
         self.screen.fill(0)
         pygame.display.flip()
@@ -60,6 +62,7 @@ class GameLoop(State):
         self.hud.render()
 
     def pause(self):
+        """Keep state until button is pressed"""
         self.handle_event()
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
@@ -101,6 +104,7 @@ class GameLoop(State):
                 self.state = GameState.RUN_LEVEL
 
     def handle_event(self) -> None:
+        """handle different types of pygame events"""
         for pygame_event in pygame.event.get():
             if pygame_event.type == pygame.QUIT:
                 sys.exit()
@@ -120,6 +124,7 @@ class GameLoop(State):
             match self.state:
 
                 case GameState.LOAD_LEVEL:
+                    self.log.debug('Enter LOAD_LEVEL')
                     if len(self.config.levels) > level:
                         width = self.config.levels[level].width
                         height = self.config.levels[level].height
@@ -135,18 +140,29 @@ class GameLoop(State):
                     self.state = GameState.PAUSE
 
                 case GameState.RUN_LEVEL:
+                    self.log.debug('Enter RUN_LEVEL')
                     self.handle_event()
 
-                    self.level.loop(dt)
+                    alive = self.level.loop(dt)
                     self.hud.loop(dt)
+                    if not alive:
+                        self.state = GameState.PLAYER_DEATH
 
                 case GameState.RESPAWN_LEVEL:
-                    pass
+                    self.log.debug('Enter RESPAWN_LEVEL')
+                    #play death animation pacman
+                    self.level.init_characters()
+                    self.level.render()
+                    self.hud.render()
+                    self.state = GameState.PAUSE
 
                 case GameState.PAUSE:
+                    self.log.debug('Enter PAUSE')
                     self.pause()
 
                 case GameState.PLAYER_DEATH:
+                    self.log.debug('Enter PLAYER_DEATH')
+                    self.lives -= 1
                     if self.lives > 0:
                         self.state = GameState.RESPAWN_LEVEL
                     else:
