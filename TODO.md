@@ -8,4 +8,7 @@
 - level time limit
 - cheat mode
 - show details on pause
-- reset various attributes upon level chaneg for player
+- level load fully in frame
+- screen wait for input after player death respawn
+- deduct life on player death
+- increase ghost touch radius
