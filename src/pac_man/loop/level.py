@@ -292,6 +292,16 @@ class Level:
             self.ghost_group.update(dt, self.tile_matrix)
             self.collission_logic()
 
+    def render(self):
+        # self.display_surface.fill((140, 40, 40))
+        self.tile_group.draw(self.display_surface)
+        self.gum_group.draw(self.display_surface)
+        self.fruit_group.draw(self.display_surface)
+        self.ghost_group.draw(self.display_surface)
+        self.player_group.draw(self.display_surface)
+
+        self.screen.blit(self.display_surface, self.position)
+
     def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
 
@@ -305,13 +315,6 @@ class Level:
         self.handle_player_state(dt)
 
         self.player_group.update(dt, self.tile_matrix)
+        self.render()
 
 
-        # self.display_surface.fill((140, 40, 40))
-        self.tile_group.draw(self.display_surface)
-        self.gum_group.draw(self.display_surface)
-        self.fruit_group.draw(self.display_surface)
-        self.ghost_group.draw(self.display_surface)
-        self.player_group.draw(self.display_surface)
-
-        self.screen.blit(self.display_surface, self.position)

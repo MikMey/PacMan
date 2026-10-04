@@ -1,6 +1,7 @@
 import pygame
 import logging
 import sys
+from enum import Enum, auto
 
 from mazegenerator import MazeGenerator
 
@@ -10,6 +11,14 @@ from ..models import TILE_SIZE, Player, PlayerState, SUBTILE_SIZE
 
 from .level import Level
 from .states import State
+
+class GameState(Enum):
+    LOAD_LEVEL = auto()
+    RUN_LEVEL = auto()
+    RESPAWN_LEVEL = auto()
+    PAUSE = auto()
+    PLAYER_DEATH = auto()
+    GAME_OVER = auto()
 
 class GameLoop(State):
     """
@@ -23,28 +32,35 @@ class GameLoop(State):
 
     def load_level(self, width, height) -> None:
 
-                hex_matrix = MazeGenerator(
-                    size=(
-                        width,
-                        height
-                    )
-                ).maze
-                # log = logging.getLogger('PacMan')
-                # log.debug(f'hex_matrix={hex_matrix}')
-        
-                self.level = Level(
-                    hex_matrix=hex_matrix,
-                    screen=self.screen,
-                    columns=width,
-                    rows=height
-                )
+        self.screen.fill(0)
+        pygame.display.flip()
 
-                self.hud = Hud(
-                    asset_cache=self.level.asset_cache,
-                    screen=self.screen,
-                    vertical_padding=self.level.vertical_padding
-                )
+        hex_matrix = MazeGenerator(
+            size=(
+                width,
+                height
+            )
+        ).maze
+        # log = logging.getLogger('PacMan')
+        # log.debug(f'hex_matrix={hex_matrix}')
 
+        self.level = Level(
+            hex_matrix=hex_matrix,
+            screen=self.screen,
+            columns=width,
+            rows=height
+        )
+
+        self.hud = Hud(
+            asset_cache=self.level.asset_cache,
+            screen=self.screen,
+            vertical_padding=self.level.vertical_padding
+        )
+        self.level.render()
+        self.hud.render()
+
+    def pause(self):
+        self.handle_event()
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
         """Handle Cheats and color cycling.
@@ -73,15 +89,16 @@ class GameLoop(State):
                 self.level.reload_tile_sheet()
 
             case pygame.K_RETURN:
-                self.event['next_level'] = True
+                self.state = GameState.LOAD_LEVEL
 
             case pygame.K_SPACE:
-                while True:
-                    if [event for event in pygame.event.get() if event.type == pygame.KEYDOWN] != []:
-                        break
+                self.state = GameState.PAUSE
 
             case pygame.K_ESCAPE:
                 sys.exit()
+
+            case _:
+                self.state = GameState.RUN_LEVEL
 
     def handle_event(self) -> None:
         for pygame_event in pygame.event.get():
@@ -91,45 +108,49 @@ class GameLoop(State):
             elif pygame_event.type == pygame.KEYDOWN:
                 self.handle_input(pygame_event)
 
-
     def run(self) -> None:
+        """Finite State Machine for level based/gameloop logic"""
+        self.state = GameState.LOAD_LEVEL
+        level = 0
+        self.lives = 3
 
-        self.event = {
-            'running': True,
-            'next_level': False,
-            'pause': True
-        }
+        while self.state != GameState.GAME_OVER:
 
-        lives = 3
+            dt = self.clock.tick(60) / 1000.0
+            match self.state:
 
-        for level in range(self.config.level_count):
+                case GameState.LOAD_LEVEL:
+                    if len(self.config.levels) > level:
+                        width = self.config.levels[level].width
+                        height = self.config.levels[level].height
+                    else:
+                        width = self.config.default_level.width
+                        height = self.config.default_level.height
 
-            self.screen.fill(0)
+                    self.load_level(
+                        width=width,
+                        height=height
+                    )
+                    level += 1
+                    self.state = GameState.PAUSE
+
+                case GameState.RUN_LEVEL:
+                    self.handle_event()
+
+                    self.level.loop(dt)
+                    self.hud.loop(dt)
+
+                case GameState.RESPAWN_LEVEL:
+                    pass
+
+                case GameState.PAUSE:
+                    self.pause()
+
+                case GameState.PLAYER_DEATH:
+                    if self.lives > 0:
+                        self.state = GameState.RESPAWN_LEVEL
+                    else:
+                        self.state = GameState.GAME_OVER
+
+
             pygame.display.flip()
-
-            if self.event['running'] == False:
-                 break
-
-            self.event['pause'] = True
-
-            self.load_level(
-                width=self.config.levels[level].width,
-                height=self.config.levels[level].height
-            )
-
-            self.event['next_level'] = False
-            while self.event['running'] and not self.event['next_level']:
-
-                dt = self.clock.tick(60) / 1000.0
-
-                self.handle_event()
-
-                # self.screen.fill((100, 50, 255))
-                self.level.loop(dt)
-                self.hud.loop(dt)
-
-                pygame.display.flip()
-
-                while self.event['pause']:
-                    if [event for event in pygame.event.get() if event.type == pygame.KEYDOWN] != []:
-                        self.event['pause'] = False

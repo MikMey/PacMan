@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 import logging
 import pygame
@@ -8,42 +8,22 @@ from .main_menu import MainMenu
 from .death_screen import DeathScreen
 from .win_screen import WinScreen
 
-class LoopStates():
-    MAIN_MENU = 0
-    GAME_LOOP = 1
-    DEATH_SCREEN = 2
-    WIN_SCREEN = 3
-    END_GAME = 4
-
-    def __init__(self):
-        self._state = LoopStates.MAIN_MENU
-
-    def main_menu(self):
-        self._state = LoopStates.MAIN_MENU
-
-    def game_loop(self):
-        self._state = LoopStates.GAME_LOOP
-
-    def death_screen(self):
-        self._state = LoopStates.DEATH_SCREEN
-
-    def win_screen(self):
-        self._state = LoopStates.WIN_SCREEN
-
-    def end_game(self):
-        self._state = LoopStates.END_GAME
-
-    def get_state(self):
-        return self._state
+class LoopState(Enum):
+    MAIN_MENU = auto()
+    GAME_LOOP = auto()
+    DEATH_SCREEN = auto()
+    WIN_SCREEN = auto()
+    END_GAME = auto()
 
 class LoopMachine():
-    state: LoopStates = LoopStates()
+    state: LoopState = LoopState.MAIN_MENU
 
     def __init__(self, config):
         self.log = logging.getLogger('PacMan')
         self.config = config
 
     def __enter__(self):
+        """context manager on call (basically init)"""
         self.log.info("context manager start")
         pygame.init()
         self.init_screen()
@@ -54,6 +34,7 @@ class LoopMachine():
         return self
 
     def __exit__(self, exc_type, exc, tb):
+        """context manager safe exit"""
         pygame.quit()
         self.log.info("context manager end")
 
@@ -62,34 +43,26 @@ class LoopMachine():
         pygame.display.set_caption("Pac-Man")
         self.clock = pygame.time.Clock()
 
-    def run_gameloop(self):
-        while True:
-            match self.state.get_state():
+    def run_pacman(self):
+        """Finite State machine for entirety of pacman"""
 
-                case LoopStates.MAIN_MENU:
-                    self.log.debug('Enter MainMenu')
+        while self.state != LoopState.END_GAME:
+
+            match self.state:
+                case LoopState.MAIN_MENU:
+                    self.log.debug("Enter MainMenu")
                     self.main_menu.run()
-                    self.state.game_loop()
+                    self.state = LoopState.GAME_LOOP
 
-                case LoopStates.GAME_LOOP:
-                    self.log.debug('Enter GameLoop')
+                case LoopState.GAME_LOOP:
+                    self.log.debug("Enter GameLoop")
                     self.game_loop.run()
 
-                case LoopStates.DEATH_SCREEN:
-                    self.log.debug('Enter DeathScreen')
+                case LoopState.DEATH_SCREEN:
+                    self.log.debug("Enter DeathScreen")
                     self.death_screen.run()
 
-                case LoopStates.WIN_SCREEN:
-                    self.log.debug('Enter WinScreen')
+                case LoopState.WIN_SCREEN:
+                    self.log.debug("Enter WinScreen")
                     self.win_screen.run()
-
-                case LoopStates.END_GAME:
-                    self.log.debug('Enter Close')
-                    return
-
-
-
-
-
-
 
