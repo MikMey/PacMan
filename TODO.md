@@ -1,6 +1,5 @@
 # Bugs
 ## Movement
-- Fix speed bricking game at different values
 
 ## Logic
 - screen wait for input after player death respawn
