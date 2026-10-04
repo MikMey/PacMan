@@ -49,14 +49,13 @@ class Level:
     
             raw_level_h = rows * TILE_SIZE
             raw_level_w = columns * TILE_SIZE
-    
+
             max_level_w = int(screen_w * 0.8)
             max_level_h = screen_h - (2 * TILE_SIZE)
-    
+
             self.scale_factor = min(
                 max_level_w // raw_level_w,
-                max_level_h // raw_level_h,
-                8,
+                max_level_h // raw_level_h
             )
 
             try:
@@ -275,6 +274,23 @@ class Level:
             Hud.score += 1
             item.kill()
 
+    def handle_player_state(self, dt):
+        if self.pacman.state == PlayerState.DEAD:
+            self.delta_start += 1
+            if self.delta_start - 75 >= self.start_tick:
+                self.start_tick = 0
+                self.delta_start = 0
+                self.pacman.state = PlayerState.RESPAWNING
+
+        elif self.pacman.state == PlayerState.RESPAWNING:
+            self.delta_start += 1
+            if self.delta_start - 60 >= self.start_tick:
+                self.init_ghost_group()
+
+        elif self.pacman.state == PlayerState.ALIVE:
+            self.delta_start = 0
+            self.ghost_group.update(dt, self.tile_matrix)
+            self.collission_logic()
 
     def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
@@ -285,21 +301,8 @@ class Level:
             Delta time used for updating sprites.
 
         """
-        if self.pacman.state == PlayerState.DEAD:
-            self.log.debug("setting to respawn")
-            self.delta_start += 1
-            if self.delta_start - 75 >= self.start_tick:
-                self.start_tick = 0
-                self.delta_start = 0
-                self.pacman.state = PlayerState.RESPAWNING
-        elif self.pacman.state == PlayerState.RESPAWNING:
-            self.delta_start += 1
-            if self.delta_start - 60 >= self.start_tick:
-                self.init_ghost_group()
-        elif self.pacman.state == PlayerState.ALIVE:
-            self.delta_start = 0
-            self.ghost_group.update(dt, self.tile_matrix)
-            self.collission_logic()
+
+        self.handle_player_state(dt)
 
         self.player_group.update(dt, self.tile_matrix)
 
