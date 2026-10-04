@@ -2,6 +2,7 @@
 import pygame
 from random import randrange
 import functools
+import time
 
 import logging
 from pydantic import ValidationError
@@ -21,8 +22,7 @@ class Level:
                 hex_matrix: list[list[int]],
                 screen: pygame.Surface,
                 columns: int,
-                rows: int,
-                pacman: Player
+                rows: int
                 ) -> None:
         """Create sprites that are needed in level."""
         self.log = logging.getLogger('PacMan')
@@ -30,7 +30,6 @@ class Level:
         self.screen = screen
         self.rows = rows
         self.columns = columns
-        self.pacman = pacman
 
         self.tile_matrix = self.create_tile_matrix(hex_matrix)
 
@@ -101,10 +100,20 @@ class Level:
                 item.create_reference()
         return matrix
 
-    def init_ghost_group(self, subtile_size) -> None:
+    def init_ghost_group(self) -> None:
         """add instances of ghost class for each ghost to ghost_group"""
 
-        PrepGhost = functools.partial(Ghost, asset_cache=self.asset_cache, subtile_size=subtile_size, player=self.pacman)
+        self.player_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacman
+        self.pacman = Player(
+            asset_cache=self.asset_cache,
+            start_pos=Tile_Pos(self.columns // 2, self.rows // 2),
+            subtile_size=self.subtile_size
+            )
+        self.player_group.add(self.pacman)
+
+        self.ghost_group: pygame.sprite.Group = pygame.sprite.Group() # Ghosts
+
+        PrepGhost = functools.partial(Ghost, asset_cache=self.asset_cache, subtile_size=self.subtile_size, player=self.pacman)
 
         self.inky: Ghost = PrepGhost(
             start_pos=Tile_Pos(0, 0),
@@ -124,6 +133,7 @@ class Level:
         )
 
         self.ghost_group.add(self.pinky, self.inky, self.blinky, self.clyde)
+
 
     def reload_tile_sheet(self) -> None:
         self.tile_group.empty()
@@ -158,7 +168,6 @@ class Level:
         self.gum_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacgums and such
         self.fruit_group: pygame.sprite.Group = pygame.sprite.Group()  # Decorative Fruits
 
-        self.ghost_group: pygame.sprite.Group = pygame.sprite.Group() # Ghosts
 
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
 
@@ -228,7 +237,7 @@ class Level:
                     ))
 
         self.subtile_size = tile_factory._sub_w
-        self.init_ghost_group(self.subtile_size)
+        self.init_ghost_group()
 
     def check_collission(self, obj):
         possible_collisions = pygame.sprite.spritecollide(
@@ -256,6 +265,7 @@ class Level:
         if item:
             if item.state == GhostState.ROAMING:
                 self.pacman.state = PlayerState.DEAD
+                self.start_tick = 0
             elif item.state == GhostState.FLEEING:
                 item.state = GhostState.RESPAWNING
 
@@ -266,7 +276,7 @@ class Level:
             item.kill()
 
 
-    def loop(self, dt: float, player_group: pygame.sprite.Group) -> None:
+    def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
 
         Parameters
@@ -275,17 +285,30 @@ class Level:
             Delta time used for updating sprites.
 
         """
+        if self.pacman.state == PlayerState.DEAD:
+            self.log.debug("setting to respawn")
+            self.delta_start += 1
+            if self.delta_start - 75 >= self.start_tick:
+                self.start_tick = 0
+                self.delta_start = 0
+                self.pacman.state = PlayerState.RESPAWNING
+        elif self.pacman.state == PlayerState.RESPAWNING:
+            self.delta_start += 1
+            if self.delta_start - 60 >= self.start_tick:
+                self.init_ghost_group()
+        elif self.pacman.state == PlayerState.ALIVE:
+            self.delta_start = 0
+            self.ghost_group.update(dt, self.tile_matrix)
+            self.collission_logic()
 
-        self.ghost_group.update(dt, self.tile_matrix)
-        player_group.update(dt, self.tile_matrix)
+        self.player_group.update(dt, self.tile_matrix)
 
-        self.collission_logic()
 
         # self.display_surface.fill((140, 40, 40))
         self.tile_group.draw(self.display_surface)
         self.gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
-        player_group.draw(self.display_surface)
         self.ghost_group.draw(self.display_surface)
+        self.player_group.draw(self.display_surface)
 
         self.screen.blit(self.display_surface, self.position)
