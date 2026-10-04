@@ -1,14 +1,22 @@
+# Bugs
+## Movement
 - Fix speed bricking game at different values
+
+## Logic
+- screen wait for input after player death respawn
+- increase ghost touch radius
+
+## Visual
+- level load fully in frame
+- screen size not matching to possible size
+
+# Features
+- level time limit
 - include super pacgums
 - allow ghosts to be eaten
 - start menu
 - game over and win screen
 - leaderboard
-- make sure pygame clears screen before render next level/screen
-- level time limit
 - cheat mode
 - show details on pause
-- level load fully in frame
-- screen wait for input after player death respawn
 - deduct life on player death
-- increase ghost touch radius
