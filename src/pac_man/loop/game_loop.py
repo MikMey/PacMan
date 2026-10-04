@@ -75,10 +75,13 @@ class GameLoop(State):
             case pygame.K_RETURN:
                 self.event['next_level'] = True
 
-            case pygame.K_ESCAPE:
+            case pygame.K_SPACE:
                 while True:
                     if [event for event in pygame.event.get() if event.type == pygame.KEYDOWN] != []:
                         break
+
+            case pygame.K_ESCAPE:
+                sys.exit()
 
     def handle_event(self) -> None:
         for pygame_event in pygame.event.get():
@@ -97,7 +100,12 @@ class GameLoop(State):
             'pause': True
         }
 
+        lives = 3
+
         for level in range(self.config.level_count):
+
+            self.screen.fill(0)
+            pygame.display.flip()
 
             if self.event['running'] == False:
                  break
