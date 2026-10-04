@@ -19,11 +19,19 @@ class PlayerState(Enum):
 class Player(Character):
     """Deals with player logic."""
 
-    def __init__(self) -> None:
+    def __init__(
+            self,
+            asset_cache: SpriteSheetCache,
+            start_pos: Tile_Pos,
+            subtile_size: int
+        ) -> None:
         
         super().__init__(
             character_name=CharacterName.PACMAN,
-            speed_mult=1.5
+            speed_mult=1.5,
+            asset_cache=asset_cache,
+            start_pos=start_pos,
+            subtile_size=subtile_size
             )
         self.state = PlayerState.ALIVE
         
@@ -36,6 +44,8 @@ class Player(Character):
             frames = self.asset_cache.get_anim(
                 self.name + "DEATH"
             )
+        elif self.state == PlayerState.RESPAWNING:
+            return
         elif self.current_dir.is_still():
             frames = self.asset_cache.get_anim(
                 self.name + self._dir_to_string(self.buffered_dir)
@@ -77,7 +87,7 @@ class Player(Character):
 
     def _update_position(self) -> None:
 
-        if self.state == PlayerState.DEAD:
+        if self.state != PlayerState.ALIVE:
             return
 
         keys = pygame.key.get_pressed()

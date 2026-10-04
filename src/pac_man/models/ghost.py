@@ -37,14 +37,11 @@ class Ghost(Character):
 
         super().__init__(
             character_name=CharacterName[ghost_peronality.name],
-            speed_mult=0.8
-            )
-
-        self.late_init(
+            speed_mult=0.8,
             asset_cache=asset_cache,
             start_pos=start_pos,
-            subtile_size=subtile_size,
-        )
+            subtile_size=subtile_size
+            )
 
         self.ghost_name = ghost_peronality
         self.player: Player = player
