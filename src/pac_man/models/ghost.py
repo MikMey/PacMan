@@ -37,7 +37,7 @@ class Ghost(Character):
 
         super().__init__(
             character_name=CharacterName[ghost_peronality.name],
-            speed_mult=0.8,
+            speed_factor=1,
             asset_cache=asset_cache,
             start_pos=start_pos,
             subtile_size=subtile_size

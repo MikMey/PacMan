@@ -28,7 +28,7 @@ class Player(Character):
         
         super().__init__(
             character_name=CharacterName.PACMAN,
-            speed_mult=1.5,
+            speed_factor=1.4,
             asset_cache=asset_cache,
             start_pos=start_pos,
             subtile_size=subtile_size

@@ -39,7 +39,7 @@ class Character(ABC, pygame.sprite.Sprite):
     def __init__(
             self,
             character_name: CharacterName,
-            speed_mult: float,
+            speed_factor: float,
             asset_cache: SpriteSheetCache,
             start_pos: Tile_Pos,
             subtile_size: int
@@ -47,7 +47,6 @@ class Character(ABC, pygame.sprite.Sprite):
         super().__init__()
 
         self.log = logging.getLogger('PacMan')
-        self.speed_mult = speed_mult
         self.name = character_name.value
 
         # Movement attributes
@@ -76,8 +75,8 @@ class Character(ABC, pygame.sprite.Sprite):
         )
 
         # TODO bricks at: 5, 7, 9, 10, 11, 13, 14, 15, 17 and greater
-        self.speed: int = int(round(self.speed_mult * self.asset_cache.scale_factor))
-        # self.log.debug(f"speed={self.speed}")
+        self.speed: int = int(self.asset_cache.scale_factor * speed_factor)
+        # self.log.debug(f"speed={self.speed},subtile={self.subtile_size}")
 
     def init_image(self):
         frames = self.asset_cache.get_anim(
@@ -161,6 +160,7 @@ class Character(ABC, pygame.sprite.Sprite):
             self.set_image()
 
     def _move_straight(self) -> bool:
+
         # change target from matrix to global map coords
         target_tile: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)
 
@@ -168,18 +168,22 @@ class Character(ABC, pygame.sprite.Sprite):
         target_tile.x += self.subtile_size // 2
         target_tile.y += self.subtile_size // 2
 
-        # Continue if currently moving
-        # print(self.rect.x, self.rect.y)
-        if self.rect.x != target_tile.x or self.rect.y != target_tile.y:
-            if self.rect.x < target_tile.x:
-                self.rect.x += self.speed
-            elif self.rect.x > target_tile.x:
-                self.rect.x -= self.speed
+        dx = target_tile.x - self.rect.x
+        dy = target_tile.y - self.rect.y
 
-            if self.rect.y < target_tile.y:
-                self.rect.y += self.speed
-            elif self.rect.y > target_tile.y:
-                self.rect.y -= self.speed
+        #because current_dir is a unit vector, we dont need to check
+        #whether the operation is correct, we can simply try and worst case have
+        # pos * 0 or pos * 1/-1
+        #if past target, snap to target (sometimes looks janky but ehh)
+        if self.current_dir.x * dx + self.current_dir.y * dy < 0:
+            self.rect.x = target_tile.x
+            self.rect.y = target_tile.y
+
+        # Continue if currently moving
+
+        elif dx + dy != 0:
+            self.rect.x += self.speed * self.current_dir.x
+            self.rect.y += self.speed * self.current_dir.y
             return True
         return False
 
