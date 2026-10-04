@@ -115,6 +115,15 @@ class Hud:
             self.high_score_element.image = self.text_factory.from_string(
                 s=str(self.high_score))
 
+    def render(self):
+        # self.top_display.fill((50, 0, 0))
+        self.text_group.draw(self.top_display)
+        self.screen.blit(self.top_display, self.top_position)
+
+        # self.bottom_display.fill((120, 0, 43))
+        self.lives_group.draw(self.bottom_display)
+        self.screen.blit(self.bottom_display, self.bottom_position)
+
     def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
 
@@ -125,10 +134,4 @@ class Hud:
 
         """
         self.add_score()
-        # self.top_display.fill((50, 0, 0))
-        self.text_group.draw(self.top_display)
-        self.screen.blit(self.top_display, self.top_position)
-
-        # self.bottom_display.fill((120, 0, 43))
-        self.lives_group.draw(self.bottom_display)
-        self.screen.blit(self.bottom_display, self.bottom_position)
+        self.render()

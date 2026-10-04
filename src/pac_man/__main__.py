@@ -42,7 +42,7 @@ def main() -> int:
         return 1
 
     with LoopMachine(config=config) as loop_machine:
-        loop_machine.run_gameloop()
+        loop_machine.run_pacman()
 
     return 0
 
