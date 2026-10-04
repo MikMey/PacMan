@@ -39,7 +39,10 @@ class Character(ABC, pygame.sprite.Sprite):
     def __init__(
             self,
             character_name: CharacterName,
-            speed_mult: float
+            speed_mult: float,
+            asset_cache: SpriteSheetCache,
+            start_pos: Tile_Pos,
+            subtile_size: int
             ):
         super().__init__()
 
@@ -56,12 +59,6 @@ class Character(ABC, pygame.sprite.Sprite):
         self.animation_speed = 0.1
         self.animation_timer = 0.0
 
-    def late_init(
-            self,
-            asset_cache: SpriteSheetCache,
-            start_pos: Tile_Pos,
-            subtile_size: int,
-        ):
         self.asset_cache = asset_cache
         self.subtile_size: int = subtile_size
         self.tile_size: int = subtile_size * 3
