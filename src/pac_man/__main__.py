@@ -1,21 +1,20 @@
-from .configuration import Config
-from .spritesheet import SpriteSheetCache
-from .game import Game
+from datetime import timedelta
+import time
 
+import logging
 from pydantic import ValidationError
 from rich.console import Console
-import time
 
-from datetime import timedelta
-import logging
-import time
+from .utils import Config
+from .render import SpriteSheetCache
+from .loop import GameLoop, LoopMachine
 
 class ElapsedFormatter():
 
     def __init__(self):
         self.start_time = time.time()
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord):
         elapsed_seconds = record.created - self.start_time
         #using timedelta here for convenient default formatting
         elapsed = timedelta(seconds = elapsed_seconds)
@@ -42,19 +41,8 @@ def main() -> int:
         console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 
-    game = Game(config=config)
-
-    try:
-        asset_cache = SpriteSheetCache.from_default_file_path(
-            scale_factor=game.scale_factor
-        )
-    except ValidationError as e:
-        console.print(str(e), style="red", markup=False, highlight=False)
-        return 1
-
-    game.load_level(asset_cache=asset_cache)
-
-    game.loop()
+    with LoopMachine(config=config) as loop_machine:
+        loop_machine.run()
 
     return 0
 

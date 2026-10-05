@@ -1,13 +1,13 @@
-from .structures import Tile_Pos
-from .spritesheet import SpriteSheetCache
-from .tile import SUBTILE_SIZE, StaticSpriteElement
-from .player import Player
-from .text import TextSpriteFactory
-
 import pygame
+
+from ..models import SUBTILE_SIZE, StaticSpriteElement
+
+from .spritesheet import SpriteSheetCache
+from .text import TextSpriteFactory
 
 
 class Hud:
+    score = 0
 
     def __init__(self,
                  asset_cache: SpriteSheetCache,
@@ -19,7 +19,7 @@ class Hud:
         self.vertical_padding = vertical_padding
 
         # Value Logic
-        self.score = 0
+        # self.score = 0
         self.high_score = 100
         self.lives = 3
 
@@ -42,13 +42,17 @@ class Hud:
         self.score_element: StaticSpriteElement
         self.high_score_element: StaticSpriteElement
         self.text_group = pygame.sprite.Group()
-
         self.lives_group = pygame.sprite.Group()
 
         self.populate_sprite_groups()
 
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
+        self.score_element: StaticSpriteElement
+        self.high_score_element: StaticSpriteElement
+        self.text_group = pygame.sprite.Group()
+        self.lives_group = pygame.sprite.Group()
+
         self.text_factory = TextSpriteFactory(assets=self.asset_cache)
 
         # Top Display
@@ -77,14 +81,6 @@ class Hud:
 
         # Bottom Display
         self.update_lives(self.lives)
-        # self.live_sprite = self.asset_cache.get_anim("PACMAN-LEFT")[3]
-        # self.lives_group.add(StaticSpriteElement.from_pixel(
-        #     self.live_sprite,
-        #     x=((self.vertical_padding / 2) -
-        #        (self.live_sprite.get_height() / 2)),
-        #     y=((self.vertical_padding / 2) -
-        #        (self.live_sprite.get_height() / 2))
-        # ))
 
     def update_lives(self, new_lives: int) -> None:
         self.lives = new_lives
@@ -102,7 +98,7 @@ class Hud:
                     live_sprite.get_height() / 2)
             ))
 
-    def add_score(self, addend: int) -> None:
+    def add_score(self) -> None:
         """Updates the score and maybe the highscore image.
 
         Parameters
@@ -111,14 +107,22 @@ class Hud:
             Number of points to be added to score.
 
         """
-        self.score += addend
         self.score_element.image = self.text_factory.from_string(
-            s=str(self.score))
+            s=str(Hud.score))
 
-        if self.score > self.high_score:
-            self.high_score = self.score
+        if Hud.score > self.high_score:
+            self.high_score = Hud.score
             self.high_score_element.image = self.text_factory.from_string(
                 s=str(self.high_score))
+
+    def render(self):
+        # self.top_display.fill((50, 0, 0))
+        self.text_group.draw(self.top_display)
+        self.screen.blit(self.top_display, self.top_position)
+
+        # self.bottom_display.fill((120, 0, 43))
+        self.lives_group.draw(self.bottom_display)
+        self.screen.blit(self.bottom_display, self.bottom_position)
 
     def loop(self, dt: float) -> None:
         """Update and display loop to be run every frame.
@@ -129,11 +133,5 @@ class Hud:
             Delta time used for updating sprites.
 
         """
-
-        # self.top_display.fill((50, 0, 0))
-        self.text_group.draw(self.top_display)
-        self.screen.blit(self.top_display, self.top_position)
-
-        # self.bottom_display.fill((120, 0, 43))
-        self.lives_group.draw(self.bottom_display)
-        self.screen.blit(self.bottom_display, self.bottom_position)
+        self.add_score()
+        self.render()

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Recreation of the arcade game Pac-Man"
 readme = "README.md"
 authors = [{ name = "ldreger" }, { name = "mimeyer" }]
-requires-python = ">=3.14"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "argparse>=1.4.0",
     "flake8>=7.3.0",

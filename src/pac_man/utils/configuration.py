@@ -1,10 +1,10 @@
 
-from pydantic import BaseModel, Field, ValidationError, model_validator
-from pydantic_core import InitErrorDetails
 from typing import Any, Optional
 import sys
 import json
 
+from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic_core import InitErrorDetails
 
 class LevelMetadata(BaseModel):
     """Metadata of a given level config."""

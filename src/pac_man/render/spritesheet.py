@@ -1,11 +1,14 @@
+import pathlib
+from typing import Optional, Any
+
 from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, ValidationError
 from pydantic_core import InitErrorDetails
-from typing import Optional, Any
 import pygame
-import pathlib
 
 
 DEFAULT_FILE_PATH = "./data/spritesheet.bmp"
+SHEET_OFFSET_X = 200
+SHEET_OFFSET_Y = 186
 
 
 class SpriteRect(BaseModel):
@@ -77,6 +80,9 @@ class SpriteSheetCache(BaseModel):
     reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
     reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)
 
+    text_color_offset: int = 9
+    tile_color_offset: int = 8
+
     _text_scale_factor: float = PrivateAttr()
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -131,101 +137,25 @@ class SpriteSheetCache(BaseModel):
 
         # === STATIC TILES === #
 
-        # Border Tiles
-        self.cache_new("BORDER-TOP", 181, 19, 8)
-        self.cache_new("BORDER-RIGHT", 172, 10, 8)
-        self.cache_new("BORDER-BOTTOM", 181, 1, 8)
-        self.cache_new("BORDER-LEFT", 190, 10, 8)
-        self.cache_new("BORDER-TOP-RIGHT", 172, 28, 8)
-        self.cache_new("BORDER-TOP-LEFT", 145, 28, 8)
-        self.cache_new("BORDER-BOTTOM-RIGHT", 172, 55, 8)
-        self.cache_new("BORDER-BOTTOM-LEFT", 145, 55, 8)
-
-        # Border Tiles connectiong to Wall Tiles
-        self.cache_new("BORDER-TOP-WALL-RIGHT", 154, 28, 8)
-        self.cache_new("BORDER-TOP-WALL-LEFT", 163, 28, 8)
-        self.cache_new("BORDER-RIGHT-WALL-TOP", 172, 46, 8)
-        self.cache_new("BORDER-RIGHT-WALL-BOTTOM", 172, 37, 8)
-        self.cache_new("BORDER-BOTTOM-WALL-RIGHT", 154, 28, 8, flip_y=True)
-        self.cache_new("BORDER-BOTTOM-WALL-LEFT", 163, 28, 8, flip_y=True)
-        self.cache_new("BORDER-LEFT-WALL-TOP", 145, 46, 8)
-        self.cache_new("BORDER-LEFT-WALL-BOTTOM", 145, 37, 8)
-
-        # Wall Tiles
-        self.cache_new("WALL-TOP", 154, 19, 8)
-        self.cache_new("WALL-RIGHT", 145, 10, 8)
-        self.cache_new("WALL-BOTTOM", 154, 1, 8)
-        self.cache_new("WALL-LEFT", 163, 10, 8)
-        self.cache_new("WALL-TOP-RIGHT", 154, 46, 8)
-        self.cache_new("WALL-TOP-LEFT", 163, 46, 8)
-        self.cache_new("WALL-BOTTOM-RIGHT", 154, 37, 8)
-        self.cache_new("WALL-BOTTOM-LEFT", 163, 37, 8)
-
-        # Corner tiles (to round of ending walls)
-        self.cache_new("CORNER-TOP-RIGHT", 145, 19, 8)
-        self.cache_new("CORNER-TOP-LEFT", 163, 19, 8)
-        self.cache_new("CORNER-BOTTOM-RIGHT", 145, 1, 8)
-        self.cache_new("CORNER-BOTTOM-LEFT", 163, 1, 8)
+        # Tiles (Walls and Borders)
+        self.bake_tile_offset(self.tile_color_offset)
 
         # Tile Items
         self.cache_new("PACGUM", 136, 10, 8)
         self.cache_new("SUPER-PACGUM", 136, 28, 8)
 
         # Fruits
-        self.cache_new("FRUIT-0", 1, 117, 16)
-        self.cache_new("FRUIT-1", 18, 117, 16)
-        self.cache_new("FRUIT-2", 35, 117, 16)
-        self.cache_new("FRUIT-3", 52, 117, 16)
-        self.cache_new("FRUIT-4", 69, 117, 16)
-        self.cache_new("FRUIT-5", 86, 117, 16)
+        self.cache_new("FRUIT-0", 401, 489, 16)  # Cherry
+        self.cache_new("FRUIT-1", 618, 489, 16)  # Strawberry
+        self.cache_new("FRUIT-2", 835, 489, 16)  # Orange
+        self.cache_new("FRUIT-3", 452, 489, 16)  # Apple
+        self.cache_new("FRUIT-4", 69, 675, 16)  # Melon
+        self.cache_new("FRUIT-5", 286, 675, 16)  # Starship
+        self.cache_new("FRUIT-6", 503, 675, 16)  # Bell
+        self.cache_new("FRUIT-7", 520, 675, 16)  # Key
 
         # Numbers, Letters and Special Characters
-        text_scale = self._text_scale_factor
-        self.cache_new("CHAR-0", 1, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-1", 10, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-2", 19, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-3", 28, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-4", 37, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-5", 46, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-6", 55, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-7", 64, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-8", 73, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-9", 82, 19, 8, scale_factor=text_scale)
-
-        self.cache_new("CHAR-A", 1, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-B", 10, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-C", 19, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-D", 28, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-E", 37, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-F", 46, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-G", 55, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-H", 64, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-I", 73, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-J", 82, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-K", 91, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-L", 100, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-M", 109, 28, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-N", 1, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-O", 10, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-P", 19, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-Q", 28, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-R", 37, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-S", 46, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-T", 55, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-U", 64, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-V", 73, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-W", 82, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-X", 91, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-Y", 100, 37, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-Z", 109, 37, 8, scale_factor=text_scale)
-
-        self.cache_new("CHAR-/", 91, 10, 8, scale_factor=text_scale)
-        self.cache_new("CHAR--", 100, 10, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-.", 109, 10, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-\"", 91, 19, 8, scale_factor=text_scale)
-        self.cache_new("CHAR-!", 109, 19, 8, scale_factor=text_scale)
-
-        self.cache_new("CHAR-COPYRIGHT", 100, 19, 8, scale_factor=text_scale)
+        self.bake_text_offset(self.text_color_offset)
 
         # === ANIMATED TILES === #
 
@@ -256,6 +186,165 @@ class SpriteSheetCache(BaseModel):
              (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
             size=16
         )
+
+        # Shadow / Blinky (Red)
+        self.cache_new_anim("GHOST-1-RIGHT", [(1, 83), (18, 83)], size=16)
+        self.cache_new_anim("GHOST-1-LEFT", [(69, 83), (86, 83)], size=16)
+        self.cache_new_anim("GHOST-1-BOTTOM", [(35, 83), (52, 83)], size=16)
+        self.cache_new_anim("GHOST-1-TOP", [(103, 83), (120, 83)], size=16)
+        self.cache_new_anim("GHOST-1-SCARED",
+                            [(1, 168), (18, 168)], size=16)
+
+        # Speedy / Pinky (Pink)
+        self.cache_new_anim("GHOST-2-RIGHT", [(201, 83), (218, 83)], size=16)
+        self.cache_new_anim("GHOST-2-LEFT", [(269, 83), (286, 83)], size=16)
+        self.cache_new_anim("GHOST-2-BOTTOM", [(235, 83), (252, 83)], size=16)
+        self.cache_new_anim("GHOST-2-TOP", [(303, 83), (320, 83)], size=16)
+        self.cache_new_anim("GHOST-2-SCARED",
+                            [(201, 168), (218, 168)], size=16)
+
+        # Bashful / Inky (Cyan)
+        self.cache_new_anim("GHOST-3-RIGHT", [(401, 83), (418, 83)], size=16)
+        self.cache_new_anim("GHOST-3-LEFT", [(469, 83), (486, 83)], size=16)
+        self.cache_new_anim("GHOST-3-BOTTOM", [(435, 83), (452, 83)], size=16)
+        self.cache_new_anim("GHOST-3-TOP", [(503, 83), (520, 83)], size=16)
+        self.cache_new_anim("GHOST-3-SCARED",
+                            [(401, 168), (418, 168)], size=16)
+
+        # Pokey / Clyde (Orange)
+        self.cache_new_anim("GHOST-4-RIGHT", [(601, 83), (618, 83)], size=16)
+        self.cache_new_anim("GHOST-4-LEFT", [(669, 83), (686, 83)], size=16)
+        self.cache_new_anim("GHOST-4-BOTTOM", [(635, 83), (652, 83)], size=16)
+        self.cache_new_anim("GHOST-4-TOP", [(703, 83), (720, 83)], size=16)
+        self.cache_new_anim("GHOST-4-SCARED",
+                            [(601, 168), (618, 168)], size=16)
+
+        # Dead Ghost (Invisisble)
+        self.cache_new_anim("GHOST-DEAD-RIGHT", [(201, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-LEFT", [(269, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-BOTTOM", [(235, 269)], size=16)
+        self.cache_new_anim("GHOST-DEAD-TOP", [(303, 269)], size=16)
+
+    def bake_tile_offset(self, offset: int) -> None:
+
+        def cache_tile(name: str, x: int, y: int) -> None:
+            self.cache_new(
+                name,
+                x + SHEET_OFFSET_X * (offset % 5),
+                y + SHEET_OFFSET_Y * (offset // 5),
+                8
+            )
+
+        cache_tile("BORDER-TOP", 181, 19)
+        cache_tile("BORDER-RIGHT", 172, 10)
+        cache_tile("BORDER-BOTTOM", 181, 1)
+        cache_tile("BORDER-LEFT", 190, 10)
+        cache_tile("BORDER-TOP-RIGHT", 172, 28)
+        cache_tile("BORDER-TOP-LEFT", 145, 28)
+        cache_tile("BORDER-BOTTOM-RIGHT", 172, 55)
+        cache_tile("BORDER-BOTTOM-LEFT", 145, 55)
+
+        cache_tile("BORDER-TOP-WALL-RIGHT", 154, 28)
+        cache_tile("BORDER-TOP-WALL-LEFT", 163, 28)
+        cache_tile("BORDER-RIGHT-WALL-TOP", 172, 46)
+        cache_tile("BORDER-RIGHT-WALL-BOTTOM", 172, 37)
+        self.cache_new(
+            "BORDER-BOTTOM-WALL-RIGHT",
+            154 + SHEET_OFFSET_X * (offset % 5),
+            28 + SHEET_OFFSET_Y * (offset // 5),
+            8,
+            flip_y=True
+        )
+        self.cache_new(
+            "BORDER-BOTTOM-WALL-LEFT",
+            163 + SHEET_OFFSET_X * (offset % 5),
+            28 + SHEET_OFFSET_Y * (offset // 5),
+            8,
+            flip_y=True
+        )
+        cache_tile("BORDER-LEFT-WALL-TOP", 145, 46)
+        cache_tile("BORDER-LEFT-WALL-BOTTOM", 145, 37)
+
+        cache_tile("WALL-TOP", 154, 19)
+        cache_tile("WALL-RIGHT", 145, 10)
+        cache_tile("WALL-BOTTOM", 154, 1)
+        cache_tile("WALL-LEFT", 163, 10)
+        cache_tile("WALL-TOP-RIGHT", 154, 46)
+        cache_tile("WALL-TOP-LEFT", 163, 46)
+        cache_tile("WALL-BOTTOM-RIGHT", 154, 37)
+        cache_tile("WALL-BOTTOM-LEFT", 163, 37)
+
+        cache_tile("CORNER-TOP-RIGHT", 145, 19)
+        cache_tile("CORNER-TOP-LEFT", 163, 19)
+        cache_tile("CORNER-BOTTOM-RIGHT", 145, 1)
+        cache_tile("CORNER-BOTTOM-LEFT", 163, 1)
+
+    def bake_text_offset(self, offset: int) -> None:
+        """Pick a global text and number color.
+
+        Parameters
+        ----------
+        offset : int
+            Offset in the tile sheet (0-19).
+
+        """
+        text_scale = self._text_scale_factor
+
+        def cache_text(name: str, x: int, y: int) -> None:
+            """Helper to cache the text with correct offset"""
+            self.cache_new(
+                name,
+                x + SHEET_OFFSET_X * (offset % 5),
+                y + SHEET_OFFSET_Y * (offset // 5),
+                8,
+                scale_factor=text_scale
+            )
+
+        cache_text("CHAR-0", 1, 19)
+        cache_text("CHAR-1", 10, 19)
+        cache_text("CHAR-2", 19, 19)
+        cache_text("CHAR-3", 28, 19)
+        cache_text("CHAR-4", 37, 19)
+        cache_text("CHAR-5", 46, 19)
+        cache_text("CHAR-6", 55, 19)
+        cache_text("CHAR-7", 64, 19)
+        cache_text("CHAR-8", 73, 19)
+        cache_text("CHAR-9", 82, 19)
+
+        cache_text("CHAR-A", 1, 28)
+        cache_text("CHAR-B", 10, 28)
+        cache_text("CHAR-C", 19, 28)
+        cache_text("CHAR-D", 28, 28)
+        cache_text("CHAR-E", 37, 28)
+        cache_text("CHAR-F", 46, 28)
+        cache_text("CHAR-G", 55, 28)
+        cache_text("CHAR-H", 64, 28)
+        cache_text("CHAR-I", 73, 28)
+        cache_text("CHAR-J", 82, 28)
+        cache_text("CHAR-K", 91, 28)
+        cache_text("CHAR-L", 100, 28)
+        cache_text("CHAR-M", 109, 28)
+        cache_text("CHAR-N", 1, 37)
+        cache_text("CHAR-O", 10, 37)
+        cache_text("CHAR-P", 19, 37)
+        cache_text("CHAR-Q", 37, 37)
+        cache_text("CHAR-R", 37, 37)
+        cache_text("CHAR-S", 46, 37)
+        cache_text("CHAR-T", 55, 37)
+        cache_text("CHAR-U", 64, 37)
+        cache_text("CHAR-V", 73, 37)
+        cache_text("CHAR-W", 82, 37)
+        cache_text("CHAR-X", 91, 37)
+        cache_text("CHAR-Y", 100, 37)
+        cache_text("CHAR-Z", 109, 37)
+
+        cache_text("CHAR-/", 91, 10)
+        cache_text("CHAR--", 100, 10)
+        cache_text("CHAR-.", 109, 10)
+        cache_text("CHAR-\"", 91, 19)
+        cache_text("CHAR-!", 109, 19)
+
+        cache_text("CHAR-COPYRIGHT", 100, 19)
 
     def cache_new(self, name: str, x: int, y: int, size: int,
                   flip_x: bool = False, flip_y: bool = False,
