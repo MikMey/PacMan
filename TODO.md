@@ -3,6 +3,7 @@
 
 ## Logic
 - [increase ghost touch radius](./src/pac_man/loop/level.py#L242)
+- player spawn in enclosed space on maps with 42
 
 ## Visual
 - [level load fully in frame](./src/pac_man/loop/level.py#L46)
