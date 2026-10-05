@@ -41,8 +41,8 @@ def main() -> int:
         console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 
-    with LoopMachine(config=config) as loop_machine:
-        loop_machine.run()
+    with LoopMachine(config=config) as pacman:
+        pacman.run()
 
     return 0
 

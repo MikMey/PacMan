@@ -67,7 +67,7 @@ class Level(State):
                 console = Console()
                 console.print(str(e), style="red", markup=False, highlight=False)
                 return 1
-    
+
             level_screen_w = int(raw_level_w * self.scale_factor)
             level_screen_h = int(raw_level_h * self.scale_factor)
     
@@ -145,17 +145,11 @@ class Level(State):
 
         for y in range(len(self.tile_matrix)):
             for x in range(len(self.tile_matrix[y])):
-                main_tile = self.tile_matrix[y][x]
+                tile = self.tile_matrix[y][x]
 
                 self.tile_group.add(StaticSpriteElement.from_relative(
                     tile_factory.from_tile(
-                        main_tile=main_tile,
-                        top_tile=self.tile_matrix[y-1][x] if y > 0 else None,
-                        right_tile=(self.tile_matrix[y][x+1]
-                                    if x < maze_x-1 else None),
-                        bottom_tile=(self.tile_matrix[y+1][x]
-                                     if y < maze_y-1 else None),
-                        left_tile=self.tile_matrix[y][x-1] if x > 0 else None,
+                        tile=tile
                     ),
                     x=x,
                     y=y

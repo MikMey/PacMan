@@ -102,6 +102,9 @@ class GameLoop(State):
             case pygame.K_ESCAPE:
                 sys.exit()
 
+            case pygame.K_KP1:
+                self.level.pacman.kill(self.dt)
+
             case _:
                 self.state = GameState.RUN_LEVEL
 
@@ -113,7 +116,7 @@ class GameLoop(State):
 
         while self.state != GameState.GAME_OVER:
 
-            dt = self.clock.tick(60) / 1000.0
+            self.dt = self.clock.tick(60) / 1000.0
             match self.state:
 
                 case GameState.LOAD_LEVEL:
@@ -137,15 +140,15 @@ class GameLoop(State):
                     self.dstart = 0
                     self.handle_event()
 
-                    alive = self.level.run(dt)
-                    self.hud.loop(dt)
+                    alive = self.level.run(self.dt)
+                    self.hud.loop(self.dt)
                     if not alive:
                         self.state = GameState.PLAYER_DEATH
 
                 case GameState.RESPAWN_LEVEL:
                     # self.log.debug('Enter RESPAWN_LEVEL')
-                    self.dstart += dt
-                    self.level.pacman.kill(dt)
+                    self.dstart += self.dt
+                    self.level.pacman.kill(self.dt)
                     self.level.render()
                     if self.dstart > 1:
                         self.level.init_characters()
@@ -153,7 +156,6 @@ class GameLoop(State):
 
                 case GameState.PAUSE:
                     # self.log.debug('Enter PAUSE')
-
                     self.pause()
 
                 case GameState.PLAYER_DEATH:

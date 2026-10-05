@@ -80,9 +80,6 @@ class Player(Character):
         elif keys[pygame.K_LEFT] or keys[pygame.K_a] and self.current_dir.x != -1:
             self.buffered_dir.set((-1, 0))
 
-        if keys[pygame.K_KP1]:
-            self.kill()
-
     def _update_position(self) -> None:
         """update target unless moving straight"""
 
