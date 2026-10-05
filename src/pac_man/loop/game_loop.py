@@ -1,13 +1,13 @@
-import pygame
-import logging
 import sys
 from enum import Enum, auto
 
+import logging
+import pygame
+
 from mazegenerator import MazeGenerator
 
-from ..utils import Config, Tile_Pos
-from ..render import Hud, SpriteSheetCache
-from ..models import TILE_SIZE, Player, PlayerState, SUBTILE_SIZE
+from ..utils import Config
+from ..render import Hud
 
 from .level import Level
 from .states import State
@@ -63,6 +63,8 @@ class GameLoop(State):
 
     def pause(self):
         """Keep state until button is pressed"""
+        self.level.render()
+        self.hud.render()
         self.handle_event()
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
@@ -103,15 +105,6 @@ class GameLoop(State):
             case _:
                 self.state = GameState.RUN_LEVEL
 
-    def handle_event(self) -> None:
-        """handle different types of pygame events"""
-        for pygame_event in pygame.event.get():
-            if pygame_event.type == pygame.QUIT:
-                sys.exit()
-
-            elif pygame_event.type == pygame.KEYDOWN:
-                self.handle_input(pygame_event)
-
     def run(self) -> None:
         """Finite State Machine for level based/gameloop logic"""
         self.state = GameState.LOAD_LEVEL
@@ -124,7 +117,7 @@ class GameLoop(State):
             match self.state:
 
                 case GameState.LOAD_LEVEL:
-                    self.log.debug('Enter LOAD_LEVEL')
+                    # self.log.debug('Enter LOAD_LEVEL')
                     if len(self.config.levels) > level:
                         width = self.config.levels[level].width
                         height = self.config.levels[level].height
@@ -140,33 +133,35 @@ class GameLoop(State):
                     self.state = GameState.PAUSE
 
                 case GameState.RUN_LEVEL:
-                    self.log.debug('Enter RUN_LEVEL')
+                    # self.log.debug('Enter RUN_LEVEL')
+                    self.dstart = 0
                     self.handle_event()
 
-                    alive = self.level.loop(dt)
+                    alive = self.level.run(dt)
                     self.hud.loop(dt)
                     if not alive:
                         self.state = GameState.PLAYER_DEATH
 
                 case GameState.RESPAWN_LEVEL:
-                    self.log.debug('Enter RESPAWN_LEVEL')
-                    #play death animation pacman
-                    self.level.init_characters()
+                    # self.log.debug('Enter RESPAWN_LEVEL')
+                    self.dstart += dt
+                    self.level.pacman.kill(dt)
                     self.level.render()
-                    self.hud.render()
-                    self.state = GameState.PAUSE
+                    if self.dstart > 1:
+                        self.level.init_characters()
+                        self.state = GameState.PAUSE
 
                 case GameState.PAUSE:
-                    self.log.debug('Enter PAUSE')
+                    # self.log.debug('Enter PAUSE')
+
                     self.pause()
 
                 case GameState.PLAYER_DEATH:
-                    self.log.debug('Enter PLAYER_DEATH')
+                    # self.log.debug('Enter PLAYER_DEATH')
                     self.lives -= 1
                     if self.lives > 0:
                         self.state = GameState.RESPAWN_LEVEL
                     else:
                         self.state = GameState.GAME_OVER
-
 
             pygame.display.flip()

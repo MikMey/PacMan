@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from dataclasses import dataclass, replace
-from typing import Type, Callable
+from dataclasses import replace
 
 import logging
 import pygame
-import numpy as np
 
 from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
@@ -74,7 +72,6 @@ class Character(ABC, pygame.sprite.Sprite):
             start_pos.y * self.tile_size + self.subtile_size // 2
         )
 
-        # TODO bricks at: 5, 7, 9, 10, 11, 13, 14, 15, 17 and greater
         self.speed: int = int(self.asset_cache.scale_factor * speed_factor)
         # self.log.debug(f"speed={self.speed},subtile={self.subtile_size}")
 
@@ -160,6 +157,7 @@ class Character(ABC, pygame.sprite.Sprite):
             self.set_image()
 
     def _move_straight(self) -> bool:
+        """continue in current direction, updating position"""
 
         # change target from matrix to global map coords
         target_tile: Pixel_Pos = self.target_tile.to_pixel_pos(self.tile_size)

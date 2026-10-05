@@ -49,16 +49,29 @@ class Tile:
     _matrix: ClassVar[list[list["Tile"]]] = []
 
     def create_reference(self):
-        if not self.is_top_closed:
+        """reference neighbouring tiles for easy access in rendering and ghost ai"""
+
+        if self.y > 0:
             self.top = Tile._matrix[self.y - 1][self.x]
-        if not self.is_bottom_closed:
+        if len(Tile._matrix) - 1 > self.y:
             self.bottom = Tile._matrix[self.y + 1][self.x]
-        if not self.is_left_closed:
+        if self.x > 0:
             self.left = Tile._matrix[self.y][self.x - 1]
-        if not self.is_right_closed:
+        if len(Tile._matrix[0]) - 1 > self.x:
             self.right = Tile._matrix[self.y][self.x + 1]
-        temp = [self.left, self.right, self.top, self.bottom]
-        self.neighbours = [item for item in temp if item is not None]
+
+        temp = []
+
+        if not self.is_top_closed:
+            temp.append(self.top)
+        if not self.is_bottom_closed:
+            temp.append(self.bottom)
+        if not self.is_left_closed:
+            temp.append(self.left)
+        if not self.is_right_closed:
+            temp.append(self.right)
+
+        self.neighbours = temp
 
     @classmethod
     def create(cls, value: int, x: int, y: int) -> "Tile":
@@ -113,25 +126,22 @@ class TileSpriteFactory(BaseModel):
         self._sub_h = sub_sample.get_height()
 
     def from_tile(
-            self, main_tile: Tile,
-            top_tile: Optional[Tile],
-            right_tile: Optional[Tile],
-            bottom_tile: Optional[Tile],
-            left_tile: Optional[Tile]
+            self, 
+            tile: Tile
         ) -> pygame.Surface:
         """Get baked tile surface from tile data and its neighbors.
 
         Parameters
         ----------
-        main_tile : Tile
+        tile : Tile
             Tile to get the surface data of.
-        top_tile : Optional[Tile]
+        tile.top : Optional[Tile]
             Tile to the north of the main tile.
-        right_tile : Optional[Tile]
+        tile.right : Optional[Tile]
             Tile to the east of the main tile.
-        bottom_tile : Optional[Tile]
+        tile.bottom : Optional[Tile]
             Tile to the south of the main tile.
-        left_tile : Optional[Tile]
+        tile.left : Optional[Tile]
             Tile to the west of the main tile.
 
         Returns
@@ -161,52 +171,52 @@ class TileSpriteFactory(BaseModel):
             )
 
         # Wall Ends (Corners)
-        if top_tile is not None:
-            if not main_tile.is_right_closed and top_tile.is_right_closed:
+        if tile.top is not None:
+            if not tile.is_right_closed and tile.top.is_right_closed:
                 blit("CORNER-TOP-RIGHT", 2, 0)
-            if not main_tile.is_left_closed and top_tile.is_left_closed:
+            if not tile.is_left_closed and tile.top.is_left_closed:
                 blit("CORNER-TOP-LEFT", 0, 0)
-        if right_tile is not None:
-            if not main_tile.is_top_closed and right_tile.is_top_closed:
+        if tile.right is not None:
+            if not tile.is_top_closed and tile.right.is_top_closed:
                 blit("CORNER-TOP-RIGHT", 2, 0)
-            if not main_tile.is_bottom_closed and right_tile.is_bottom_closed:
+            if not tile.is_bottom_closed and tile.right.is_bottom_closed:
                 blit("CORNER-BOTTOM-RIGHT", 2, 2)
-        if bottom_tile is not None:
-            if not main_tile.is_right_closed and bottom_tile.is_right_closed:
+        if tile.bottom is not None:
+            if not tile.is_right_closed and tile.bottom.is_right_closed:
                 blit("CORNER-BOTTOM-RIGHT", 2, 2)
-            if not main_tile.is_left_closed and bottom_tile.is_left_closed:
+            if not tile.is_left_closed and tile.bottom.is_left_closed:
                 blit("CORNER-BOTTOM-LEFT", 0, 2)
-        if left_tile is not None:
-            if not main_tile.is_top_closed and left_tile.is_top_closed:
+        if tile.left is not None:
+            if not tile.is_top_closed and tile.left.is_top_closed:
                 blit("CORNER-TOP-LEFT", 0, 0)
-            if not main_tile.is_bottom_closed and left_tile.is_bottom_closed:
+            if not tile.is_bottom_closed and tile.left.is_bottom_closed:
                 blit("CORNER-BOTTOM-LEFT", 0, 2)
 
         # Main Wall and Border Tilings
-        if main_tile.is_top_closed:
-            if top_tile is None:
+        if tile.is_top_closed:
+            if tile.top is None:
                 for i in range(3):
                     blit("BORDER-TOP", i, 0)
             else:
                 for i in range(3):
                     blit("WALL-TOP", i, 0)
             pass
-        if main_tile.is_right_closed:
-            if right_tile is None:
+        if tile.is_right_closed:
+            if tile.right is None:
                 for i in range(3):
                     blit("BORDER-RIGHT", 2, i)
             else:
                 for i in range(3):
                     blit("WALL-RIGHT", 2, i)
-        if main_tile.is_bottom_closed:
-            if bottom_tile is None:
+        if tile.is_bottom_closed:
+            if tile.bottom is None:
                 for i in range(3):
                     blit("BORDER-BOTTOM", i, 2)
             else:
                 for i in range(3):
                     blit("WALL-BOTTOM", i, 2)
-        if main_tile.is_left_closed:
-            if left_tile is None:
+        if tile.is_left_closed:
+            if tile.left is None:
                 for i in range(3):
                     blit("BORDER-LEFT", 0, i)
             else:
@@ -214,50 +224,50 @@ class TileSpriteFactory(BaseModel):
                     blit("WALL-LEFT", 0, i)
 
         # Border to Wall Connections
-        if main_tile.is_top_closed and top_tile is None:
-            if main_tile.is_right_closed:
+        if tile.is_top_closed and tile.top is None:
+            if tile.is_right_closed:
                 blit("BORDER-TOP-WALL-RIGHT", 2, 0)
-            if main_tile.is_left_closed:
+            if tile.is_left_closed:
                 blit("BORDER-TOP-WALL-LEFT", 0, 0)
-        if main_tile.is_right_closed and right_tile is None:
-            if main_tile.is_bottom_closed:
+        if tile.is_right_closed and tile.right is None:
+            if tile.is_bottom_closed:
                 blit("BORDER-RIGHT-WALL-BOTTOM", 2, 2)
-            if main_tile.is_top_closed:
+            if tile.is_top_closed:
                 blit("BORDER-RIGHT-WALL-TOP", 2, 0)
-        if main_tile.is_bottom_closed and bottom_tile is None:
-            if main_tile.is_right_closed:
+        if tile.is_bottom_closed and tile.bottom is None:
+            if tile.is_right_closed:
                 blit("BORDER-BOTTOM-WALL-RIGHT", 2, 2)
-            if main_tile.is_left_closed:
+            if tile.is_left_closed:
                 blit("BORDER-BOTTOM-WALL-LEFT", 0, 2)
-        if main_tile.is_left_closed and left_tile is None:
-            if main_tile.is_bottom_closed:
+        if tile.is_left_closed and tile.left is None:
+            if tile.is_bottom_closed:
                 blit("BORDER-LEFT-WALL-BOTTOM", 0, 2)
-            if main_tile.is_top_closed:
+            if tile.is_top_closed:
                 blit("BORDER-LEFT-WALL-TOP", 0, 0)
 
         # Border Corners
-        if top_tile is None and right_tile is None:
+        if tile.top is None and tile.right is None:
             blit("BORDER-TOP-RIGHT", 2, 0)
-        if top_tile is None and left_tile is None:
+        if tile.top is None and tile.left is None:
             blit("BORDER-TOP-LEFT", 0, 0)
-        if bottom_tile is None and right_tile is None:
+        if tile.bottom is None and tile.right is None:
             blit("BORDER-BOTTOM-RIGHT", 2, 2)
-        if bottom_tile is None and left_tile is None:
+        if tile.bottom is None and tile.left is None:
             blit("BORDER-BOTTOM-LEFT", 0, 2)
 
         # End all Borders early
-        if (top_tile is None or right_tile is None or
-                bottom_tile is None or left_tile is None):
+        if (tile.top is None or tile.right is None or
+                tile.bottom is None or tile.left is None):
             return surface
 
         # Wall Conenctions
-        if main_tile.is_top_closed and main_tile.is_right_closed:
+        if tile.is_top_closed and tile.is_right_closed:
             blit("WALL-TOP-RIGHT", 2, 0)
-        if main_tile.is_top_closed and main_tile.is_left_closed:
+        if tile.is_top_closed and tile.is_left_closed:
             blit("WALL-TOP-LEFT", 0, 0)
-        if main_tile.is_bottom_closed and main_tile.is_right_closed:
+        if tile.is_bottom_closed and tile.is_right_closed:
             blit("WALL-BOTTOM-RIGHT", 2, 2)
-        if main_tile.is_bottom_closed and main_tile.is_left_closed:
+        if tile.is_bottom_closed and tile.is_left_closed:
             blit("WALL-BOTTOM-LEFT", 0, 2)
 
         return surface

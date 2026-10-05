@@ -14,8 +14,9 @@ from ..utils import Tile_Pos
 from ..render import SpriteSheetCache, Hud
 from ..models import TileSpriteFactory, Tile, GhostPersonality, StaticSpriteElement,TILE_SIZE, SUBTILE_SIZE, Player, Ghost, GhostState, PlayerState
 
+from .states import State
 
-class Level:
+class Level(State):
     """Sprite and loop logic for the main game level."""
 
     def __init__(self,
@@ -167,7 +168,6 @@ class Level:
         self.gum_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacgums and such
         self.fruit_group: pygame.sprite.Group = pygame.sprite.Group()  # Decorative Fruits
 
-
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
 
         maze_x = len(self.tile_matrix[0])
@@ -175,17 +175,11 @@ class Level:
 
         for y in range(len(self.tile_matrix)):
             for x in range(len(self.tile_matrix[y])):
-                main_tile = self.tile_matrix[y][x]
+                main_tile: Tile = self.tile_matrix[y][x]
 
                 self.tile_group.add(StaticSpriteElement.from_relative(
                     tile_factory.from_tile(
-                        main_tile=main_tile,
-                        top_tile=self.tile_matrix[y-1][x] if y > 0 else None,
-                        right_tile=(self.tile_matrix[y][x+1]
-                                    if x < maze_x-1 else None),
-                        bottom_tile=(self.tile_matrix[y+1][x]
-                                     if y < maze_y-1 else None),
-                        left_tile=self.tile_matrix[y][x-1] if x > 0 else None,
+                        tile=main_tile
                     ),
                     x=x,
                     y=y
@@ -256,7 +250,6 @@ class Level:
                 return item
 
     def collission_logic(self):
-
         #superpacgum
 
         #ghost
@@ -274,19 +267,6 @@ class Level:
             Hud.score += 1
             item.kill()
 
-    # def handle_player_state(self, dt):
-    #     if self.pacman.state == PlayerState.DEAD:
-    #         self.delta_start += 1
-    #         if self.delta_start - 75 >= self.start_tick:
-    #             self.start_tick = 0
-    #             self.delta_start = 0
-    #             self.pacman.state = PlayerState.RESPAWNING
-
-    #     elif self.pacman.state == PlayerState.RESPAWNING:
-    #         self.delta_start += 1
-    #         if self.delta_start - 60 >= self.start_tick:
-    #             self.init_ghost_group()
-
 
     def render(self):
         # self.display_surface.fill((140, 40, 40))
@@ -298,7 +278,7 @@ class Level:
 
         self.screen.blit(self.display_surface, self.position)
 
-    def loop(self, dt: float) -> bool:
+    def run(self, dt: float) -> bool:
         """
         Update and display loop to be run every frame.
 

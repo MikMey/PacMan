@@ -1,19 +1,18 @@
 from dataclasses import replace
-import time
-from enum import Enum
+from enum import Enum, auto
 
 import pygame
 
-from ..utils import Tile_Pos, Pixel_Pos, UnitVector
+from ..utils import Tile_Pos, UnitVector
 from ..render import SpriteSheetCache
 
 from .tile import Tile
 from .characters import Character, CharacterName, DIRECTION_REVERSE
 
 class PlayerState(Enum):
-    ALIVE = 0
-    DEAD = 1
-    RESPAWNING = 2
+    ALIVE = auto()
+    DEAD = auto()
+    RESPAWNING = auto()
 
 
 class Player(Character):
@@ -37,9 +36,9 @@ class Player(Character):
         
         self.buffered_dir: UnitVector = UnitVector()
 
-        
 
     def set_image(self) -> None:
+        """sprite image based on current action"""
         if self.state == PlayerState.DEAD:
             frames = self.asset_cache.get_anim(
                 self.name + "DEATH"
@@ -58,10 +57,9 @@ class Player(Character):
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
 
-    def kill(self) -> None:
-        
-        self.is_dying = True
-        self.animation_timer = 0.0
+    def kill(self, dt) -> None:
+        self.state = PlayerState.DEAD
+        self._update_frame(dt)
 
     def handle_input(self, keys: pygame.key.ScancodeWrapper) -> None:
         """Handle WASD and arrow key input.
@@ -86,6 +84,7 @@ class Player(Character):
             self.kill()
 
     def _update_position(self) -> None:
+        """update target unless moving straight"""
 
         if self.state != PlayerState.ALIVE:
             return

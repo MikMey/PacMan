@@ -7,6 +7,7 @@ from .game_loop import GameLoop
 from .main_menu import MainMenu
 from .death_screen import DeathScreen
 from .win_screen import WinScreen
+from .states import State
 
 class LoopState(Enum):
     MAIN_MENU = auto()
@@ -15,7 +16,7 @@ class LoopState(Enum):
     WIN_SCREEN = auto()
     END_GAME = auto()
 
-class LoopMachine():
+class LoopMachine(State):
     state: LoopState = LoopState.MAIN_MENU
 
     def __init__(self, config):
@@ -43,10 +44,11 @@ class LoopMachine():
         pygame.display.set_caption("Pac-Man")
         self.clock = pygame.time.Clock()
 
-    def run_pacman(self):
+    def run(self):
         """Finite State machine for entirety of pacman"""
 
         while self.state != LoopState.END_GAME:
+            self.handle_event()
 
             match self.state:
                 case LoopState.MAIN_MENU:
@@ -60,10 +62,10 @@ class LoopMachine():
                     self.state = LoopState.DEATH_SCREEN
 
                 case LoopState.DEATH_SCREEN:
-                    self.log.debug("Enter DeathScreen")
+                    # self.log.debug("Enter DeathScreen")
                     self.death_screen.run()
 
                 case LoopState.WIN_SCREEN:
-                    self.log.debug("Enter WinScreen")
+                    # self.log.debug("Enter WinScreen")
                     self.win_screen.run()
 
