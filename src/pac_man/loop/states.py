@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import sys
-
 import pygame
+
 
 class State(ABC):
     def __init__(self, state):
