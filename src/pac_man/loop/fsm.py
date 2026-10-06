@@ -1,7 +1,10 @@
-import time
+from typing import Optional
+from types import TracebackType
 
 import logging
 import pygame
+
+from ..utils import Config
 
 from .game_loop import GameLoop
 from .main_menu import MainMenu
