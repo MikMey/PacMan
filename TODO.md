@@ -14,7 +14,6 @@
 - [level time limit](./src/pac_man/loop/game_loop.py#L109)
 - include super pacgums
 - allow ghosts to be eaten
-- [start menu](./src/pac_man/loop/fsm.py#54)
 - [game over screen](./src/pac_man/loop/fsm.py#54)
 - leaderboard
 - cheat mode

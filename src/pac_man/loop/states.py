@@ -1,7 +1,16 @@
 from abc import ABC, abstractmethod
 import sys
+from enum import Enum, auto
 
 import pygame
+
+class LoopState(Enum):
+    MAIN_MENU = auto()
+    GAME_LOOP = auto()
+    DEATH_SCREEN = auto()
+    WIN_SCREEN = auto()
+    END_GAME = auto()
+    HIGHSCORE = auto()
 
 class State(ABC):
     def __init__(self, state):
