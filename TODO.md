@@ -9,9 +9,10 @@
 - [level load fully in frame](./src/pac_man/loop/level.py#L46)
 - [screen size not matching to possible size](./src/pac_man/loop/level.py#L46)
 - [death animation always correct lenght](./src/pac_man/loop/game_loop.py#L150)
+- visualize lost lives
+- visualize timer
 
 # Features
-- [level time limit](./src/pac_man/loop/game_loop.py#L109)
 - include super pacgums
 - allow ghosts to be eaten
 - [game over screen](./src/pac_man/loop/fsm.py#54)

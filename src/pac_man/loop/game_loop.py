@@ -132,11 +132,16 @@ class GameLoop(State):
                         width=width,
                         height=height
                     )
+                    self.limit = self.config.levels[level].timer
                     level += 1
                     self.state = GameState.PAUSE
 
                 case GameState.RUN_LEVEL:
                     # self.log.debug('Enter RUN_LEVEL')
+                    self.limit -= self.dt
+                    if self.limit <= 0:
+                        self.state = GameState.GAME_OVER
+                        continue
                     self.dstart = 0
                     self.handle_event()
 
