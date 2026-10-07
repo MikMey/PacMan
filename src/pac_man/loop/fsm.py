@@ -96,7 +96,10 @@ class LoopMachine(State):
                         screen=self.screen,
                         clock=self.clock
                     )
-                    self.game_loop.run(ShowHighscore.highscore)
+                    rc = self.game_loop.run(ShowHighscore.highscore)
+                    if rc == LoopState.GAME_LOOP:
+                        pass
+
                     self.state = LoopState.DEATH_SCREEN
 
                 case LoopState.DEATH_SCREEN:

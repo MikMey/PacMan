@@ -267,7 +267,8 @@ class Level(State):
             if distance_squared < (eat_radius ** 2):
                 return item
 
-    def collission_logic(self) -> None:
+    def collission_logic(self) -> bool:
+
         # superpacgum
 
         # ghost
@@ -282,8 +283,13 @@ class Level(State):
         # pacgum
         item = self.check_collission(self.gum_group)
         if item:
+            # print(len(self.gum_group))
             Hud.score += 1
             item.kill()
+            if len(self.gum_group) == 0:
+                return True
+
+        return False
 
     def render(self) -> None:
         # self.display_surface.fill((140, 40, 40))
@@ -310,7 +316,8 @@ class Level(State):
         if not self.freeze:
             self.ghost_group.update(dt, self.tile_matrix)
         self.player_group.update(dt, self.tile_matrix)
-        self.collission_logic()
+        rc = self.collission_logic()
         self.render()
 
-        return self.pacman.state == PlayerState.ALIVE
+        return rc
+        # return self.pacman.state == PlayerState.ALIVE
