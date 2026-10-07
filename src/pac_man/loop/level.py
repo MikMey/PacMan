@@ -103,10 +103,15 @@ class Level(State):
     def init_characters(self) -> None:
         """add instances of ghost class for each ghost to ghost_group"""
 
+        start_pos = Tile_Pos(self.columns // 2, self.rows // 2)
+        tile: Tile = Tile.get_tile(start_pos)
+        if not tile.neighbours or tile.neighbours == []:
+            start_pos.add(Tile_Pos(-1, 0))
+
         self.player_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacman
         self.pacman = Player(
             asset_cache=self.asset_cache,
-            start_pos=Tile_Pos(self.columns // 2, self.rows // 2),
+            start_pos=start_pos,
             subtile_size=self.subtile_size
             )
         self.player_group.add(self.pacman)
