@@ -274,23 +274,26 @@ class TileSpriteFactory(BaseModel):
 
         return surface
 
-    def get_item(self, tile: Tile) -> pygame.Surface:
+    def get_item(self, name: str) -> pygame.Surface:
         """Get item of tile based on tile data.
 
         Parameters
         ----------
-        tile : Tile
-            Tile to get the item of.
+        name : str
+            Name of the item to get.
 
         Returns
         -------
         pygame.Surface
             Surface of the item (e.g. pacgum)
         """
-        # NOTE: not fully implemented
         surface = pygame.Surface((self._sub_w, self._sub_h))
 
-        surface.blit(self.assets.get_static("PACGUM"), (0, 0))
+        match name:
+            case "pacgum":
+                surface.blit(self.assets.get_static("PACGUM"), (0, 0))
+            case "super_pacgum":
+                surface.blit(self.assets.get_static("SUPER-PACGUM"), (0, 0))
 
         return surface
 

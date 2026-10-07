@@ -3,10 +3,13 @@ from enum import Enum, auto
 
 import logging
 import pygame
+import random
+import sys
 
 from mazegenerator import MazeGenerator
 
 from ..utils import Config
+from ..utils.configuration import LevelMetadata
 from ..render import Hud
 
 from .level import Level
@@ -37,34 +40,31 @@ class GameLoop(State):
         self.screen = screen
         self.clock = clock
 
-    def load_level(self, width: int, height: int, level: int) -> None:
+    def load_level(self, level_num: int) -> None:
         """Clear screen, get matrix, init hud and level, draw"""
 
         self.screen.fill(0)
         pygame.display.flip()
 
-        if level == 0:
-            seed = 69420
+        level: LevelMetadata = self.config.levels[level_num]
+
+        if level.seed is None:
+            seed = random.randint(-sys.maxsize - 1, sys.maxsize)
         else:
-            seed = 0
+            seed = level.seed
+
         try:
             hex_matrix = MazeGenerator(
-                size=(
-                    width,
-                    height
-                ),
+                size=(level.width, level.height),
                 seed=seed
             ).maze
         except Exception as err:
             sys.exit(f"Mazegen skillissue:\n{err}")
-        # log = logging.getLogger('PacMan')
-        # log.debug(f'hex_matrix={hex_matrix}')
 
         self.level: Level = Level(
             hex_matrix=hex_matrix,
             screen=self.screen,
-            columns=width,
-            rows=height
+            level=level
         )
 
         self.hud = Hud(
@@ -160,14 +160,10 @@ class GameLoop(State):
                         lvl_conf = self.config.levels[curr_level]
                     else:
                         lvl_conf = self.config.default_level
-                    width = lvl_conf.width
-                    height = lvl_conf.height
+                    # width = lvl_conf.width
+                    # height = lvl_conf.height
 
-                    self.load_level(
-                        width=width,
-                        height=height,
-                        level=curr_level
-                    )
+                    self.load_level(level_num=curr_level)
                     self.limit = lvl_conf.timer
                     curr_level += 1
                     self.state = GameState.PAUSE
