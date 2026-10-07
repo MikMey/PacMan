@@ -8,7 +8,7 @@ import pygame
 from ..models import StaticSpriteElement
 from ..render import SpriteSheetCache
 
-from .states import State
+from .states import State, LoopState
 
 SUBTILE_SIZE = 8
 TILE_SIZE = SUBTILE_SIZE * 3
@@ -19,7 +19,11 @@ class _BaseHighscore():
     screen: pygame.Surface = None
     highscore_file: str = None
 
-    def __init__(self, highscore_file: Optional[str], screen: Optional[pygame.Surface]):
+    def __init__(
+            self,
+            highscore_file: Optional[str],
+            screen: Optional[pygame.Surface]
+    ):
         if not _BaseHighscore.screen:
             _BaseHighscore.screen = screen
         self.screen = _BaseHighscore.screen
@@ -30,7 +34,8 @@ class _BaseHighscore():
             self.screen.get_width() // (SUBTILE_SIZE * 22),
             self.screen.get_height() // (SUBTILE_SIZE * 22)
         )
-        self.asset_cache = SpriteSheetCache.from_default_file_path(scale_factor)
+        self.asset_cache =\
+            SpriteSheetCache.from_default_file_path(scale_factor)
 
         surface_w = int(22 * SUBTILE_SIZE * self.asset_cache.scale_factor)
         surface_h = int(22 * SUBTILE_SIZE * self.asset_cache.scale_factor)
@@ -41,7 +46,7 @@ class _BaseHighscore():
             SUBTILE_SIZE * 3
         )
 
-    def _get_highscore(self):
+    def _get_highscore(self) -> dict[str, int]:
         try:
             with open(self.highscore_file, 'r') as f:
                 raw_highscores: str = f.read()
@@ -77,7 +82,7 @@ class ShowHighscore(_BaseHighscore, State):
         highscores = self._get_highscore()
         self._prep_sprite(highscores)
 
-    def _prep_sprite(self, highscores: dict[str, int]):
+    def _prep_sprite(self, highscores: dict[str, int]) -> None:
         self._scores_group: pygame.sprite.Group = pygame.sprite.Group()
         for key, value in highscores.items():
             if (
@@ -111,7 +116,7 @@ class ShowHighscore(_BaseHighscore, State):
                                 [11, y])
             y += 2
 
-    def run(self, state):
+    def run(self, state: LoopState) -> None:
         self.state = state
         self._scores_group.draw(self.surface)
         self.screen.blit(self.surface, self.position)
@@ -127,7 +132,10 @@ class EnterHighscore(_BaseHighscore, State):
         else:
             super().__init__(highscore_file, screen)
 
-    def _validate_score(self, highscores: dict[str, int], score: int):
+    def _validate_score(self,
+                        highscores: dict[str, int],
+                        score: int
+                        ) -> dict[str, int]:
         if highscores and highscores != {}:
             to_check = min(highscores.values())
             if score <= to_check and len(highscores.items()) >= 10:
@@ -144,7 +152,7 @@ class EnterHighscore(_BaseHighscore, State):
             highscores[self.player_name] = score
         return highscores
 
-    def _write_highscore(self, content: dict):
+    def _write_highscore(self, content: dict) -> None:
         try:
             with open(self.highscore_file, 'w') as f:
                 json.dump(content, f)
@@ -156,7 +164,7 @@ class EnterHighscore(_BaseHighscore, State):
         except Exception as err:
             sys.exit(f"Error:\n{err}")
 
-    def _get_name(self):
+    def _get_name(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -176,7 +184,7 @@ class EnterHighscore(_BaseHighscore, State):
                 else:
                     self.slots[i].image = self.asset_cache.get_static("CHAR--")
 
-    def _prep_sprites_enter(self, score):
+    def _prep_sprites_enter(self, score: int) -> None:
         self._enter_group: pygame.sprite.Group = pygame.sprite.Group()
 
         self.slots: list[StaticSpriteElement] = []
@@ -205,7 +213,7 @@ class EnterHighscore(_BaseHighscore, State):
             )
             self._enter_group.add(self.slots[x])
 
-    def run(self, score):
+    def run(self, score: int) -> None:
         if not score:
             score = 0
         self.player_name = ""

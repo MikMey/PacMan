@@ -53,7 +53,8 @@ class LoopMachine(State):
         self.main_menu = MainMenu(screen=self.screen)
         self.death_screen = DeathScreen()
         self.win_screen = WinScreen()
-        self.enter_highscore = EnterHighscore('data/highscore.json', self.screen)
+        self.enter_highscore =\
+            EnterHighscore('data/highscore.json', self.screen)
         self.show_highscore = ShowHighscore(None, None)
         return self
 
@@ -118,4 +119,3 @@ class LoopMachine(State):
                     self.state = LoopState.SHOW_HIGHSCORE
 
             pygame.display.flip()
-

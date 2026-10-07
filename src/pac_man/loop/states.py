@@ -21,11 +21,11 @@ class LoopState(Enum):
 
 
 class State(ABC):
-    def __init__(self, state):
+    def __init__(self, state: LoopState) -> None:
         self.state = state
 
     @abstractmethod
-    def run(self):
+    def run(self) -> None:
         pass
 
     def handle_input(self, key_event: pygame.event.Event) -> None:

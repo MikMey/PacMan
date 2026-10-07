@@ -26,7 +26,7 @@ class Hud:
                     scale_factor=self.scale_factor
                 )
         except ValidationError as e:
-            sys.exit(str(e), style="red", markup=False, highlight=False)
+            sys.exit(str(e))
         self.screen = screen
         self.vertical_padding = vertical_padding
 
@@ -127,7 +127,7 @@ class Hud:
             self.high_score_element.image = self.text_factory.from_string(
                 s=str(self.high_score))
 
-    def render(self):
+    def render(self) -> None:
         # self.top_display.fill((50, 0, 0))
         self.text_group.draw(self.top_display)
         self.screen.blit(self.top_display, self.top_position)

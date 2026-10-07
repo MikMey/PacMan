@@ -77,7 +77,7 @@ class Character(ABC, pygame.sprite.Sprite):
         self.speed: int = int(self.asset_cache.scale_factor * speed_factor)
         # self.log.debug(f"speed={self.speed},subtile={self.subtile_size}")
 
-    def init_image(self):
+    def init_image(self) -> None:
         frames = self.asset_cache.get_anim(
             self.name + 'RIGHT'
         )
@@ -188,7 +188,7 @@ class Character(ABC, pygame.sprite.Sprite):
         return False
 
     @abstractmethod
-    def _update_position(self, tile_matrix) -> None:
+    def _update_position(self, tile_matrix: list[list[Tile]]) -> None:
         """Update player position if possible.
 
         Parameters

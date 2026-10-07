@@ -1,9 +1,10 @@
 
-import pygame
 from random import randrange
 import functools
 import sys
+from typing import Any
 
+import pygame
 import logging
 from pydantic import ValidationError
 
@@ -50,7 +51,7 @@ class Level(State):
                         rows: int,
                         screen_w: int,
                         screen_h: int
-                        ):
+                        ) -> None:
         """Initialize level scaling and size"""
 
         raw_level_h = rows * TILE_SIZE
@@ -245,7 +246,7 @@ class Level(State):
         self.subtile_size = tile_factory._sub_w
         self.init_characters()
 
-    def check_collission(self, obj):
+    def check_collission(self, obj: pygame.sprite.Group) -> Any:
         possible_collisions = pygame.sprite.spritecollide(
             self.pacman,  # type: ignore
             obj,
@@ -262,7 +263,7 @@ class Level(State):
             if distance_squared < (eat_radius ** 2):
                 return item
 
-    def collission_logic(self):
+    def collission_logic(self) -> None:
         # superpacgum
 
         # ghost
@@ -280,7 +281,7 @@ class Level(State):
             Hud.score += 1
             item.kill()
 
-    def render(self):
+    def render(self) -> None:
         # self.display_surface.fill((140, 40, 40))
         self.tile_group.draw(self.display_surface)
         self.gum_group.draw(self.display_surface)

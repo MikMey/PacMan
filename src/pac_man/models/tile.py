@@ -49,7 +49,7 @@ class Tile:
 
     _matrix: ClassVar[list[list["Tile"]]] = []
 
-    def create_reference(self):
+    def create_reference(self) -> None:
         """reference neighbouring tiles for
         easy access in rendering and ghost ai"""
 
@@ -94,7 +94,7 @@ class Tile:
             is_left_closed=bool(value & 0b1000),
         )
 
-    def set_matrix(matrix: list[list["Tile"]]):
+    def set_matrix(matrix: list[list["Tile"]]) -> None:
         Tile._matrix = matrix
 
     def get_tile(pos: Tile_Pos) -> "Tile":

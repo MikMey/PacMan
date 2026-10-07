@@ -1,6 +1,5 @@
 import sys
 from enum import Enum, auto
-import random
 
 import logging
 import pygame
@@ -13,6 +12,7 @@ from ..render import Hud
 from .level import Level
 from .states import State
 
+
 class GameState(Enum):
     LOAD_LEVEL = auto()
     RUN_LEVEL = auto()
@@ -21,18 +21,23 @@ class GameState(Enum):
     PLAYER_DEATH = auto()
     GAME_OVER = auto()
 
+
 class GameLoop(State):
     """
     Runs between main screen and win or loose,
     handles level calling, score totaling and state changes
     """
-    def __init__(self, config: Config, screen: pygame.Surface, clock: pygame.time.Clock) -> None:
+    def __init__(self,
+                 config: Config,
+                 screen: pygame.Surface,
+                 clock: pygame.time.Clock
+                 ) -> None:
         self.log = logging.getLogger('PacMan')
         self.config = config
         self.screen = screen
         self.clock = clock
 
-    def load_level(self, width, height, level) -> None:
+    def load_level(self, width: int, height: int, level: int) -> None:
         """Clear screen, get matrix, init hud and level, draw"""
 
         self.screen.fill(0)
@@ -71,7 +76,7 @@ class GameLoop(State):
         self.level.render()
         self.hud.render()
 
-    def pause(self):
+    def pause(self) -> None:
         """Keep state until button is pressed"""
         self.level.render()
         self.hud.render()

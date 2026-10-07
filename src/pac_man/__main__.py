@@ -6,22 +6,24 @@ from pydantic import ValidationError
 from rich.console import Console
 
 from .utils import Config
-from .render import SpriteSheetCache
-from .loop import GameLoop, LoopMachine
+from .loop import LoopMachine
 
 
 class ElapsedFormatter():
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.start_time = time.time()
 
-    def format(self, record: logging.LogRecord):
+    def format(self, record: logging.LogRecord) -> str:
         elapsed_seconds = record.created - self.start_time
         # using timedelta here for convenient default formatting
-        elapsed = timedelta(seconds = elapsed_seconds)
-        return "{} {} - {}".format(elapsed, record.levelname, record.getMessage())
+        elapsed = timedelta(seconds=elapsed_seconds)
+        return "{} {} - {}".format(elapsed,
+                                   record.levelname,
+                                   record.getMessage())
 
-def start_log():
+
+def start_log() -> None:
     # add custom formatter to root logger for simple demonstration
     handler = logging.StreamHandler()
     handler.setFormatter(ElapsedFormatter())
@@ -30,6 +32,7 @@ def start_log():
     log = logging.getLogger('PacMan')
     log.setLevel(5)
     log.info("Programm start")
+
 
 def main() -> int:
 
@@ -46,6 +49,7 @@ def main() -> int:
         pacman.run()
 
     return 0
+
 
 if __name__ == "__main__":
     main()
