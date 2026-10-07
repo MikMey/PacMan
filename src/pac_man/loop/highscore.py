@@ -147,13 +147,14 @@ class EnterHighscore(_BaseHighscore, State):
         self._enter_group: pygame.sprite.Group = pygame.sprite.Group()
 
         self.slots: list[StaticSpriteElement] = []
-        self._group_add_str(self.asset_cache, self._enter_group, "enter name", [0, 0])
+        self._group_add_str(self.asset_cache, self._enter_group, 'game over', [0, 0])
+        self._group_add_str(self.asset_cache, self._enter_group, "enter name", [0, 2])
         for x in range(10):
             self.slots.append(
                 StaticSpriteElement.from_pixel(
                     self.asset_cache.get_static("CHAR--"),
                     (x+1) * self.asset_cache.scale_factor * SUBTILE_SIZE,
-                    2 * self.asset_cache.scale_factor * SUBTILE_SIZE
+                    4 * self.asset_cache.scale_factor * SUBTILE_SIZE
                 )
             )
             self._enter_group.add(self.slots[x])
