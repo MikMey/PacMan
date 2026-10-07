@@ -111,12 +111,7 @@ class MainMenu(State):
         self.menu_group: pygame.sprite.Group = pygame.sprite.Group()
 
         for y, row in enumerate(START_MENU):
-            for x, tile in enumerate(START_MENU[y]):
-                if not tile:
-                    continue
-                curr_x = (x * self.asset_cache.scale_factor * SUBTILE_SIZE)
-                curr_y = (y * self.asset_cache.scale_factor * SUBTILE_SIZE)
-                self.menu_group.add(StaticSpriteElement.from_pixel(self.asset_cache.get_static(tile), curr_x, curr_y))
+            self._group_add_name(self.asset_cache, self.menu_group, row, [0, y])
 
         self.selector_group: pygame.sprite.Group = pygame.sprite.Group()
         self.selector = Selector(self.scale_factor)

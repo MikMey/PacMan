@@ -36,6 +36,7 @@ class LoopMachine(State):
         """Sets up logging context and passes game configurations."""
         self._log = logging.getLogger('PacMan')
         self._config = config
+        self.score = 0
 
     def __enter__(self) -> "LoopMachine":
         """Initializes pygame and instantiates game state classes.
@@ -52,7 +53,8 @@ class LoopMachine(State):
         self.main_menu = MainMenu(screen=self.screen)
         self.death_screen = DeathScreen()
         self.win_screen = WinScreen()
-        self.show_highscore = ShowHighscore('data/highscore.json', self.screen)
+        self.enter_highscore = EnterHighscore('data/highscore.json', self.screen)
+        self.show_highscore = ShowHighscore(None, None)
         return self
 
     def __exit__(self,
@@ -110,7 +112,8 @@ class LoopMachine(State):
                     self.show_highscore.run(self.state)
 
                 case LoopState.ENTER_HIGHSCORE:
-                    EnterHighscore(None, None)
+                    self.enter_highscore.run(self.score)
+                    self.show_highscore = ShowHighscore(None, None)
                     self.state = LoopState.SHOW_HIGHSCORE
 
             pygame.display.flip()

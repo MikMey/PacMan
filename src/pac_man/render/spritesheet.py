@@ -339,6 +339,7 @@ class SpriteSheetCache(BaseModel):
         cache_text("CHAR-X", 91, 37)
         cache_text("CHAR-Y", 100, 37)
         cache_text("CHAR-Z", 109, 37)
+        cache_text("CHAR- ", 127, 37)
 
         cache_text("CHAR-/", 91, 10)
         cache_text("CHAR--", 100, 10)

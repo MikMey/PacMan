@@ -58,6 +58,7 @@ class _BaseHighscore():
             sys.exit(f"Error:\n{err}")
         return highscores
 
+
 class ShowHighscore(_BaseHighscore, State):
     def __init__(self, highscore_file: Optional[str], screen: Optional[pygame.Surface]):
         if _BaseHighscore.highscore_file and _BaseHighscore.screen:
@@ -70,30 +71,12 @@ class ShowHighscore(_BaseHighscore, State):
 
     def _prep_sprite(self, highscores: dict[str, int]):
         self._scores_group: pygame.sprite.Group = pygame.sprite.Group()
-        x = 0
-        y = 0
+        highscores = {key: value for key, value in sorted(highscores.items(), key=lambda item: item[1], reverse=True)}
+        self._group_add_str(self.asset_cache, self._scores_group, "highscore", [0, 0])
+        y = 2
         for key, value in highscores.items():
-            for char in key:
-                self._scores_group.add(
-                    StaticSpriteElement.from_pixel(
-                        self.asset_cache.get_static("CHAR-" + char.upper()),
-                        x * self.asset_cache.scale_factor * SUBTILE_SIZE,
-                        y * self.asset_cache.scale_factor * SUBTILE_SIZE
-                    )
-                )
-                x += 1
-            x += 1
-            str_value = str(value)
-            for char in str_value:
-                self._scores_group.add(
-                    StaticSpriteElement.from_pixel(
-                        self.asset_cache.get_static("CHAR-" + char.upper()),
-                        x * self.asset_cache.scale_factor * SUBTILE_SIZE,
-                        y * self.asset_cache.scale_factor * SUBTILE_SIZE
-                    )
-                )
-                x += 1
-            x=0
+            self._group_add_str(self.asset_cache, self._scores_group, key, [0, y])
+            self._group_add_str(self.asset_cache, self._scores_group, str(value), [11, y])
             y+=2
 
     def run(self, state):
@@ -158,12 +141,13 @@ class EnterHighscore(_BaseHighscore, State):
         self._enter_group: pygame.sprite.Group = pygame.sprite.Group()
 
         self.slots: list[StaticSpriteElement] = []
+        self._group_add_str(self.asset_cache, self._enter_group, "enter name", [0, 0])
         for x in range(10):
             self.slots.append(
                 StaticSpriteElement.from_pixel(
                     self.asset_cache.get_static("CHAR--"),
                     (x+1) * self.asset_cache.scale_factor * SUBTILE_SIZE,
-                    1 * self.asset_cache.scale_factor * SUBTILE_SIZE
+                    2 * self.asset_cache.scale_factor * SUBTILE_SIZE
                 )
             )
             self._enter_group.add(self.slots[x])
