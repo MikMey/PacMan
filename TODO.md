@@ -6,8 +6,6 @@
 - player spawn in enclosed space on maps with 42
 
 ## Visual
-- [level load fully in frame](./src/pac_man/loop/level.py#L46)
-- [screen size not matching to possible size](./src/pac_man/loop/level.py#L46)
 - [death animation always correct lenght](./src/pac_man/loop/game_loop.py#L150)
 - visualize lost lives
 - visualize timer
