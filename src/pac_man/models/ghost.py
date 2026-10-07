@@ -104,7 +104,10 @@ class Ghost(Character):
                 Tile_Pos(len(self.tile_matrix[0]) - 1, 0)
                 )
         else:
-            pass
+            self.current_dir = self.bfs(
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(0, len(self.tile_matrix) - 1)
+                )
 
     def pinky(self) -> None:
         """Chase 2 tiles to right of pacman; flee top left"""
@@ -140,7 +143,13 @@ class Ghost(Character):
                 Tile_Pos(0, 0)
                 )
         else:
-            pass
+            self.current_dir = self.bfs(
+            Tile_Pos(self.current_tile.x, self.current_tile.y),
+            Tile_Pos(
+                len(self.tile_matrix[0]) - 1,
+                len(self.tile_matrix) - 1
+                )
+            )
 
     def inky(self) -> None:
         """go left (1/3 go right); flee bottom right"""
@@ -214,7 +223,13 @@ class Ghost(Character):
                     )
                 )
         else:
-            pass
+            self.current_dir = self.bfs(
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(
+                    0,
+                    0
+                    )
+                )
         # self.log.debug('inky finish')
 
     def clyde(self) -> None:
@@ -250,7 +265,10 @@ class Ghost(Character):
                 Tile_Pos(0, len(self.tile_matrix) - 1)
                 )
         else:
-            pass
+            self.current_dir = self.bfs(
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(len(self.tile_matrix[0]) - 1, 0)
+                )
 
     def bfs(self, pos: Tile_Pos, target: Tile_Pos) -> UnitVector:
         # self.log.debug('bfs call')
