@@ -109,7 +109,7 @@ QUIT = 2
 
 
 class Selector(pygame.sprite.Sprite):
-    def __init__(self, scale_factor):
+    def __init__(self, scale_factor: int) -> None:
         super().__init__()
         self.selector_cache =\
             SpriteSheetCache.from_default_file_path(scale_factor * 1.5)
@@ -128,7 +128,7 @@ class MainMenu(State):
         LoopState.END_GAME
     ]
 
-    def __init__(self, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface) -> None:
 
         self.screen = screen
         self.curr = START
@@ -161,7 +161,7 @@ class MainMenu(State):
 
         self.init_draw()
 
-    def init_draw(self):
+    def init_draw(self) -> None:
 
         self.menu_group: pygame.sprite.Group = pygame.sprite.Group()
 
@@ -177,7 +177,7 @@ class MainMenu(State):
         self.selector = Selector(self.scale_factor)
         self.selector_group.add(self.selector)
 
-    def handle_input(self):
+    def handle_input(self) -> None:
         if self.keys[pygame.K_w]:
             if self.curr == 0:
                 self.selector.rect.y += (
@@ -204,13 +204,13 @@ class MainMenu(State):
                     )
             self.curr = (self.curr + 1) % 3
 
-    def render(self):
+    def render(self) -> None:
         self.surface.fill(0)
         self.menu_group.draw(self.surface)
         self.selector_group.draw(self.surface)
         self.screen.blit(self.surface, self.position)
 
-    def run(self):
+    def run(self) -> LoopState:
         self.keys = pygame.key.get_pressed()
         if self.keys[pygame.K_SPACE]:
             return MainMenu.state[self.curr]

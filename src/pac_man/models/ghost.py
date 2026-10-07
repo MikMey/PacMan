@@ -49,7 +49,7 @@ class Ghost(Character):
 
         self.current_dir.set((0, 1))
 
-    def set_image(self):
+    def set_image(self) -> None:
         if self.state == GhostState.RESPAWNING:
             frames = self.asset_cache.get_anim(
                 'GHOST-DEAD' + self._dir_to_string(self.current_dir)
@@ -65,7 +65,7 @@ class Ghost(Character):
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
 
-    def kill():
+    def kill() -> None:
         pass
 
     def _update_position(self) -> None:
@@ -85,7 +85,7 @@ class Ghost(Character):
                 self.current_dir
                 )
 
-    def blinky(self):
+    def blinky(self) -> None:
         """Direct chase; flee top right"""
         if self.state == GhostState.ROAMING:
             # self.log.debug('blinky call')
@@ -104,7 +104,7 @@ class Ghost(Character):
         else:
             pass
 
-    def pinky(self):
+    def pinky(self) -> None:
         """Chase 2 tiles to right of pacman; flee top left"""
         if self.state == GhostState.ROAMING:
             if (
@@ -140,7 +140,7 @@ class Ghost(Character):
         else:
             pass
 
-    def inky(self):
+    def inky(self) -> None:
         """go left (1/3 go right); flee bottom right"""
         # self.log.debug('inky call')
 
@@ -212,7 +212,7 @@ class Ghost(Character):
             pass
         # self.log.debug('inky finish')
 
-    def clyde(self):
+    def clyde(self) -> None:
         """move random at intersection; flee bottom left"""
         # self.log.debug('clyde call')
         CHANGE = [

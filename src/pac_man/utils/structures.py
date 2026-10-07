@@ -1,4 +1,6 @@
 
+from typing import Any, Generator
+
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
@@ -18,7 +20,7 @@ class Pixel_Pos:
     x: int
     y: int
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Any, Any, Any]:
         """Defines attribute order."""
         yield self.x
         yield self.y
@@ -53,7 +55,7 @@ class UnitVector:
         """True if hori and vert are zero, False otherwise."""
         return self.x == 0 and self.y == 0
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Any, Any, Any]:
         """Defines attribute order."""
         yield self.x
         yield self.y
@@ -78,19 +80,19 @@ class Tile_Pos:
         """Returns new instance of multiplied Position."""
         return Pixel_Pos(self.x * tile_size, self.y * tile_size)
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Any, Any, Any]:
         """Defines attribute order."""
         yield self.x
         yield self.y
 
-    def set(self, pos: tuple):
+    def set(self, pos: tuple) -> None:
         self.x = pos[0]
         self.y = pos[1]
 
     def get(self) -> tuple:
         return (self.x, self.y)
 
-    def add(self, change: "Tile_Pos | UnitVector"):
+    def add(self, change: "Tile_Pos | UnitVector") -> None:
         self.x += change.x
         self.y += change.y
 
