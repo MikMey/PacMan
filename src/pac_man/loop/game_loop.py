@@ -1,5 +1,6 @@
 import sys
 from enum import Enum, auto
+import random
 
 import logging
 import pygame
@@ -31,22 +32,30 @@ class GameLoop(State):
         self.screen = screen
         self.clock = clock
 
-    def load_level(self, width, height) -> None:
+    def load_level(self, width, height, level) -> None:
         """Clear screen, get matrix, init hud and level, draw"""
 
         self.screen.fill(0)
         pygame.display.flip()
 
-        hex_matrix = MazeGenerator(
-            size=(
-                width,
-                height
-            )
-        ).maze
+        if level == 0:
+            seed = 69420
+        else:
+            seed = 0
+        try:
+            hex_matrix = MazeGenerator(
+                size=(
+                    width,
+                    height
+                ),
+                seed=seed
+            ).maze
+        except Exception as err:
+            sys.exit(f"Mazegen skillissue:\n{err}")
         # log = logging.getLogger('PacMan')
         # log.debug(f'hex_matrix={hex_matrix}')
 
-        self.level = Level(
+        self.level: Level = Level(
             hex_matrix=hex_matrix,
             screen=self.screen,
             columns=width,
@@ -110,7 +119,7 @@ class GameLoop(State):
     def run(self) -> None:
         """Finite State Machine for level based/gameloop logic"""
         self.state = GameState.LOAD_LEVEL
-        level = 0
+        curr_level = 0
         self.lives = 3
 
         while self.state != GameState.GAME_OVER:
@@ -120,19 +129,20 @@ class GameLoop(State):
 
                 case GameState.LOAD_LEVEL:
                     # self.log.debug('Enter LOAD_LEVEL')
-                    if len(self.config.levels) > level:
-                        width = self.config.levels[level].width
-                        height = self.config.levels[level].height
+                    if len(self.config.levels) > curr_level:
+                        lvl_conf = self.config.levels[curr_level]
                     else:
-                        width = self.config.default_level.width
-                        height = self.config.default_level.height
+                        lvl_conf = self.config.default_level
+                    width = lvl_conf.width
+                    height = lvl_conf.height
 
                     self.load_level(
                         width=width,
-                        height=height
+                        height=height,
+                        level=curr_level
                     )
-                    self.limit = self.config.levels[level].timer
-                    level += 1
+                    self.limit = lvl_conf.timer
+                    curr_level += 1
                     self.state = GameState.PAUSE
 
                 case GameState.RUN_LEVEL:
