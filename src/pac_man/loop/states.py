@@ -10,7 +10,8 @@ class LoopState(Enum):
     DEATH_SCREEN = auto()
     WIN_SCREEN = auto()
     END_GAME = auto()
-    HIGHSCORE = auto()
+    SHOW_HIGHSCORE = auto()
+    ENTER_HIGHSCORE = auto()
 
 class State(ABC):
     def __init__(self, state):
@@ -23,7 +24,10 @@ class State(ABC):
     def handle_input(self, key_event: pygame.event.Event) -> None:
         match key_event.key:
             case pygame.K_ESCAPE:
-                sys.exit()
+                if self.state == LoopState.SHOW_HIGHSCORE:
+                    self.state = LoopState.MAIN_MENU
+                else:
+                    sys.exit()
 
     def handle_event(self) -> None:
         """handle different types of pygame events"""

@@ -11,6 +11,7 @@ from .main_menu import MainMenu
 from .death_screen import DeathScreen
 from .win_screen import WinScreen
 from .states import State, LoopState
+from .highscore import EnterHighscore, ShowHighscore
 
 
 class LoopMachine(State):
@@ -48,14 +49,10 @@ class LoopMachine(State):
 
         pygame.init()
         self._init_screen()
-        self.game_loop = GameLoop(
-            config=self._config,
-            screen=self.screen,
-            clock=self.clock
-        )
         self.main_menu = MainMenu(screen=self.screen)
         self.death_screen = DeathScreen()
         self.win_screen = WinScreen()
+        self.show_highscore = ShowHighscore('data/highscore.json', self.screen)
         return self
 
     def __exit__(self,
@@ -82,6 +79,7 @@ class LoopMachine(State):
         """Finite State machine for entirety of PacMan."""
         while self.state != LoopState.END_GAME:
             self.handle_event()
+            self.screen.fill(0)
 
             match self.state:
                 case LoopState.MAIN_MENU:
@@ -90,19 +88,30 @@ class LoopMachine(State):
 
                 case LoopState.GAME_LOOP:
                     # self.log.debug("Enter GameLoop")
+                    self.game_loop = GameLoop(
+                        config=self._config,
+                        screen=self.screen,
+                        clock=self.clock
+                    )
                     self.game_loop.run()
                     self.state = LoopState.DEATH_SCREEN
 
                 case LoopState.DEATH_SCREEN:
                     self._log.debug("Enter State: DEATH_SCREEN")
                     self.death_screen.run()
+                    self.state = LoopState.ENTER_HIGHSCORE
 
                 case LoopState.WIN_SCREEN:
                     self._log.debug("Enter State: WIN_SCREEN")
                     self.win_screen.run()
+                    self.state = LoopState.ENTER_HIGHSCORE
 
-                case LoopState.HIGHSCORE:
-                    pass
+                case LoopState.SHOW_HIGHSCORE:
+                    self.show_highscore.run(self.state)
+
+                case LoopState.ENTER_HIGHSCORE:
+                    EnterHighscore(None, None)
+                    self.state = LoopState.SHOW_HIGHSCORE
 
             pygame.display.flip()
 

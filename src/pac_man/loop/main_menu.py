@@ -73,7 +73,7 @@ class Selector(pygame.sprite.Sprite):
 class MainMenu(State):
     state = [
         LoopState.GAME_LOOP,
-        LoopState.HIGHSCORE,
+        LoopState.SHOW_HIGHSCORE,
         LoopState.END_GAME
     ]
 
