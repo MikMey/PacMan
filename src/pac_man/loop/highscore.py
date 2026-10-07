@@ -8,10 +8,11 @@ import pygame
 from ..models import StaticSpriteElement
 from ..render import SpriteSheetCache
 
-from .states import State, LoopState
+from .states import State
 
 SUBTILE_SIZE = 8
 TILE_SIZE = SUBTILE_SIZE * 3
+
 
 class _BaseHighscore():
 
@@ -39,13 +40,16 @@ class _BaseHighscore():
             (self.screen.get_width() - surface_w) // 2,  # horizontal_padding,
             SUBTILE_SIZE * 3
         )
-        
 
     def _get_highscore(self):
         try:
             with open(self.highscore_file, 'r') as f:
                 raw_highscores: str = f.read()
-                if not raw_highscores or not len(raw_highscores) or raw_highscores == 'null':
+                if (
+                    not raw_highscores or not
+                    len(raw_highscores) or
+                    raw_highscores == 'null'
+                ):
                     highscores = {}
                 else:
                     highscores = json.loads(raw_highscores)
@@ -63,7 +67,9 @@ class ShowHighscore(_BaseHighscore, State):
 
     highscore: int = 0
 
-    def __init__(self, highscore_file: Optional[str], screen: Optional[pygame.Surface]):
+    def __init__(self,
+                 highscore_file: Optional[str],
+                 screen: Optional[pygame.Surface]):
         if _BaseHighscore.highscore_file and _BaseHighscore.screen:
             super().__init__(None, None)
         else:
@@ -74,26 +80,48 @@ class ShowHighscore(_BaseHighscore, State):
     def _prep_sprite(self, highscores: dict[str, int]):
         self._scores_group: pygame.sprite.Group = pygame.sprite.Group()
         for key, value in highscores.items():
-            if not(isinstance(key, str) and key.isalnum() and isinstance(value, int) and value >= 0):
+            if (
+                not
+                (isinstance(key, str) and
+                    key.isalnum() and
+                    isinstance(value, int) and
+                    value >= 0)
+            ):
                 return
-        highscores = {key: value for key, value in sorted(highscores.items(), key=lambda item: item[1], reverse=True)}
-        self._group_add_str(self.asset_cache, self._scores_group, "highscore", [0, 0])
+        highscores = {
+            key: value
+            for key, value in sorted(highscores.items(),
+                                     key=lambda item: item[1], reverse=True)}
+        self._group_add_str(
+            self.asset_cache,
+            self._scores_group,
+            "highscore",
+            [0, 0])
         y = 2
         for key, value in highscores.items():
             if value > ShowHighscore.highscore:
                 ShowHighscore.highscore = value
-            self._group_add_str(self.asset_cache, self._scores_group, key, [0, y])
-            self._group_add_str(self.asset_cache, self._scores_group, str(value), [11, y])
-            y+=2
+            self._group_add_str(self.asset_cache,
+                                self._scores_group,
+                                key,
+                                [0, y])
+            self._group_add_str(self.asset_cache,
+                                self._scores_group,
+                                str(value),
+                                [11, y])
+            y += 2
 
     def run(self, state):
         self.state = state
         self._scores_group.draw(self.surface)
         self.screen.blit(self.surface, self.position)
 
+
 class EnterHighscore(_BaseHighscore, State):
 
-    def __init__(self, highscore_file: Optional[str], screen: Optional[pygame.Surface]):
+    def __init__(self,
+                 highscore_file: Optional[str],
+                 screen: Optional[pygame.Surface]):
         if _BaseHighscore.highscore_file and _BaseHighscore.screen:
             super().__init__(None, None)
         else:
@@ -104,15 +132,17 @@ class EnterHighscore(_BaseHighscore, State):
             to_check = min(highscores.values())
             if score <= to_check and len(highscores.items()) >= 10:
                 return highscores
-            if len(highscores.items()) >= 10 and self.player_name not in highscores.keys():
+            if (len(highscores.items()) >= 10 and
+                    self.player_name not in highscores.keys()):
                 for key, value in highscores.copy().items():
                     if value == to_check:
                         highscores.pop(key)
                         break
-        if len(self.player_name) and (self.player_name not in highscores.keys() or highscores[self.player_name] > score):
+        if (len(self.player_name) and
+            (self.player_name not in highscores.keys() or
+             highscores[self.player_name] > score)):
             highscores[self.player_name] = score
         return highscores
-
 
     def _write_highscore(self, content: dict):
         try:
@@ -125,7 +155,6 @@ class EnterHighscore(_BaseHighscore, State):
             sys.exit(f"Provided file path is incorrect:\n{err}")
         except Exception as err:
             sys.exit(f"Error:\n{err}")
-
 
     def _get_name(self):
         for event in pygame.event.get():
@@ -140,7 +169,10 @@ class EnterHighscore(_BaseHighscore, State):
                         self.player_name += char.upper()
             for i in range(len(self.slots)):
                 if len(self.player_name) >= i + 1 and self.player_name[i]:
-                    self.slots[i].image = self.asset_cache.get_static("CHAR-" + self.player_name[i].upper())
+                    self.slots[i].image =\
+                        self.asset_cache.get_static(
+                            "CHAR-" + self.player_name[i].upper()
+                            )
                 else:
                     self.slots[i].image = self.asset_cache.get_static("CHAR--")
 
@@ -148,9 +180,21 @@ class EnterHighscore(_BaseHighscore, State):
         self._enter_group: pygame.sprite.Group = pygame.sprite.Group()
 
         self.slots: list[StaticSpriteElement] = []
-        self._group_add_str(self.asset_cache, self._enter_group, 'game over', [0, 0])
-        self._group_add_str(self.asset_cache, self._enter_group, f'score {score}', [0, 2])
-        self._group_add_str(self.asset_cache, self._enter_group, "enter name", [0, 4])
+        self._group_add_str(
+            self.asset_cache,
+            self._enter_group,
+            'game over',
+            [0, 0])
+        self._group_add_str(
+            self.asset_cache,
+            self._enter_group,
+            f'score {score}',
+            [0, 2])
+        self._group_add_str(
+            self.asset_cache,
+            self._enter_group,
+            "enter name",
+            [0, 4])
         for x in range(10):
             self.slots.append(
                 StaticSpriteElement.from_pixel(
@@ -161,14 +205,13 @@ class EnterHighscore(_BaseHighscore, State):
             )
             self._enter_group.add(self.slots[x])
 
-
     def run(self, score):
         if not score:
             score = 0
         self.player_name = ""
         self.confirmed = True
         self._prep_sprites_enter(score)
-        while self.confirmed == True:
+        while self.confirmed is True:
             time.sleep(0.01)
             self._enter_group.draw(self.surface)
             self.screen.blit(self.surface, self.position)

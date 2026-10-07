@@ -1,55 +1,100 @@
 import sys
 import time
-from enum import Enum, auto
 
 import pygame
-import logging
 from pydantic import ValidationError
 
 from ..render import SpriteSheetCache
-from ..models import StaticSpriteElement
 
 from .states import State, LoopState
 
 START_MENU = [
-            [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None,
+             None, None, None, None, None, None, None, None,
+             None, None],
 
-            [None, None, None, None, None, None, None, "CHAR-P", "CHAR-A", "CHAR-C", "CHAR--", "CHAR-M", "CHAR-A", "CHAR-N", None, None, None, None],
-            [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-            [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, "CHAR-P",
+             "CHAR-A", "CHAR-C", "CHAR--", "CHAR-M", "CHAR-A",
+             "CHAR-N", None, None, None, None],
+            [None, None, None, None, None, None, None, None, None,
+             None, None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None, None,
+             None, None, None, None, None, None, None, None, None],
 
-            [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, None, None, None, None, None, None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, "CHAR-S", "CHAR-T", "CHAR-A", "CHAR-R", "CHAR-T", None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, None, None, None, None, None, None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "CORNER-BOTTOM-LEFT", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT", None],
+            [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None, None,
+             None, None, None, None, None, None, None, None,
+             "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None, None,
+             "CHAR-S", "CHAR-T", "CHAR-A", "CHAR-R", "CHAR-T", None,
+             None, None, "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None, None,
+             None, None, None, None, None, None, None, None,
+             "BORDER-RIGHT", None],
+            [None, None, None, None, "CORNER-BOTTOM-LEFT", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT", None],
 
-            [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None, None, None,
+             None, None, None, None, None, None, None, None],
 
-            [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, None, None, None, None, None, None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, "CHAR-H", "CHAR-I", "CHAR-G", "CHAR-H", "CHAR-S", "CHAR-C", "CHAR-O", "CHAR-R", "CHAR-E", None, "BORDER-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, None, None, None, None, None, None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "CORNER-BOTTOM-LEFT", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT", None],
+            [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None, None,
+             None, None, None, None, None, None, None, None,
+             "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, "CHAR-H", "CHAR-I",
+             "CHAR-G", "CHAR-H", "CHAR-S", "CHAR-C", "CHAR-O", "CHAR-R",
+             "CHAR-E", None, "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None, None, None,
+             None, None, None, None, None, None, None, "BORDER-RIGHT", None],
+            [None, None, None, None, "CORNER-BOTTOM-LEFT", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT", None],
 
-            [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None, None,
+             None, None, None, None, None, None, None, None, None],
 
-            [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, None, None, None, None, None, None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, "CHAR-Q", "CHAR-U", "CHAR-I", "CHAR-T", None, None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "BORDER-LEFT", None, None, None, None, None, None, None, None, None, None, None, "BORDER-RIGHT", None],
-            [None, None, None, None, "CORNER-BOTTOM-LEFT", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT", None],
+            [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None,
+             None, None, None, None, None, None, None, None,
+             None, "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None,
+             None, "CHAR-Q", "CHAR-U", "CHAR-I", "CHAR-T", None,
+             None, None, None, "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None,
+             None, None, None, None, None, None, None, None,
+             None, "BORDER-RIGHT", None],
+            [None, None, None, None, "CORNER-BOTTOM-LEFT",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT",
+             None],
 
-            [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+            [None, None, None, None, None, None, None, None,
+             None, None, None, None, None, None, None, None, None, None]
         ]
 
-#WIDTH
+# WIDTH
 MAX_LETTERS = 9
 BOX_BUFFER = 1
 PACMAN_BUFFER = 2
 WIDTH_MULT = MAX_LETTERS + BOX_BUFFER*2 + PACMAN_BUFFER
 
-#HEIGHT
+# HEIGHT
 MAX_BOXES = 5
 BOX_HEIGHT = 5
 BUFFER = 1
@@ -66,10 +111,14 @@ QUIT = 2
 class Selector(pygame.sprite.Sprite):
     def __init__(self, scale_factor):
         super().__init__()
-        self.selector_cache = SpriteSheetCache.from_default_file_path(scale_factor * 1.5)
-        self.image: pygame.Surface = self.selector_cache.get_static("S-PACMAN-RIGHT")
+        self.selector_cache =\
+            SpriteSheetCache.from_default_file_path(scale_factor * 1.5)
+        self.image: pygame.Surface =\
+            self.selector_cache.get_static("S-PACMAN-RIGHT")
         self.rect: pygame.Rect = self.image.get_rect()
-        self.rect.y += (SUBTILE_SIZE * self.selector_cache.scale_factor * 3 + SUBTILE_SIZE)
+        self.rect.y += (SUBTILE_SIZE *
+                        self.selector_cache.scale_factor *
+                        3 + SUBTILE_SIZE)
 
 
 class MainMenu(State):
@@ -90,14 +139,19 @@ class MainMenu(State):
         )
 
         try:
-            self.asset_cache: SpriteSheetCache = SpriteSheetCache.from_default_file_path(
-                scale_factor=self.scale_factor
-            )
+            self.asset_cache: SpriteSheetCache =\
+                SpriteSheetCache.from_default_file_path(
+                    scale_factor=self.scale_factor
+                )
         except ValidationError as e:
-            sys.exit(style="red", markup=False, highlight=False)
+            sys.exit(f"{e}", style="red", markup=False, highlight=False)
 
-        surface_w = int(len(START_MENU[0]) * SUBTILE_SIZE * self.asset_cache.scale_factor)
-        surface_h = int(len(START_MENU) * SUBTILE_SIZE * self.asset_cache.scale_factor)
+        surface_w = int(len(START_MENU[0]) *
+                        SUBTILE_SIZE *
+                        self.asset_cache.scale_factor)
+        surface_h = int(len(START_MENU) *
+                        SUBTILE_SIZE *
+                        self.asset_cache.scale_factor)
         self.surface = pygame.Surface((surface_w, surface_h))
 
         self.position = pygame.Vector2(
@@ -112,7 +166,12 @@ class MainMenu(State):
         self.menu_group: pygame.sprite.Group = pygame.sprite.Group()
 
         for y, row in enumerate(START_MENU):
-            self._group_add_name(self.asset_cache, self.menu_group, row, [0, y])
+            self._group_add_name(
+                self.asset_cache,
+                self.menu_group,
+                row,
+                [0, y]
+                )
 
         self.selector_group: pygame.sprite.Group = pygame.sprite.Group()
         self.selector = Selector(self.scale_factor)
