@@ -5,6 +5,7 @@ import logging
 import pygame
 
 from ..utils import Config
+from ..render import Hud
 
 from .game_loop import GameLoop
 from .main_menu import MainMenu
@@ -36,7 +37,6 @@ class LoopMachine(State):
         """Sets up logging context and passes game configurations."""
         self._log = logging.getLogger('PacMan')
         self._config = config
-        self.score = 0
 
     def __enter__(self) -> "LoopMachine":
         """Initializes pygame and instantiates game state classes.
@@ -112,7 +112,8 @@ class LoopMachine(State):
                     self.show_highscore.run(self.state)
 
                 case LoopState.ENTER_HIGHSCORE:
-                    self.enter_highscore.run(self.score)
+                    self.enter_highscore.run(Hud.score)
+                    Hud.score = 0
                     self.show_highscore = ShowHighscore(None, None)
                     self.state = LoopState.SHOW_HIGHSCORE
 
