@@ -71,6 +71,9 @@ class ShowHighscore(_BaseHighscore, State):
 
     def _prep_sprite(self, highscores: dict[str, int]):
         self._scores_group: pygame.sprite.Group = pygame.sprite.Group()
+        for key, value in highscores.items():
+            if not(isinstance(key, str) and key.isalnum() and isinstance(value, int) and value >= 0):
+                return
         highscores = {key: value for key, value in sorted(highscores.items(), key=lambda item: item[1], reverse=True)}
         self._group_add_str(self.asset_cache, self._scores_group, "highscore", [0, 0])
         y = 2
