@@ -2,6 +2,7 @@
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
+
 @dataclass(slots=True)
 class Pixel_Pos:
     """Pixel position of spritesheet or screen.
@@ -22,6 +23,7 @@ class Pixel_Pos:
         yield self.x
         yield self.y
 
+
 @dataclass(slots=True)
 class UnitVector:
     """Negative Identity matrix for movement on tiles.
@@ -37,7 +39,7 @@ class UnitVector:
     x: int = Field(ge=-1, le=1, default=0)
     y: int = Field(ge=-1, le=1, default=0)
 
-    def set(self, direction: tuple = (0, 0))-> None:
+    def set(self, direction: tuple = (0, 0)) -> None:
         """Sets new direction."""
         if not direction:
             raise ValueError("'direction' attr is None")
@@ -55,6 +57,7 @@ class UnitVector:
         """Defines attribute order."""
         yield self.x
         yield self.y
+
 
 @dataclass(slots=True)
 class Tile_Pos:
@@ -94,7 +97,7 @@ class Tile_Pos:
     def copy(self) -> "Tile_Pos":
         new_tile: Tile_Pos = Tile_Pos()
         new_tile.set(self.get())
-        return(new_tile)
+        return (new_tile)
 
     @staticmethod
     def get_neighbour(tile: "Tile_Pos", unit_vector: UnitVector) -> "Tile_Pos":
@@ -123,5 +126,3 @@ class Tile_Pos:
 #         """Defines attribute order."""
 #         yield self.width
 #         yield self.height
-
-

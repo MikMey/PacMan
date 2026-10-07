@@ -1,4 +1,7 @@
+import sys
+
 import pygame
+from pydantic import ValidationError
 
 from ..models import SUBTILE_SIZE, StaticSpriteElement
 
@@ -10,18 +13,27 @@ class Hud:
     score = 0
 
     def __init__(self,
-                 asset_cache: SpriteSheetCache,
                  screen: pygame.Surface,
-                 vertical_padding: int) -> None:
+                 vertical_padding: int,
+                 high_score: int,
+                 lives: int
+                 ) -> None:
         """Create sprites that are needed in level."""
-        self.asset_cache = asset_cache
+        self.scale_factor = 8
+        try:
+            self.asset_cache: SpriteSheetCache =\
+                SpriteSheetCache.from_default_file_path(
+                    scale_factor=self.scale_factor
+                )
+        except ValidationError as e:
+            sys.exit(str(e), style="red", markup=False, highlight=False)
         self.screen = screen
         self.vertical_padding = vertical_padding
 
         # Value Logic
         # self.score = 0
-        self.high_score = 100
-        self.lives = 3
+        self.high_score = high_score
+        self.lives = lives
 
         # Display Logic
         self.top_display = pygame.Surface((
@@ -121,6 +133,7 @@ class Hud:
         self.screen.blit(self.top_display, self.top_position)
 
         # self.bottom_display.fill((120, 0, 43))
+        self.bottom_display.fill(0)
         self.lives_group.draw(self.bottom_display)
         self.screen.blit(self.bottom_display, self.bottom_position)
 

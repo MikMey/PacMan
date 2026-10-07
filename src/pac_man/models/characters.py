@@ -11,10 +11,10 @@ from ..render import SpriteSheetCache
 from .tile import Tile
 
 DIRECTION_REVERSE = {
-    (1,0): (-1,0),
-    (0,1): (0,-1),
-    (-1,0): (1,0),
-    (0,-1): (0,1)
+    (1, 0): (-1, 0),
+    (0, 1): (0, -1),
+    (-1, 0): (1, 0),
+    (0, -1): (0, 1)
 }
 
 DIRECTION = {
@@ -24,12 +24,14 @@ DIRECTION = {
     (1, 0): 'RIGHT'
 }
 
+
 class CharacterName(Enum):
     PACMAN = 'PACMAN-'
     BLINKY = 'GHOST-1-'
     PINKY = 'GHOST-2-'
     INKY = 'GHOST-3-'
     CLYDE = 'GHOST-4-'
+
 
 class Character(ABC, pygame.sprite.Sprite):
     """Character Parent Class"""
@@ -81,7 +83,6 @@ class Character(ABC, pygame.sprite.Sprite):
         )
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
-
 
     def _dir_to_string(self, dir: UnitVector) -> str:
         """Converts :obj:`Direction` to string. Defaults to RIGHT.
@@ -169,10 +170,11 @@ class Character(ABC, pygame.sprite.Sprite):
         dx = target_tile.x - self.rect.x
         dy = target_tile.y - self.rect.y
 
-        #because current_dir is a unit vector, we dont need to check
-        #whether the operation is correct, we can simply try and worst case have
+        # because current_dir is a unit vector, we dont need to check
+        # whether the operation is correct,
+        # we can simply try and worst case have
         # pos * 0 or pos * 1/-1
-        #if past target, snap to target (sometimes looks janky but ehh)
+        # if past target, snap to target (sometimes looks janky but ehh)
         if self.current_dir.x * dx + self.current_dir.y * dy < 0:
             self.rect.x = target_tile.x
             self.rect.y = target_tile.y
@@ -217,9 +219,7 @@ class Character(ABC, pygame.sprite.Sprite):
         """Get correct sprite data based on context."""
         pass
 
-
     @abstractmethod
     def kill() -> None:
         """Starts death animation."""
         pass
-

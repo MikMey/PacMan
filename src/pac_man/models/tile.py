@@ -11,6 +11,7 @@ from ..render import SpriteSheetCache
 SUBTILE_SIZE = 8
 TILE_SIZE = SUBTILE_SIZE * 3
 
+
 @dataclass
 class Tile:
     """Metadata of tile walls and items (not holding sprite data).
@@ -27,13 +28,13 @@ class Tile:
         True if there is a wall to the west of tile.
 
     """
-    #for sprite
+    # for sprite
     is_top_closed: bool
     is_right_closed: bool
     is_bottom_closed: bool
     is_left_closed: bool
 
-    #for movement
+    # for movement
     x: int
     y: int
 
@@ -49,7 +50,8 @@ class Tile:
     _matrix: ClassVar[list[list["Tile"]]] = []
 
     def create_reference(self):
-        """reference neighbouring tiles for easy access in rendering and ghost ai"""
+        """reference neighbouring tiles for
+        easy access in rendering and ghost ai"""
 
         if self.y > 0:
             self.top = Tile._matrix[self.y - 1][self.x]
@@ -126,9 +128,9 @@ class TileSpriteFactory(BaseModel):
         self._sub_h = sub_sample.get_height()
 
     def from_tile(
-            self, 
+            self,
             tile: Tile
-        ) -> pygame.Surface:
+            ) -> pygame.Surface:
         """Get baked tile surface from tile data and its neighbors.
 
         Parameters

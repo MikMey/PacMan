@@ -6,6 +6,7 @@ import json
 from pydantic import BaseModel, Field, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
+
 class LevelMetadata(BaseModel):
     """Metadata of a given level config."""
     width: int = Field(ge=1, default=10)
@@ -254,7 +255,7 @@ class Config(BaseModel):
         try:
             with open(self.highscore_filename, 'r', encoding="utf-8") as f:
                 content = f.read()
-                if not content:
+                if not content or content == 'null':
                     scores = []
                 else:
                     scores = json.loads(content)

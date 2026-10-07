@@ -2,19 +2,18 @@
 ## Movement
 
 ## Logic
-- [increase ghost touch radius](./src/pac_man/loop/level.py#L242)
+- [increase ghost touch radius](./src/pac_man/loop/level.py#L242) (bonus)
 
 ## Visual
-- [level load fully in frame](./src/pac_man/loop/level.py#L46)
-- [screen size not matching to possible size](./src/pac_man/loop/level.py#L46)
-- [death animation always correct lenght](./src/pac_man/loop/game_loop.py#L150)
+- visualize timer
+- visualize current level
+- [death animation always correct lenght](./src/pac_man/loop/game_loop.py#L150) (bonus)
+- make highscore screens look nicer (bonus)
+- better game over screen (bonus)
+- show details on pause (bonus)
 
 # Features
-- [level time limit](./src/pac_man/loop/game_loop.py#L109)
+- instructions option in main menu
 - include super pacgums
 - allow ghosts to be eaten
-- [start menu](./src/pac_man/loop/fsm.py#54)
-- [game over screen](./src/pac_man/loop/fsm.py#54)
-- leaderboard
-- cheat mode
-- show details on pause
+- return to main menu from game

@@ -1,8 +1,8 @@
 NAME := src.pac_man
-SOURCE := ./src/pac_man/
+SOURCE := src/pac_man
 PYTHON ?= python3 -m
 FLAKE8 := uv run -m flake8
-FLAKE8_FLAGS := --count --show-source --filename [./*.py]
+FLAKE8_FLAGS := --count --show-source
 MYPY := uv run mypy
 MYPY_FLAGS := --warn-return-any \
 				--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
@@ -18,9 +18,12 @@ install:
 run:
 	uv run $(PYTHON) $(NAME) $(CONFIG)
 
+source:
+	find $(SOURCE) -type f -name '*.py' -print0 | xargs -0
+
 lint:
-	$(FLAKE8) $(FLAKE8_FLAGS) $(SOURCE)*.py
-	$(MYPY) $(SOURCE)*.py $(MYPY_FLAGS)
+	$(FLAKE8) $(FLAKE8_FLAGS) $(SOURCE)
+	$(MYPY) $(SOURCE) $(MYPY_FLAGS)
 
 clean:
 	rm -rf .mypy_cache .pytest_cache

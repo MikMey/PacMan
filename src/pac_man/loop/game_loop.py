@@ -1,5 +1,6 @@
 import sys
 from enum import Enum, auto
+import random
 
 import logging
 import pygame
@@ -31,22 +32,30 @@ class GameLoop(State):
         self.screen = screen
         self.clock = clock
 
-    def load_level(self, width, height) -> None:
+    def load_level(self, width, height, level) -> None:
         """Clear screen, get matrix, init hud and level, draw"""
 
         self.screen.fill(0)
         pygame.display.flip()
 
-        hex_matrix = MazeGenerator(
-            size=(
-                width,
-                height
-            )
-        ).maze
+        if level == 0:
+            seed = 69420
+        else:
+            seed = 0
+        try:
+            hex_matrix = MazeGenerator(
+                size=(
+                    width,
+                    height
+                ),
+                seed=seed
+            ).maze
+        except Exception as err:
+            sys.exit(f"Mazegen skillissue:\n{err}")
         # log = logging.getLogger('PacMan')
         # log.debug(f'hex_matrix={hex_matrix}')
 
-        self.level = Level(
+        self.level: Level = Level(
             hex_matrix=hex_matrix,
             screen=self.screen,
             columns=width,
@@ -54,9 +63,10 @@ class GameLoop(State):
         )
 
         self.hud = Hud(
-            asset_cache=self.level.asset_cache,
             screen=self.screen,
-            vertical_padding=self.level.vertical_padding
+            vertical_padding=self.level.vertical_padding,
+            high_score=self.highscore,
+            lives=self.lives
         )
         self.level.render()
         self.hud.render()
@@ -102,58 +112,87 @@ class GameLoop(State):
             case pygame.K_ESCAPE:
                 sys.exit()
 
+            case pygame.K_KP1:
+                self.level.pacman.kill(self.dt)
+
+            case pygame.K_KP2:
+                self.lives += 1
+                if self.hud:
+                    self.hud.update_lives(self.lives)
+
+            case pygame.K_KP3:
+                if self.level and not self.level.freeze:
+                    self.level.freeze = True
+                elif self.level:
+                    self.level.freeze = False
+
+            case pygame.K_PAGEUP:
+                if self.level:
+                    self.level.pacman.speed += 1
+
+            case pygame.K_PAGEDOWN:
+                if self.level and self.level.pacman.speed >= 1:
+                    self.level.pacman.speed -= 1
+
             case _:
                 self.state = GameState.RUN_LEVEL
 
-    def run(self) -> None:
+    def run(self, highscore: int) -> None:
         """Finite State Machine for level based/gameloop logic"""
         self.state = GameState.LOAD_LEVEL
-        level = 0
+        curr_level = 0
         self.lives = 3
+        self.highscore = highscore
 
         while self.state != GameState.GAME_OVER:
 
-            dt = self.clock.tick(60) / 1000.0
+            self.dt = self.clock.tick(60) / 1000.0
             match self.state:
 
                 case GameState.LOAD_LEVEL:
                     # self.log.debug('Enter LOAD_LEVEL')
-                    if len(self.config.levels) > level:
-                        width = self.config.levels[level].width
-                        height = self.config.levels[level].height
+                    if len(self.config.levels) > curr_level:
+                        lvl_conf = self.config.levels[curr_level]
                     else:
-                        width = self.config.default_level.width
-                        height = self.config.default_level.height
+                        lvl_conf = self.config.default_level
+                    width = lvl_conf.width
+                    height = lvl_conf.height
 
                     self.load_level(
                         width=width,
-                        height=height
+                        height=height,
+                        level=curr_level
                     )
-                    level += 1
+                    self.limit = lvl_conf.timer
+                    curr_level += 1
                     self.state = GameState.PAUSE
 
                 case GameState.RUN_LEVEL:
                     # self.log.debug('Enter RUN_LEVEL')
+                    self.limit -= self.dt
+                    if self.limit <= 0:
+                        self.state = GameState.GAME_OVER
+                        continue
                     self.dstart = 0
                     self.handle_event()
 
-                    alive = self.level.run(dt)
-                    self.hud.loop(dt)
+                    alive = self.level.run(self.dt)
+                    self.hud.loop(self.dt)
                     if not alive:
                         self.state = GameState.PLAYER_DEATH
 
                 case GameState.RESPAWN_LEVEL:
                     # self.log.debug('Enter RESPAWN_LEVEL')
-                    self.dstart += dt
-                    self.level.pacman.kill(dt)
+                    self.dstart += self.dt
+                    self.level.pacman.kill(self.dt)
                     self.level.render()
                     if self.dstart > 1:
                         self.level.init_characters()
+                        self.hud.update_lives(self.lives)
                         self.state = GameState.PAUSE
 
                 case GameState.PAUSE:
                     # self.log.debug('Enter PAUSE')
-
                     self.pause()
 
                 case GameState.PLAYER_DEATH:

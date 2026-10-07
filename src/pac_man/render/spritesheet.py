@@ -157,6 +157,8 @@ class SpriteSheetCache(BaseModel):
         # Numbers, Letters and Special Characters
         self.bake_text_offset(self.text_color_offset)
 
+        self.cache_new("S-PACMAN-RIGHT", 103, 151, 16)
+
         # === ANIMATED TILES === #
 
         # Pacman Sprites
@@ -327,7 +329,7 @@ class SpriteSheetCache(BaseModel):
         cache_text("CHAR-N", 1, 37)
         cache_text("CHAR-O", 10, 37)
         cache_text("CHAR-P", 19, 37)
-        cache_text("CHAR-Q", 37, 37)
+        cache_text("CHAR-Q", 28, 37)
         cache_text("CHAR-R", 37, 37)
         cache_text("CHAR-S", 46, 37)
         cache_text("CHAR-T", 55, 37)
@@ -337,6 +339,7 @@ class SpriteSheetCache(BaseModel):
         cache_text("CHAR-X", 91, 37)
         cache_text("CHAR-Y", 100, 37)
         cache_text("CHAR-Z", 109, 37)
+        cache_text("CHAR- ", 127, 37)
 
         cache_text("CHAR-/", 91, 10)
         cache_text("CHAR--", 100, 10)

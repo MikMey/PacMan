@@ -9,6 +9,7 @@ from .utils import Config
 from .render import SpriteSheetCache
 from .loop import GameLoop, LoopMachine
 
+
 class ElapsedFormatter():
 
     def __init__(self):
@@ -16,12 +17,12 @@ class ElapsedFormatter():
 
     def format(self, record: logging.LogRecord):
         elapsed_seconds = record.created - self.start_time
-        #using timedelta here for convenient default formatting
+        # using timedelta here for convenient default formatting
         elapsed = timedelta(seconds = elapsed_seconds)
         return "{} {} - {}".format(elapsed, record.levelname, record.getMessage())
 
 def start_log():
-    #add custom formatter to root logger for simple demonstration
+    # add custom formatter to root logger for simple demonstration
     handler = logging.StreamHandler()
     handler.setFormatter(ElapsedFormatter())
     logging.getLogger().addHandler(handler)
@@ -41,11 +42,10 @@ def main() -> int:
         console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 
-    with LoopMachine(config=config) as loop_machine:
-        loop_machine.run()
+    with LoopMachine(config=config) as pacman:
+        pacman.run()
 
     return 0
-
 
 if __name__ == "__main__":
     main()

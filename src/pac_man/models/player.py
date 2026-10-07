@@ -9,6 +9,7 @@ from ..render import SpriteSheetCache
 from .tile import Tile
 from .characters import Character, CharacterName, DIRECTION_REVERSE
 
+
 class PlayerState(Enum):
     ALIVE = auto()
     DEAD = auto()
@@ -23,8 +24,8 @@ class Player(Character):
             asset_cache: SpriteSheetCache,
             start_pos: Tile_Pos,
             subtile_size: int
-        ) -> None:
-        
+    ) -> None:
+
         super().__init__(
             character_name=CharacterName.PACMAN,
             speed_factor=1.4,
@@ -33,9 +34,8 @@ class Player(Character):
             subtile_size=subtile_size
             )
         self.state = PlayerState.ALIVE
-        
-        self.buffered_dir: UnitVector = UnitVector()
 
+        self.buffered_dir: UnitVector = UnitVector()
 
     def set_image(self) -> None:
         """sprite image based on current action"""
@@ -73,15 +73,15 @@ class Player(Character):
 
         if keys[pygame.K_UP] or keys[pygame.K_w] and self.current_dir.y != -1:
             self.buffered_dir.set((0, -1))
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and self.current_dir.x != 1:
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d] and
+              self.current_dir.x != 1):
             self.buffered_dir.set((1, 0))
-        elif keys[pygame.K_DOWN] or keys[pygame.K_s] and self.current_dir.y != 1:
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s] and
+              self.current_dir.y != 1):
             self.buffered_dir.set((0, 1))
-        elif keys[pygame.K_LEFT] or keys[pygame.K_a] and self.current_dir.x != -1:
+        elif (keys[pygame.K_LEFT] or keys[pygame.K_a] and
+              self.current_dir.x != -1):
             self.buffered_dir.set((-1, 0))
-
-        if keys[pygame.K_KP1]:
-            self.kill()
 
     def _update_position(self) -> None:
         """update target unless moving straight"""
@@ -92,7 +92,12 @@ class Player(Character):
         keys = pygame.key.get_pressed()
         self.handle_input(keys)
 
-        if self.current_dir.get() != (0,0) and self.buffered_dir.get() == DIRECTION_REVERSE[self.current_dir.get()]:
+        if (
+            self.current_dir.get() != (0, 0) and
+            self.buffered_dir.get() == DIRECTION_REVERSE[
+                self.current_dir.get()
+                ]
+        ):
             self.current_dir = self.buffered_dir
             self.target_tile = self.current_tile
 
@@ -100,10 +105,19 @@ class Player(Character):
         if not self._move_straight():
             self.current_tile = self.target_tile.copy()
 
-            if not self.buffered_dir.is_still() and not self._is_wall(self.buffered_dir.get(), Tile.get_tile(self.current_tile)):
+            if (not self.buffered_dir.is_still() and
+                not self._is_wall(
+                    self.buffered_dir.get(),
+                    Tile.get_tile(self.current_tile)
+            )):
                 self.current_dir = replace(self.buffered_dir)
 
-            elif self._is_wall(self.current_dir.get(), Tile.get_tile(self.current_tile)):
+            elif self._is_wall(
+                self.current_dir.get(),
+                Tile.get_tile(self.current_tile)
+            ):
                 self.current_dir.set((0, 0))
 
-            self.target_tile = Tile_Pos.get_neighbour(self.current_tile, self.current_dir)
+            self.target_tile = Tile_Pos.get_neighbour(
+                self.current_tile, self.current_dir
+                )
