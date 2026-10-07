@@ -80,8 +80,8 @@ class LoopMachine(State):
     def run(self) -> None:
         """Finite State machine for entirety of PacMan."""
         while self.state != LoopState.END_GAME:
-            self.handle_event()
             self.screen.fill(0)
+            self.handle_event()
 
             match self.state:
                 case LoopState.MAIN_MENU:
@@ -95,7 +95,7 @@ class LoopMachine(State):
                         screen=self.screen,
                         clock=self.clock
                     )
-                    self.game_loop.run()
+                    self.game_loop.run(ShowHighscore.highscore)
                     self.state = LoopState.DEATH_SCREEN
 
                 case LoopState.DEATH_SCREEN:

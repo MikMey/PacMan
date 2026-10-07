@@ -13,8 +13,11 @@ class Hud:
     score = 0
 
     def __init__(self,
-                 screen: pygame.Surface,
-                 vertical_padding: int) -> None:
+                screen: pygame.Surface,
+                vertical_padding: int,
+                high_score: int,
+                lives: int
+            ) -> None:
         """Create sprites that are needed in level."""
         self.scale_factor = 8
         try:
@@ -29,8 +32,8 @@ class Hud:
 
         # Value Logic
         # self.score = 0
-        self.high_score = 100
-        self.lives = 3
+        self.high_score = high_score
+        self.lives = lives
 
         # Display Logic
         self.top_display = pygame.Surface((
@@ -130,6 +133,7 @@ class Hud:
         self.screen.blit(self.top_display, self.top_position)
 
         # self.bottom_display.fill((120, 0, 43))
+        self.bottom_display.fill(0)
         self.lives_group.draw(self.bottom_display)
         self.screen.blit(self.bottom_display, self.bottom_position)
 

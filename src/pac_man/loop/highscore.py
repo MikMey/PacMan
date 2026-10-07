@@ -60,12 +60,14 @@ class _BaseHighscore():
 
 
 class ShowHighscore(_BaseHighscore, State):
+
+    highscore: int = 0
+
     def __init__(self, highscore_file: Optional[str], screen: Optional[pygame.Surface]):
         if _BaseHighscore.highscore_file and _BaseHighscore.screen:
             super().__init__(None, None)
         else:
             super().__init__(highscore_file, screen)
-
         highscores = self._get_highscore()
         self._prep_sprite(highscores)
 
@@ -78,6 +80,8 @@ class ShowHighscore(_BaseHighscore, State):
         self._group_add_str(self.asset_cache, self._scores_group, "highscore", [0, 0])
         y = 2
         for key, value in highscores.items():
+            if value > ShowHighscore.highscore:
+                ShowHighscore.highscore = value
             self._group_add_str(self.asset_cache, self._scores_group, key, [0, y])
             self._group_add_str(self.asset_cache, self._scores_group, str(value), [11, y])
             y+=2
@@ -167,6 +171,8 @@ class EnterHighscore(_BaseHighscore, State):
             self.screen.blit(self.surface, self.position)
             pygame.display.flip()
             self._get_name()
+        if not self.player_name or self.player_name == '':
+            return
         highscores = self._get_highscore()
         highscores = self._validate_score(highscores, score)
         self._write_highscore(highscores)

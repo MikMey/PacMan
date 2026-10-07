@@ -64,7 +64,9 @@ class GameLoop(State):
 
         self.hud = Hud(
             screen=self.screen,
-            vertical_padding=self.level.vertical_padding
+            vertical_padding=self.level.vertical_padding,
+            high_score=self.highscore,
+            lives=self.lives
         )
         self.level.render()
         self.hud.render()
@@ -116,11 +118,12 @@ class GameLoop(State):
             case _:
                 self.state = GameState.RUN_LEVEL
 
-    def run(self) -> None:
+    def run(self, highscore: int) -> None:
         """Finite State Machine for level based/gameloop logic"""
         self.state = GameState.LOAD_LEVEL
         curr_level = 0
         self.lives = 3
+        self.highscore = highscore
 
         while self.state != GameState.GAME_OVER:
 
@@ -166,6 +169,7 @@ class GameLoop(State):
                     self.level.render()
                     if self.dstart > 1:
                         self.level.init_characters()
+                        self.hud.update_lives(self.lives)
                         self.state = GameState.PAUSE
 
                 case GameState.PAUSE:
