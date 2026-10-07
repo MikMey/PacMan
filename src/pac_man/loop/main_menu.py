@@ -62,6 +62,7 @@ START = 0
 HIGHSCORE = 1
 QUIT = 2
 
+
 class Selector(pygame.sprite.Sprite):
     def __init__(self, scale_factor):
         super().__init__()
@@ -69,6 +70,7 @@ class Selector(pygame.sprite.Sprite):
         self.image: pygame.Surface = self.selector_cache.get_static("S-PACMAN-RIGHT")
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.y += (SUBTILE_SIZE * self.selector_cache.scale_factor * 3 + SUBTILE_SIZE)
+
 
 class MainMenu(State):
     state = [
@@ -105,7 +107,6 @@ class MainMenu(State):
 
         self.init_draw()
 
-
     def init_draw(self):
 
         self.menu_group: pygame.sprite.Group = pygame.sprite.Group()
@@ -117,19 +118,31 @@ class MainMenu(State):
         self.selector = Selector(self.scale_factor)
         self.selector_group.add(self.selector)
 
-    
     def handle_input(self):
         if self.keys[pygame.K_w]:
             if self.curr == 0:
-                self.selector.rect.y += (SUBTILE_SIZE * self.selector.selector_cache.scale_factor * 4)*2
+                self.selector.rect.y += (
+                    SUBTILE_SIZE *
+                    self.selector.selector_cache.scale_factor *
+                    4)*2
             else:
-                self.selector.rect.y -= (SUBTILE_SIZE * self.selector.selector_cache.scale_factor * 4)
+                self.selector.rect.y -= (
+                    SUBTILE_SIZE *
+                    self.selector.selector_cache.scale_factor *
+                    4)
             self.curr = (self.curr - 1) % 3
         elif self.keys[pygame.K_s]:
             if self.curr == 2:
-                self.selector.rect.y -= (SUBTILE_SIZE * self.selector.selector_cache.scale_factor * 4)*2
+                self.selector.rect.y -= (
+                    SUBTILE_SIZE *
+                    self.selector.selector_cache.scale_factor *
+                    4)*2
             else:
-                self.selector.rect.y += (SUBTILE_SIZE * self.selector.selector_cache.scale_factor * 4)
+                self.selector.rect.y += (
+                    SUBTILE_SIZE *
+                    self.selector.selector_cache.scale_factor
+                    * 4
+                    )
             self.curr = (self.curr + 1) % 3
 
     def render(self):
@@ -143,7 +156,7 @@ class MainMenu(State):
         if self.keys[pygame.K_SPACE]:
             return MainMenu.state[self.curr]
         self.handle_input()
-        
+
         self.render()
         time.sleep(0.15)
         return LoopState.MAIN_MENU

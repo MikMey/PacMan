@@ -9,6 +9,7 @@ from ..render import SpriteSheetCache
 
 SUBTILE_SIZE = 8
 
+
 class LoopState(Enum):
     MAIN_MENU = auto()
     GAME_LOOP = auto()
@@ -17,6 +18,7 @@ class LoopState(Enum):
     END_GAME = auto()
     SHOW_HIGHSCORE = auto()
     ENTER_HIGHSCORE = auto()
+
 
 class State(ABC):
     def __init__(self, state):
@@ -44,7 +46,12 @@ class State(ABC):
                 self.handle_input(pygame_event)
 
     @staticmethod
-    def _group_add_str(cache: SpriteSheetCache, group: pygame.sprite.Group, s: str, pos: list) -> None:
+    def _group_add_str(
+        cache: SpriteSheetCache,
+        group: pygame.sprite.Group,
+        s: str,
+        pos: list
+    ) -> None:
         for char in s:
             group.add(
                 StaticSpriteElement.from_pixel(
@@ -56,7 +63,12 @@ class State(ABC):
             pos[0] += 1
 
     @staticmethod
-    def _group_add_name(cache: SpriteSheetCache, group: pygame.sprite.Group, arr: list[str|None], pos: list) -> None:
+    def _group_add_name(
+        cache: SpriteSheetCache,
+        group: pygame.sprite.Group,
+        arr: list[str | None],
+        pos: list
+    ) -> None:
         for x, name in enumerate(arr):
             if not name:
                 continue
@@ -67,4 +79,3 @@ class State(ABC):
                     pos[1] * cache.scale_factor * SUBTILE_SIZE
                 )
             )
-

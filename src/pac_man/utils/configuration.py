@@ -6,6 +6,7 @@ import json
 from pydantic import BaseModel, Field, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
+
 class LevelMetadata(BaseModel):
     """Metadata of a given level config."""
     width: int = Field(ge=1, default=10)

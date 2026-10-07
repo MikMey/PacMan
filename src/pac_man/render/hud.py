@@ -18,9 +18,10 @@ class Hud:
         """Create sprites that are needed in level."""
         self.scale_factor = 8
         try:
-            self.asset_cache: SpriteSheetCache = SpriteSheetCache.from_default_file_path(
-                scale_factor=self.scale_factor
-            )
+            self.asset_cache: SpriteSheetCache =\
+                SpriteSheetCache.from_default_file_path(
+                    scale_factor=self.scale_factor
+                )
         except ValidationError as e:
             sys.exit(str(e), style="red", markup=False, highlight=False)
         self.screen = screen

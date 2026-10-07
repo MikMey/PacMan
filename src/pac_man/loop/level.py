@@ -158,9 +158,12 @@ class Level(State):
     def populate_sprite_groups(self) -> None:
         """Add sprites needed in level to sprite groups."""
 
-        self.tile_group: pygame.sprite.Group = pygame.sprite.Group()  # Tiles without pacgums
-        self.gum_group: pygame.sprite.Group = pygame.sprite.Group()  # Pacgums and such
-        self.fruit_group: pygame.sprite.Group = pygame.sprite.Group()  # Decorative Fruits
+        self.tile_group: pygame.sprite.Group =\
+            pygame.sprite.Group()  # Tiles without pacgums
+        self.gum_group: pygame.sprite.Group =\
+            pygame.sprite.Group()  # Pacgums and such
+        self.fruit_group: pygame.sprite.Group =\
+            pygame.sprite.Group()  # Decorative Fruits
 
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
 

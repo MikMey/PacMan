@@ -9,10 +9,12 @@ from .characters import CharacterName, Character, DIRECTION_REVERSE
 from .player import Player
 from .tile import Tile
 
+
 class GhostState(Enum):
     ROAMING = 0
     FLEEING = 1
     RESPAWNING = 2
+
 
 class GhostPersonality(Enum):
 
@@ -20,6 +22,7 @@ class GhostPersonality(Enum):
     PINKY: Callable = 'pinky'
     INKY: Callable = 'inky'
     CLYDE: Callable = 'clyde'
+
 
 class Ghost(Character):
 
@@ -43,9 +46,8 @@ class Ghost(Character):
         self.ghost_name = ghost_peronality
         self.player: Player = player
         self.state: GhostState = GhostState.ROAMING
-        
 
-        self.current_dir.set((0,1))
+        self.current_dir.set((0, 1))
 
     def set_image(self):
         if self.state == GhostState.RESPAWNING:
@@ -78,8 +80,10 @@ class Ghost(Character):
                 func: Callable = self.__getattribute__(self.ghost_name.value)
                 func()
 
-            self.target_tile = Tile_Pos.get_neighbour(self.current_tile, self.current_dir)
-
+            self.target_tile = Tile_Pos.get_neighbour(
+                self.current_tile,
+                self.current_dir
+                )
 
     def blinky(self):
         """Direct chase; flee top right"""
@@ -87,7 +91,10 @@ class Ghost(Character):
             # self.log.debug('blinky call')
             self.current_dir = self.bfs(
                 Tile_Pos(self.current_tile.x, self.current_tile.y),
-                Tile_Pos(self.player.current_tile.x, self.player.current_tile.y)
+                Tile_Pos(
+                    self.player.current_tile.x,
+                    self.player.current_tile.y
+                    )
                 )
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
@@ -97,22 +104,33 @@ class Ghost(Character):
         else:
             pass
 
-
     def pinky(self):
         """Chase 2 tiles to right of pacman; flee top left"""
         if self.state == GhostState.ROAMING:
-            if random.randint(0,2) != 0 and not self._is_wall(self.current_dir.get(), Tile.get_tile(self.current_tile)):
+            if (
+                random.randint(0, 2) != 0 and
+                not self._is_wall(
+                    self.current_dir.get(),
+                    Tile.get_tile(self.current_tile)
+                    )
+            ):
                 return
             # self.log.debug('pinky call')
             if self.player.current_tile.x + 3 <= len(self.tile_matrix[0]):
                 self.current_dir = self.bfs(
                     Tile_Pos(self.current_tile.x, self.current_tile.y),
-                    Tile_Pos(self.player.current_tile.x + 2, self.player.current_tile.y)
+                    Tile_Pos(
+                        self.player.current_tile.x + 2,
+                        self.player.current_tile.y
+                        )
                     )
             else:
                 self.current_dir = self.bfs(
                     Tile_Pos(self.current_tile.x, self.current_tile.y),
-                    Tile_Pos(self.player.current_tile.x - 2, self.player.current_tile.y)
+                    Tile_Pos(
+                        self.player.current_tile.x - 2,
+                        self.player.current_tile.y
+                        )
                     )
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
@@ -127,31 +145,43 @@ class Ghost(Character):
         # self.log.debug('inky call')
 
         TURN_RIGHT = {
-            (1,0): (0,1),
-            (0,1): (-1,0),
-            (-1,0): (0,-1),
-            (0,-1): (1,0)
+            (1, 0): (0, 1),
+            (0, 1): (-1, 0),
+            (-1, 0): (0, -1),
+            (0, -1): (1, 0)
         }
         TURN_LEFT = {
-            (1,0): (0,-1),
-            (0,1): (1,0),
-            (-1,0): (0,1),
-            (0,-1): (-1,0)
+            (1, 0): (0, -1),
+            (0, 1): (1, 0),
+            (-1, 0): (0, 1),
+            (0, -1): (-1, 0)
         }
-        
+
         if self.state == GhostState.ROAMING:
-            if random.randint(0,2) == 0 and not self._is_wall(self.current_dir.get(), Tile.get_tile(self.current_tile)):
+            if (
+                random.randint(0, 2) == 0 and
+                not self._is_wall(
+                    self.current_dir.get(),
+                    Tile.get_tile(self.current_tile)
+                    )
+            ):
                 return
-            
+
             turn = self.current_dir.get()
-                
-            if random.randint(0,2):
+
+            if random.randint(0, 2):
                 while True:
                     turn = TURN_LEFT[turn]
                     if turn == self.current_dir.get():
                         self.current_dir.set(DIRECTION_REVERSE[turn])
                         break
-                    if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != DIRECTION_REVERSE[self.current_dir.get()]:
+                    if (
+                        not self._is_wall(
+                            turn,
+                            Tile.get_tile(self.current_tile)
+                        ) and
+                        turn != DIRECTION_REVERSE[self.current_dir.get()]
+                    ):
                         self.current_dir.set(turn)
                         break
             else:
@@ -160,14 +190,23 @@ class Ghost(Character):
                     if turn == self.current_dir.get():
                         self.current_dir.set(DIRECTION_REVERSE[turn])
                         break
-                    if not self._is_wall(turn, Tile.get_tile(self.current_tile)) and turn != DIRECTION_REVERSE[self.current_dir.get()]:
+                    if (
+                        not self._is_wall(
+                            turn,
+                            Tile.get_tile(self.current_tile)
+                        ) and
+                        turn != DIRECTION_REVERSE[self.current_dir.get()]
+                    ):
                         self.current_dir.set(turn)
                         break
                 # self.log.debug(f"turn={turn}")
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
                 Tile_Pos(self.current_tile.x, self.current_tile.y),
-                Tile_Pos(len(self.tile_matrix[0]) - 1, len(self.tile_matrix) - 1)
+                Tile_Pos(
+                    len(self.tile_matrix[0]) - 1,
+                    len(self.tile_matrix) - 1
+                    )
                 )
         else:
             pass
@@ -177,18 +216,27 @@ class Ghost(Character):
         """move random at intersection; flee bottom left"""
         # self.log.debug('clyde call')
         CHANGE = [
-            (1,0),
-            (0,1),
-            (-1,0),
-            (0,-1)
+            (1, 0),
+            (0, 1),
+            (-1, 0),
+            (0, -1)
         ]
         if self.state == GhostState.ROAMING:
-            if random.randint(0,3) == 0 and not self._is_wall(self.current_dir.get(), Tile.get_tile(self.current_tile)):
+            if (
+                random.randint(0, 3) == 0 and
+                not self._is_wall(
+                    self.current_dir.get(),
+                    Tile.get_tile(self.current_tile)
+                    )
+            ):
                 return
             while True:
-                res = random.randint(0,3)
+                res = random.randint(0, 3)
                 direction = CHANGE[res]
-                if not self._is_wall(direction, Tile.get_tile(self.current_tile)):
+                if not self._is_wall(
+                    direction,
+                    Tile.get_tile(self.current_tile)
+                ):
                     self.current_dir.set(direction)
                     break
         elif self.state == GhostState.FLEEING:
@@ -198,7 +246,6 @@ class Ghost(Character):
                 )
         else:
             pass
-
 
     def bfs(self, pos: Tile_Pos, target: Tile_Pos) -> UnitVector:
         # self.log.debug('bfs call')
@@ -216,7 +263,7 @@ class Ghost(Character):
                     break
                 queue.append(neighbour)
         location: Tile = Tile.get_tile(pos)
-        direction: UnitVector = UnitVector(0,0)
+        direction: UnitVector = UnitVector(0, 0)
         for neighbour in location.neighbours:
             if neighbour.cost == location.cost - 1:
                 direction.set(
@@ -227,4 +274,3 @@ class Ghost(Character):
                 tile.cost = -1
         # self.log.debug(f'dir={direction}')
         return direction
-
