@@ -139,6 +139,10 @@ class GameLoop(State):
                 if self.level and self.level.pacman.speed >= 1:
                     self.level.pacman.speed -= 1
 
+            case pygame.K_KP5:
+                if self.level:
+                    self.level.switch_ghosts()
+
             case _:
                 self.state = GameState.RUN_LEVEL
 

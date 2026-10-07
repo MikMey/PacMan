@@ -52,8 +52,10 @@ class Ghost(Character):
     def set_image(self) -> None:
         if self.state == GhostState.RESPAWNING:
             frames = self.asset_cache.get_anim(
-                'GHOST-DEAD' + self._dir_to_string(self.current_dir)
+                'GHOST-DEAD-' + self._dir_to_string(self.current_dir)
             )
+            if not len(frames) > self.current_frame:
+                self.current_frame = 0
         elif self.state == GhostState.FLEEING:
             frames = self.asset_cache.get_anim(
                 self.name + "SCARED"
@@ -166,6 +168,9 @@ class Ghost(Character):
                     )
             ):
                 return
+
+            if self.current_dir.get() == (0, 0):
+                self.current_dir.set((1, 0))
 
             turn = self.current_dir.get()
 

@@ -1,5 +1,6 @@
 # Bugs
 ## Movement
+- fix da ghsot
 
 ## Logic
 - [increase ghost touch radius](./src/pac_man/loop/level.py#L242) (bonus)
@@ -15,5 +16,4 @@
 # Features
 - instructions option in main menu
 - include super pacgums
-- allow ghosts to be eaten
 - return to main menu from game

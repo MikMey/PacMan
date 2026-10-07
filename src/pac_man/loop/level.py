@@ -263,6 +263,14 @@ class Level(State):
             if distance_squared < (eat_radius ** 2):
                 return item
 
+    def switch_ghosts(self) -> None:
+        for ghost in self.ghost_group:
+            ghost: Ghost = ghost
+            if ghost.state == GhostState.ROAMING:
+                ghost.state = GhostState.FLEEING
+            elif ghost.state == GhostState.FLEEING:
+                ghost.state = GhostState.ROAMING
+
     def collission_logic(self) -> None:
         # superpacgum
 
