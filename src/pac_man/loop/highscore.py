@@ -45,7 +45,7 @@ class _BaseHighscore():
         try:
             with open(self.highscore_file, 'r') as f:
                 raw_highscores: str = f.read()
-                if not raw_highscores or not len(raw_highscores):
+                if not raw_highscores or not len(raw_highscores) or raw_highscores == 'null':
                     highscores = {}
                 else:
                     highscores = json.loads(raw_highscores)
@@ -108,7 +108,6 @@ class EnterHighscore(_BaseHighscore, State):
 
     def _write_highscore(self, content: dict):
         try:
-            print(content)
             with open(self.highscore_file, 'w') as f:
                 json.dump(content, f)
         except json.decoder.JSONDecodeError as err:
@@ -154,6 +153,8 @@ class EnterHighscore(_BaseHighscore, State):
 
 
     def run(self, score):
+        if not score:
+            score = 0
         self.player_name = ""
         self.confirmed = True
         self._prep_sprites_enter()

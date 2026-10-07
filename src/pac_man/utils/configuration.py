@@ -255,7 +255,7 @@ class Config(BaseModel):
         try:
             with open(self.highscore_filename, 'r', encoding="utf-8") as f:
                 content = f.read()
-                if not content:
+                if not content or content == 'null':
                     scores = []
                 else:
                     scores = json.loads(content)
