@@ -115,6 +115,25 @@ class GameLoop(State):
             case pygame.K_KP1:
                 self.level.pacman.kill(self.dt)
 
+            case pygame.K_KP2:
+                self.lives += 1
+                if self.hud:
+                    self.hud.update_lives(self.lives)
+
+            case pygame.K_KP3:
+                if self.level and not self.level.freeze:
+                    self.level.freeze = True
+                elif self.level:
+                    self.level.freeze = False
+
+            case pygame.K_PAGEUP:
+                if self.level:
+                    self.level.pacman.speed += 1
+
+            case pygame.K_PAGEDOWN:
+                if self.level and self.level.pacman.speed >= 1:
+                    self.level.pacman.speed -= 1
+
             case _:
                 self.state = GameState.RUN_LEVEL
 

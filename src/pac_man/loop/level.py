@@ -34,6 +34,8 @@ class Level(State):
 
         self.tile_matrix = self.create_tile_matrix(hex_matrix)
 
+        self.freeze = False
+
         self.init_level_size(
             columns,
             rows,
@@ -292,7 +294,8 @@ class Level(State):
         """
 
         # self.handle_player_state(dt)
-        self.ghost_group.update(dt, self.tile_matrix)
+        if not self.freeze:
+            self.ghost_group.update(dt, self.tile_matrix)
         self.player_group.update(dt, self.tile_matrix)
         self.collission_logic()
         self.render()
