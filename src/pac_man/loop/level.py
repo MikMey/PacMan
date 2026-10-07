@@ -51,8 +51,8 @@ class Level(State):
             raw_level_h = rows * TILE_SIZE
             raw_level_w = columns * TILE_SIZE
 
-            max_level_w = int(screen_w * 0.8)
-            max_level_h = screen_h - (2 * TILE_SIZE)
+            max_level_w = float(screen_w * 0.9)
+            max_level_h = float(screen_h * 0.8)
 
             self.scale_factor = min(
                 max_level_w // raw_level_w,
@@ -72,7 +72,7 @@ class Level(State):
             level_screen_h = int(raw_level_h * self.scale_factor)
     
             self.horizontal_padding = int(level_screen_w * 0.1)
-            self.vertical_padding = int(TILE_SIZE * self.scale_factor)
+            self.vertical_padding = int(screen_h * 0.1)
 
             surface_w = int(columns * TILE_SIZE * self.asset_cache.scale_factor)
             surface_h = int(rows * TILE_SIZE * self.asset_cache.scale_factor)
@@ -80,7 +80,7 @@ class Level(State):
             self.display_surface = pygame.Surface((surface_w, surface_h))
 
             self.position = pygame.Vector2(
-                (self.screen.get_width() - surface_w) // 2,  # horizontal_padding,
+                (screen_w - surface_w) // 2,  # horizontal_padding,
                 self.vertical_padding
             )
 

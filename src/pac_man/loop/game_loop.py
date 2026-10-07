@@ -54,7 +54,6 @@ class GameLoop(State):
         )
 
         self.hud = Hud(
-            asset_cache=self.level.asset_cache,
             screen=self.screen,
             vertical_padding=self.level.vertical_padding
         )
