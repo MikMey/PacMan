@@ -5,7 +5,6 @@
 - [increase ghost touch radius](./src/pac_man/loop/level.py#L242) (bonus)
 
 ## Visual
-- display final score
 - visualize timer
 - visualize current level
 - [death animation always correct lenght](./src/pac_man/loop/game_loop.py#L150) (bonus)

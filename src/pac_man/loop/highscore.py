@@ -103,12 +103,13 @@ class EnterHighscore(_BaseHighscore, State):
         if highscores and highscores != {}:
             to_check = min(highscores.values())
             if score <= to_check and len(highscores.items()) >= 10:
-                return
+                return highscores
             if len(highscores.items()) >= 10 and self.player_name not in highscores.keys():
                 for key, value in highscores.copy().items():
                     if value == to_check:
                         highscores.pop(key)
-        if len(self.player_name) and self.player_name not in highscores.keys() or highscores[self.player_name] > score:
+                        break
+        if len(self.player_name) and (self.player_name not in highscores.keys() or highscores[self.player_name] > score):
             highscores[self.player_name] = score
         return highscores
 
@@ -143,18 +144,19 @@ class EnterHighscore(_BaseHighscore, State):
                 else:
                     self.slots[i].image = self.asset_cache.get_static("CHAR--")
 
-    def _prep_sprites_enter(self):
+    def _prep_sprites_enter(self, score):
         self._enter_group: pygame.sprite.Group = pygame.sprite.Group()
 
         self.slots: list[StaticSpriteElement] = []
         self._group_add_str(self.asset_cache, self._enter_group, 'game over', [0, 0])
-        self._group_add_str(self.asset_cache, self._enter_group, "enter name", [0, 2])
+        self._group_add_str(self.asset_cache, self._enter_group, f'score {score}', [0, 2])
+        self._group_add_str(self.asset_cache, self._enter_group, "enter name", [0, 4])
         for x in range(10):
             self.slots.append(
                 StaticSpriteElement.from_pixel(
                     self.asset_cache.get_static("CHAR--"),
                     (x+1) * self.asset_cache.scale_factor * SUBTILE_SIZE,
-                    4 * self.asset_cache.scale_factor * SUBTILE_SIZE
+                    6 * self.asset_cache.scale_factor * SUBTILE_SIZE
                 )
             )
             self._enter_group.add(self.slots[x])
@@ -165,7 +167,7 @@ class EnterHighscore(_BaseHighscore, State):
             score = 0
         self.player_name = ""
         self.confirmed = True
-        self._prep_sprites_enter()
+        self._prep_sprites_enter(score)
         while self.confirmed == True:
             time.sleep(0.01)
             self._enter_group.draw(self.surface)
