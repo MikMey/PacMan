@@ -23,6 +23,7 @@ class GameState(Enum):
     PAUSE = auto()
     PLAYER_DEATH = auto()
     GAME_OVER = auto()
+    RETURN = auto()
 
 
 class GameLoop(State):
@@ -115,7 +116,7 @@ class GameLoop(State):
                 self.state = GameState.PAUSE
 
             case pygame.K_ESCAPE:
-                sys.exit()
+                self.state = GameState.RETURN
 
             case pygame.K_KP1:
                 self.level.pacman.kill(self.dt)
@@ -165,7 +166,7 @@ class GameLoop(State):
         self.lives = 3
         self.highscore = highscore
 
-        while True:
+        while self.state != GameState.RETURN:
 
             self.dt = self.clock.tick(60) / 1000.0
             match self.state:
@@ -223,3 +224,4 @@ class GameLoop(State):
                     #     self.set_state(GameState.GAME_OVER)
 
             pygame.display.flip()
+        return LoopState.MAIN_MENU
