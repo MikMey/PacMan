@@ -67,7 +67,7 @@ class Ghost(Character):
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
 
-    def kill() -> None:
+    def kill(self) -> None:
         pass
 
     def _update_position(self) -> None:

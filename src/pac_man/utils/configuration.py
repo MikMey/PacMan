@@ -11,10 +11,11 @@ class LevelMetadata(BaseModel):
     """Metadata of a given level config."""
     width: int = Field(ge=1, default=10)
     height: int = Field(ge=1, default=10)
-    lives: int = Field(ge=1, default=10)
-    pacgums: int = Field(ge=1, default=10)
-    super_pacgums: int = Field(ge=1, default=10)
-    timer: int = Field(ge=1, default=10)
+    lives: int = Field(ge=1, default=3)
+    pacgums: int = Field(ge=0, default=0)
+    super_pacgums: int = Field(ge=0, default=4)
+    timer: int = Field(ge=1, default=90)
+    seed: int | None = None
 
 
 class HighscoreMetadata(BaseModel):
@@ -65,7 +66,7 @@ class Config(BaseModel):
     points_per_pacgum: int = 10
     points_per_super_pacgum: int = 50
     points_per_ghost: int = 200
-    seed: Optional[int] = None
+    # seed: Optional[int] = None
 
     default_level: LevelMetadata = Field(default_factory=LevelMetadata)
     levels: list[LevelMetadata] = Field(default_factory=list)
@@ -170,10 +171,8 @@ class Config(BaseModel):
                                             "for allowed keys"
                                         )}
                                     ))
-                case "seed":
-                    data[k] = v
                 case ("width" | "height" | "lives" | "pacgums" |
-                      "super_pacgums" | "timer"):
+                      "super_pacgums" | "timer" | "seed"):
                     default_level_dict[k] = v
                 case "levels":
                     if isinstance(v, list):

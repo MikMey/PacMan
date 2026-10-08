@@ -3,12 +3,14 @@ from random import randrange
 import functools
 import sys
 from typing import Any
+import random
 
 import pygame
 import logging
 from pydantic import ValidationError
 
 from ..utils import Tile_Pos
+from ..utils.configuration import LevelMetadata
 from ..render import SpriteSheetCache, Hud
 from ..models import TileSpriteFactory, Tile, GhostPersonality, \
     StaticSpriteElement, TILE_SIZE, SUBTILE_SIZE, \
@@ -23,23 +25,23 @@ class Level(State):
     def __init__(self,
                  hex_matrix: list[list[int]],
                  screen: pygame.Surface,
-                 columns: int,
-                 rows: int
+                 level: LevelMetadata
                  ) -> None:
         """Create sprites that are needed in level."""
         self.log = logging.getLogger('PacMan')
 
         self.screen = screen
-        self.rows = rows
-        self.columns = columns
+        self.data = level
+        self.rows = self.data.height
+        self.columns = self.data.width
 
         self.tile_matrix = self.create_tile_matrix(hex_matrix)
 
         self.freeze = False
 
         self.init_level_size(
-            columns,
-            rows,
+            self.columns,
+            self.rows,
             self.screen.get_width(),
             self.screen.get_height()
         )
@@ -184,8 +186,7 @@ class Level(State):
 
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
 
-        # maze_x = len(self.tile_matrix[0])
-        # maze_y = len(self.tile_matrix)
+        possible_pacgums: list[tuple[int, int]] = []
 
         for y in range(len(self.tile_matrix)):
             for x in range(len(self.tile_matrix[y])):
@@ -199,7 +200,6 @@ class Level(State):
                     y=y
                 ))
                 if main_tile.neighbours == []:
-                    # self.log.debug(f"neigh={main_tile.neighbours}")
                     rand_fruit = self.asset_cache.get_static(
                                  f"FRUIT-{randrange(8)}")
                     self.fruit_group.add(StaticSpriteElement.from_pixel(
@@ -212,36 +212,40 @@ class Level(State):
                             * SUBTILE_SIZE) // 2),
                     ))
                 else:
-                    self.gum_group.add(StaticSpriteElement.from_relative(
-                        tile_factory.get_item(tile=main_tile),
-                        x=x * 3 + 1,
-                        y=y * 3 + 1
-                    ))
+                    possible_pacgums.append((x * 3 + 1, y * 3 + 1))
 
                 if not main_tile.is_top_closed:
-                    self.gum_group.add(StaticSpriteElement.from_relative(
-                        tile_factory.get_item(tile=main_tile),
-                        x=x * 3 + 1,
-                        y=y * 3
-                    ))
+                    possible_pacgums.append((x * 3 + 1, y * 3))
                 if not main_tile.is_right_closed:
-                    self.gum_group.add(StaticSpriteElement.from_relative(
-                        tile_factory.get_item(tile=main_tile),
-                        x=x * 3 + 2,
-                        y=y * 3 + 1
-                    ))
+                    possible_pacgums.append((x * 3 + 2, y * 3 + 1))
                 if not main_tile.is_bottom_closed:
-                    self.gum_group.add(StaticSpriteElement.from_relative(
-                        tile_factory.get_item(tile=main_tile),
-                        x=x * 3 + 1,
-                        y=y * 3 + 2
-                    ))
+                    possible_pacgums.append((x * 3 + 1, y * 3 + 2))
                 if not main_tile.is_left_closed:
-                    self.gum_group.add(StaticSpriteElement.from_relative(
-                        tile_factory.get_item(tile=main_tile),
-                        x=x * 3,
-                        y=y * 3 + 1
-                    ))
+                    possible_pacgums.append((x * 3, y * 3 + 1))
+
+        gum = self.data.pacgums
+        s_gums = self.data.super_pacgums
+        if gum == 0:
+            gum = len(possible_pacgums)
+
+        while possible_pacgums and gum > 0:
+            idx = random.randrange(len(possible_pacgums))
+            pos = possible_pacgums.pop(idx)
+
+            if s_gums > 0:
+                self.gum_group.add(StaticSpriteElement.from_relative(
+                    tile_factory.get_item("super_pacgum"),
+                    x=pos[0],
+                    y=pos[1]
+                ))
+                s_gums -= 1
+            else:
+                self.gum_group.add(StaticSpriteElement.from_relative(
+                    tile_factory.get_item("pacgum"),
+                    x=pos[0],
+                    y=pos[1]
+                ))
+            gum -= 1
 
         self.subtile_size = tile_factory._sub_w
         self.init_characters()
@@ -271,7 +275,8 @@ class Level(State):
             elif ghost.state == GhostState.FLEEING:
                 ghost.state = GhostState.ROAMING
 
-    def collission_logic(self) -> None:
+    def collission_logic(self) -> bool:
+
         # superpacgum
 
         # ghost
@@ -286,8 +291,13 @@ class Level(State):
         # pacgum
         item = self.check_collission(self.gum_group)
         if item:
+            # print(len(self.gum_group))
             Hud.score += 1
             item.kill()
+            if len(self.gum_group) == 0:
+                return True
+
+        return False
 
     def render(self) -> None:
         # self.display_surface.fill((140, 40, 40))
@@ -314,7 +324,8 @@ class Level(State):
         if not self.freeze:
             self.ghost_group.update(dt, self.tile_matrix)
         self.player_group.update(dt, self.tile_matrix)
-        self.collission_logic()
+        rc = self.collission_logic()
         self.render()
 
-        return self.pacman.state == PlayerState.ALIVE
+        return rc
+        # return self.pacman.state == PlayerState.ALIVE
