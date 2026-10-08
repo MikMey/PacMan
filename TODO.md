@@ -1,8 +1,9 @@
 # Bugs
 ## Movement
-- fix da ghsot
 
 ## Logic
+- make superpacgums turn ghost fleeing
+- ghost sometimes not edible when inside respawning ghost
 - [increase ghost touch radius](./src/pac_man/loop/level.py#L242) (bonus)
 
 ## Visual
@@ -15,5 +16,3 @@
 
 # Features
 - instructions option in main menu
-- include super pacgums
-- return to main menu from game
