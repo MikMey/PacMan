@@ -180,14 +180,15 @@ class GameLoop(State):
 
                     lvl_conf = self.config.levels[curr_level]
                     self.load_level(level_num=curr_level)
-                    self.limit: float = lvl_conf.timer
+                    self.hud.time = lvl_conf.timer + 1
+                    self.hud.update_time_second()
                     curr_level += 1
                     self.set_state(GameState.PAUSE)
 
                 case GameState.RUN_LEVEL:
-                    self.limit -= self.dt
-                    if self.limit <= 0:
-                        return LoopState.DEATH_SCREEN
+                    # self.limit -= self.dt
+                    # if self.limit <= 0:
+                    #     return LoopState.DEATH_SCREEN
                     # if self.limit <= 0:
                     #     self.set_state(GameState.GAME_OVER)
                     #     continue
@@ -200,7 +201,8 @@ class GameLoop(State):
                     if is_no_pacgums:
                         self.set_state(GameState.LOAD_LEVEL)
 
-                    self.hud.loop(self.dt)
+                    if self.hud.loop(self.dt):
+                        self.state = GameState.PLAYER_DEATH
                     # if not alive:
                     #     self.set_state(GameState.PLAYER_DEATH)
 

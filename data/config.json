@@ -18,8 +18,8 @@
     "width": 10,                                    // [int] [>=1] (10) default maze width
     "height": 10,                                   // [int] [>=1] (10) default maze height
     "lives": 3,                                     // [int] [>=1] (3) default amount of lives per level
-    "pacgums": 2,                                  // [int] [>=0] (0) default pacgum amount per level (0=full)
-    "super_pacgums": 4,                            // [int] [>=0] (4) default super pacgum amount per level
+    "pacgums": 2,                                   // [int] [>=0] (0) default pacgum amount per level (0=full)
+    "super_pacgums": 4,                             // [int] [>=0] (4) default super pacgum amount per level
     "timer": 90,                                    // [int] [>=1] (90) defaut timer per level in seconds
     "seed": 67,                                     // [int|null] (67) seed for the beginning level (null=random)
 
@@ -28,12 +28,13 @@
 
     "levels": [                                     // Any fallback data may be specifically re-set here
         {
-            "width": 10,
-            "height": 8
+            "width": 3,
+            "height": 3
         },
         {
             "width": 20,
-            "height": 4
+            "height": 4,
+            "timer": 2
         },
         {
             "width": 20,

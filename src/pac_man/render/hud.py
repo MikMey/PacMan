@@ -11,6 +11,7 @@ from .text import TextSpriteFactory
 
 class Hud:
     score = 0
+    # time = 5
 
     def __init__(self,
                  screen: pygame.Surface,
@@ -50,11 +51,15 @@ class Hud:
             0, screen.get_height() - vertical_padding
         )
 
+        self.time = -1
+        self.time_delta: float = 0
+
         # Text and numbers
         self.score_element: StaticSpriteElement
         self.high_score_element: StaticSpriteElement
         self.text_group: pygame.sprite.Group = pygame.sprite.Group()
         self.lives_group: pygame.sprite.Group = pygame.sprite.Group()
+        self.timer_group: pygame.sprite.Group = pygame.sprite.Group()
 
         self.populate_sprite_groups()
 
@@ -62,6 +67,7 @@ class Hud:
         """Add sprites needed in level to sprite groups."""
         self.text_group = pygame.sprite.Group()
         self.lives_group = pygame.sprite.Group()
+        self.timer_group = pygame.sprite.Group()
 
         self.text_factory = TextSpriteFactory(assets=self.asset_cache)
 
@@ -92,6 +98,22 @@ class Hud:
         # Bottom Display
         self.update_lives(self.lives)
 
+        static_timer_element = self.text_factory.from_string(s="timer")
+        self.timer_group.add(StaticSpriteElement.from_pixel(
+            static_timer_element,
+            x=(self.screen.get_width() * 0.75 -
+               static_timer_element.get_width() // 2),
+            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor / 2
+        ))
+
+        self.time_element = StaticSpriteElement.from_pixel(
+            self.text_factory.from_string(s=str(self.time)),
+            x=(self.screen.get_width() * 0.75 -
+               static_timer_element.get_width() // 6),
+            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor * 1.5
+        )
+        self.timer_group.add(self.time_element)
+
     def update_lives(self, new_lives: int) -> None:
         self.lives = new_lives
 
@@ -107,6 +129,16 @@ class Hud:
                 y=(self.vertical_padding / 2 -
                     live_sprite.get_height() / 2)
             ))
+
+    def update_time_second(self) -> bool:
+
+        self.time -= 1
+        if self.time < 0:
+            return True
+
+        self.time_element.image = self.text_factory.from_string(
+                    s=str(self.time))
+        return False
 
     def add_score(self) -> None:
         """Updates the score and maybe the highscore image.
@@ -133,9 +165,10 @@ class Hud:
         # self.bottom_display.fill((120, 0, 43))
         self.bottom_display.fill(0)
         self.lives_group.draw(self.bottom_display)
+        self.timer_group.draw(self.bottom_display)
         self.screen.blit(self.bottom_display, self.bottom_position)
 
-    def loop(self, dt: float) -> None:
+    def loop(self, dt: float) -> bool:
         """Update and display loop to be run every frame.
 
         Parameters
@@ -144,5 +177,12 @@ class Hud:
             Delta time used for updating sprites.
 
         """
+        self.time_delta += dt
+        while self.time_delta >= 1:
+            if self.update_time_second():
+                return True
+
+            self.time_delta -= 1
         self.add_score()
         self.render()
+        return False

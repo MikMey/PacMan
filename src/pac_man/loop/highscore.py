@@ -201,7 +201,8 @@ class EnterHighscore(_BaseHighscore, State):
     def _get_name(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
+                if (event.key == pygame.K_RETURN or
+                        event.key == pygame.K_ESCAPE):
                     self.confirmed = False
                 if event.key == pygame.K_BACKSPACE:
                     self.player_name: str = self.player_name[:-1]

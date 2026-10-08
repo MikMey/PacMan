@@ -5,7 +5,6 @@
 - spawn superpacgums in corners
 
 ## Visual
-- visualize timer
 - visualize current level
 
 # Features
