@@ -47,6 +47,9 @@ game. The guide available from the menu lists the game controls.
 
 Run static checks with `make lint`.
 
+package
+uv run pyinstaller --noconfirm --clean pac_man.spec
+
 # Resources
 
 - [42 Pac-Man project subject](https://projects.intra.42.fr/projects/pac-man)
