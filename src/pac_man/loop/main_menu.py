@@ -61,6 +61,29 @@ START_MENU: list[list[str | None]] = [
              "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
              "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT", None],
 
+             [None, None, None, None, None, None, None, None, None,
+            None, None, None, None, None, None, None, None, None],
+
+            [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP",
+            "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+            "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+            "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None,
+            None, None, None, None, None, None, None, None,
+            None, "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None,
+             None, "CHAR-G", "CHAR-U", "CHAR-I", "CHAR-D",
+             "CHAR-E", None, None, None, "BORDER-RIGHT", None],
+            [None, None, None, None, "BORDER-LEFT", None, None,
+            None, None, None, None, None, None, None, None,
+            None, "BORDER-RIGHT", None],
+            [None, None, None, None, "CORNER-BOTTOM-LEFT",
+            "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+            "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+            "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+            "BORDER-BOTTOM", "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT",
+            None],
+
             [None, None, None, None, None, None, None, None, None,
              None, None, None, None, None, None, None, None, None],
 
@@ -105,7 +128,10 @@ TILE_SIZE = SUBTILE_SIZE * 3
 
 START = 0
 HIGHSCORE = 1
-QUIT = 2
+GUIDE = 2
+QUIT = 3
+
+TOTAL = 4
 
 
 class Selector(pygame.sprite.Sprite):
@@ -125,6 +151,7 @@ class MainMenu(State):
     state: list[LoopState] = [
         LoopState.GAME_LOOP,
         LoopState.SHOW_HIGHSCORE,
+        LoopState.GUIDE,
         LoopState.END_GAME
     ]
 
@@ -183,26 +210,26 @@ class MainMenu(State):
                 self.selector.rect.y += int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
-                    4)*2
+                    4)* (TOTAL - 1)
             else:
                 self.selector.rect.y -= int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
                     4)
-            self.curr = (self.curr - 1) % 3
+            self.curr = (self.curr - 1) % TOTAL
         elif self.keys[pygame.K_s]:
-            if self.curr == 2:
+            if self.curr == TOTAL - 1:
                 self.selector.rect.y -= int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
-                    4)*2
+                    4)* (TOTAL - 1)
             else:
                 self.selector.rect.y += int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor
                     * 4
                     )
-            self.curr = (self.curr + 1) % 3
+            self.curr = (self.curr + 1) % TOTAL
 
     def render(self) -> None:
         self.surface.fill(0)

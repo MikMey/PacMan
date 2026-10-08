@@ -117,4 +117,7 @@ class LoopMachine(State):
                     self.show_highscore = ShowHighscore(None, None)
                     self.state = LoopState.SHOW_HIGHSCORE
 
+                case LoopState.GUIDE:
+                    print("ahhhhhh")
+
             pygame.display.flip()

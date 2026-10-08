@@ -19,6 +19,7 @@ class LoopState(Enum):
     END_GAME = auto()
     SHOW_HIGHSCORE = auto()
     ENTER_HIGHSCORE = auto()
+    GUIDE = auto()
 
 
 class State(ABC):

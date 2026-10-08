@@ -8,9 +8,9 @@
 ## Visual
 - visualize timer
 - visualize current level
+- guide show inforrr
 
 # Features
-- instructions option in main menu
 
 # Optional
 - Highscore file sourced from  config file
