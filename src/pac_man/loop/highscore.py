@@ -236,8 +236,8 @@ class EnterHighscore(_BaseHighscore, State):
 class Guide(_BaseHighscore, State):
 
     def __init__(self,
-                    highscore_file: Optional[str],
-                    screen: Optional[pygame.Surface]):
+                 highscore_file: Optional[str],
+                 screen: Optional[pygame.Surface]):
         if _BaseHighscore.highscore_file and _BaseHighscore.screen:
             super().__init__(None, None)
         else:
@@ -245,26 +245,26 @@ class Guide(_BaseHighscore, State):
         self._prep_sprites_enter()
 
     def _prep_sprites_enter(self) -> None:
-            self._guide: pygame.sprite.Group = pygame.sprite.Group()
+        self._guide: pygame.sprite.Group = pygame.sprite.Group()
 
-            prep = functools.partial(
-                self._group_add_str,
-                self.asset_cache,
-                self._guide
-            )
-            prep("Move", [0,0])
-            prep("WASD/Arrow", [9,0])
-            prep("quit",[0,2])
-            prep("esc", [9,2])
-            prep("CHEAT",[0,4])
-            prep("lives",[0,6])
-            prep("kp2", [9,6])
-            prep("nomove",[0,8])
-            prep("kp3", [9,8])
-            prep("skip",[0,10])
-            prep("enter", [9,10])
-            prep("pause",[0,12])
-            prep("space", [9,12])
+        prep = functools.partial(
+            self._group_add_str,
+            self.asset_cache,
+            self._guide
+        )
+        prep("Move", [0, 0])
+        prep("WASD/Arrow", [9, 0])
+        prep("quit", [0, 2])
+        prep("esc", [9, 2])
+        prep("CHEAT", [0, 4])
+        prep("lives", [0, 6])
+        prep("kp2", [9, 6])
+        prep("nomove", [0, 8])
+        prep("kp3", [9, 8])
+        prep("skip", [0, 10])
+        prep("enter", [9, 10])
+        prep("pause", [0, 12])
+        prep("space", [9, 12])
 
     def run(self) -> None:
         self._guide.draw(self.surface)

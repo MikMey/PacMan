@@ -61,28 +61,28 @@ START_MENU: list[list[str | None]] = [
              "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
              "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT", None],
 
-             [None, None, None, None, None, None, None, None, None,
-            None, None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None, None,
+             None, None, None, None, None, None, None, None, None],
 
             [None, None, None, None, "CORNER-TOP-LEFT", "BORDER-TOP",
-            "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
-            "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
-            "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "CORNER-TOP-RIGHT", None],
             [None, None, None, None, "BORDER-LEFT", None, None,
-            None, None, None, None, None, None, None, None,
-            None, "BORDER-RIGHT", None],
+             None, None, None, None, None, None, None, None,
+             None, "BORDER-RIGHT", None],
             [None, None, None, None, "BORDER-LEFT", None, None,
              None, "CHAR-G", "CHAR-U", "CHAR-I", "CHAR-D",
              "CHAR-E", None, None, None, "BORDER-RIGHT", None],
             [None, None, None, None, "BORDER-LEFT", None, None,
-            None, None, None, None, None, None, None, None,
-            None, "BORDER-RIGHT", None],
+             None, None, None, None, None, None, None, None,
+             None, "BORDER-RIGHT", None],
             [None, None, None, None, "CORNER-BOTTOM-LEFT",
-            "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
-            "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
-            "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
-            "BORDER-BOTTOM", "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT",
-            None],
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "BORDER-BOTTOM",
+             "BORDER-BOTTOM", "BORDER-BOTTOM", "CORNER-BOTTOM-RIGHT",
+             None],
 
             [None, None, None, None, None, None, None, None, None,
              None, None, None, None, None, None, None, None, None],
@@ -210,7 +210,7 @@ class MainMenu(State):
                 self.selector.rect.y += int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
-                    4)* (TOTAL - 1)
+                    4) * (TOTAL - 1)
             else:
                 self.selector.rect.y -= int(
                     SUBTILE_SIZE *
@@ -222,7 +222,7 @@ class MainMenu(State):
                 self.selector.rect.y -= int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
-                    4)* (TOTAL - 1)
+                    4) * (TOTAL - 1)
             else:
                 self.selector.rect.y += int(
                     SUBTILE_SIZE *
