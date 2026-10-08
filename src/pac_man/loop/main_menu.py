@@ -8,7 +8,7 @@ from ..render import SpriteSheetCache
 
 from .states import State, LoopState
 
-START_MENU = [
+START_MENU: list[list[str | None]] = [
             [None, None, None, None, None, None, None, None,
              None, None, None, None, None, None, None, None,
              None, None],
@@ -116,13 +116,13 @@ class Selector(pygame.sprite.Sprite):
         self.image: pygame.Surface =\
             self.selector_cache.get_static("S-PACMAN-RIGHT")
         self.rect: pygame.Rect = self.image.get_rect()
-        self.rect.y += (SUBTILE_SIZE *
-                        self.selector_cache.scale_factor *
-                        3 + SUBTILE_SIZE)
+        self.rect.y += int(SUBTILE_SIZE *
+                           self.selector_cache.scale_factor *
+                           3 + SUBTILE_SIZE)
 
 
 class MainMenu(State):
-    state = [
+    state: list[LoopState] = [
         LoopState.GAME_LOOP,
         LoopState.SHOW_HIGHSCORE,
         LoopState.END_GAME
@@ -144,7 +144,7 @@ class MainMenu(State):
                     scale_factor=self.scale_factor
                 )
         except ValidationError as e:
-            sys.exit(f"{e}", style="red", markup=False, highlight=False)
+            sys.exit(f"{e}")
 
         surface_w = int(len(START_MENU[0]) *
                         SUBTILE_SIZE *
@@ -177,27 +177,27 @@ class MainMenu(State):
         self.selector = Selector(self.scale_factor)
         self.selector_group.add(self.selector)
 
-    def handle_input(self) -> None:
+    def handle_input(self) -> None:  # type: ignore
         if self.keys[pygame.K_w]:
             if self.curr == 0:
-                self.selector.rect.y += (
+                self.selector.rect.y += int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
                     4)*2
             else:
-                self.selector.rect.y -= (
+                self.selector.rect.y -= int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
                     4)
             self.curr = (self.curr - 1) % 3
         elif self.keys[pygame.K_s]:
             if self.curr == 2:
-                self.selector.rect.y -= (
+                self.selector.rect.y -= int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor *
                     4)*2
             else:
-                self.selector.rect.y += (
+                self.selector.rect.y += int(
                     SUBTILE_SIZE *
                     self.selector.selector_cache.scale_factor
                     * 4

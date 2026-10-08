@@ -20,10 +20,10 @@ class GhostState(Enum):
 
 class GhostPersonality(Enum):
 
-    BLINKY: Callable = 'blinky'
-    PINKY: Callable = 'pinky'
-    INKY: Callable = 'inky'
-    CLYDE: Callable = 'clyde'
+    BLINKY = 'blinky'
+    PINKY = 'pinky'
+    INKY = 'inky'
+    CLYDE = 'clyde'
 
 
 class Ghost(Character):
@@ -100,14 +100,15 @@ class Ghost(Character):
             Full matrix of Tiles to look up wall states in.
 
         """
-        self.speed: int = int(self.asset_cache.scale_factor * SPEED_FACTOR)
+        self.speed = int(self.asset_cache.scale_factor * SPEED_FACTOR)
         if self.state == GhostState.RESPAWNING:
-            self.speed: int = int(self.asset_cache.scale_factor * SPEED_FACTOR + 4)
+            self.speed =\
+                int(self.asset_cache.scale_factor * SPEED_FACTOR + 4)
             self.count += dt
             if self.count >= 10:
                 self.state = GhostState.ROAMING
         elif self.state != GhostState.RESPAWNING:
-            self.count = 0
+            self.count: float = 0
         self.tile_matrix = tile_matrix
         self._update_frame(dt)
         self._update_position()
@@ -169,11 +170,11 @@ class Ghost(Character):
                 )
         else:
             self.current_dir = self.bfs(
-            Tile_Pos(self.current_tile.x, self.current_tile.y),
-            Tile_Pos(
-                len(self.tile_matrix[0]) - 1,
-                len(self.tile_matrix) - 1
-                )
+                Tile_Pos(self.current_tile.x, self.current_tile.y),
+                Tile_Pos(
+                        len(self.tile_matrix[0]) - 1,
+                        len(self.tile_matrix) - 1
+                    )
             )
 
     def inky(self) -> None:
@@ -301,20 +302,24 @@ class Ghost(Character):
         curr.cost = 0
         queue: list[Tile] = [curr]
         while queue:
-            curr: Tile = queue.pop(0)
-            for neighbour in curr.neighbours:
+            curr = queue.pop(0)
+            for neighbour in curr.neighbours:  # type: ignore
                 if neighbour.cost != -1:
                     continue
                 neighbour.cost = curr.cost + 1
                 if (neighbour.x, neighbour.y) == pos.get():
                     queue = []
                     break
-                if (neighbour.x, neighbour.y) == self.player.current_tile.get() and self.state == GhostState.FLEEING:
+                if (
+                    (neighbour.x, neighbour.y) ==
+                    self.player.current_tile.get() and
+                    self.state == GhostState.FLEEING
+                ):
                     continue
                 queue.append(neighbour)
         location: Tile = Tile.get_tile(pos)
         direction: UnitVector = UnitVector(0, 0)
-        for neighbour in location.neighbours:
+        for neighbour in location.neighbours:  # type: ignore
             if neighbour.cost == location.cost - 1:
                 direction.set(
                     (neighbour.x - location.x, neighbour.y - location.y)

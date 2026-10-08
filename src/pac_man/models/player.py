@@ -57,7 +57,7 @@ class Player(Character):
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
 
-    def kill(self, dt: float) -> None:
+    def kill(self, dt: float) -> None:  # type: ignore
         self.state = PlayerState.DEAD
         self._update_frame(dt)
 

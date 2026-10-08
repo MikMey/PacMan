@@ -16,8 +16,8 @@ TILE_SIZE = SUBTILE_SIZE * 3
 
 class _BaseHighscore():
 
-    screen: pygame.Surface = None
-    highscore_file: str = None
+    screen: pygame.Surface = None  # type: ignore
+    highscore_file: str = None  # type: ignore
 
     def __init__(
             self,
@@ -25,11 +25,11 @@ class _BaseHighscore():
             screen: Optional[pygame.Surface]
     ):
         if not _BaseHighscore.screen:
-            _BaseHighscore.screen = screen
-        self.screen = _BaseHighscore.screen
+            _BaseHighscore.screen = screen  # type: ignore
+        self.screen: pygame.Surface = _BaseHighscore.screen
         if not _BaseHighscore.highscore_file:
-            _BaseHighscore.highscore_file = highscore_file
-        self.highscore_file = _BaseHighscore.highscore_file
+            _BaseHighscore.highscore_file = highscore_file  # type: ignore
+        self.highscore_file: str = _BaseHighscore.highscore_file
         scale_factor = min(
             self.screen.get_width() // (SUBTILE_SIZE * 22),
             self.screen.get_height() // (SUBTILE_SIZE * 22)
@@ -170,7 +170,7 @@ class EnterHighscore(_BaseHighscore, State):
                 if event.key == pygame.K_RETURN:
                     self.confirmed = False
                 if event.key == pygame.K_BACKSPACE:
-                    self.player_name = self.player_name[:-1]
+                    self.player_name: str = self.player_name[:-1]
                 if event.key <= 255 and len(self.player_name) < 10:
                     char = chr(event.key)
                     if char.isalnum():

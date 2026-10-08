@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import sys
 from enum import Enum, auto
+from typing import Any
 
 import pygame
 
@@ -21,11 +22,11 @@ class LoopState(Enum):
 
 
 class State(ABC):
-    def __init__(self, state: LoopState) -> None:
+    def __init__(self, state: LoopState | Any) -> None:
         self.state = state
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self, *args: Any, **kwargs: Any) -> Any:
         pass
 
     def handle_input(self, key_event: pygame.event.Event) -> None:

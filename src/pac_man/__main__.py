@@ -9,7 +9,7 @@ from .utils import Config
 from .loop import LoopMachine
 
 
-class ElapsedFormatter():
+class ElapsedFormatter(logging.Formatter):
 
     def __init__(self) -> None:
         self.start_time = time.time()
@@ -25,7 +25,7 @@ class ElapsedFormatter():
 
 def start_log() -> None:
     # add custom formatter to root logger for simple demonstration
-    handler = logging.StreamHandler()
+    handler: logging.StreamHandler = logging.StreamHandler()
     handler.setFormatter(ElapsedFormatter())
     logging.getLogger().addHandler(handler)
 

@@ -45,7 +45,7 @@ class Tile:
 
     neighbours: Optional[list["Tile"]] = None
 
-    cost: Optional[int] = -1
+    cost: int = -1
 
     _matrix: ClassVar[list[list["Tile"]]] = []
 
@@ -62,16 +62,16 @@ class Tile:
         if len(Tile._matrix[0]) - 1 > self.x:
             self.right = Tile._matrix[self.y][self.x + 1]
 
-        temp = []
+        temp: list[Tile] = []
 
         if not self.is_top_closed:
-            temp.append(self.top)
+            temp.append(self.top)  # type: ignore
         if not self.is_bottom_closed:
-            temp.append(self.bottom)
+            temp.append(self.bottom)  # type: ignore
         if not self.is_left_closed:
-            temp.append(self.left)
+            temp.append(self.left)  # type: ignore
         if not self.is_right_closed:
-            temp.append(self.right)
+            temp.append(self.right)  # type: ignore
 
         self.neighbours = temp
 
@@ -94,9 +94,11 @@ class Tile:
             is_left_closed=bool(value & 0b1000),
         )
 
+    @staticmethod
     def set_matrix(matrix: list[list["Tile"]]) -> None:
         Tile._matrix = matrix
 
+    @staticmethod
     def get_tile(pos: Tile_Pos) -> "Tile":
         tile: Tile = Tile._matrix[pos.y][pos.x]
         return tile
@@ -319,7 +321,7 @@ class StaticSpriteElement(pygame.sprite.Sprite):
         super().__init__()
 
         self.image = image
-        self.rect = rect
+        self.rect = rect  # type: ignore
 
     @classmethod
     def from_pixel(cls, image: pygame.Surface,

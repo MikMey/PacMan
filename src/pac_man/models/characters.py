@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from dataclasses import replace
+from typing import Any
 
 import logging
 import pygame
@@ -188,7 +189,7 @@ class Character(ABC, pygame.sprite.Sprite):
         return False
 
     @abstractmethod
-    def _update_position(self, tile_matrix: list[list[Tile]]) -> None:
+    def _update_position(self) -> None:
         """Update player position if possible.
 
         Parameters
@@ -220,6 +221,6 @@ class Character(ABC, pygame.sprite.Sprite):
         pass
 
     @abstractmethod
-    def kill() -> None:
+    def kill(self, *args: Any, **kwargs: Any) -> None:
         """Starts death animation."""
         pass
