@@ -160,11 +160,11 @@ class GameLoop(State):
         self.log.debug(f"GameLoop: Setting {new_state.name}...")
         self.state = new_state
 
-    def run(self, highscore: int) -> LoopState:
+    def run(self, highscore: int, level_num: int) -> LoopState:
         """Finite State Machine for level based/gameloop logic."""
         self.state: GameState = GameState.LOAD_LEVEL
-        curr_level = 0
-        self.lives = 3
+        # curr_level = 0
+        self.lives = self.config.levels[level_num].lives
         self.highscore = highscore
 
         while self.state != GameState.RETURN:
@@ -175,25 +175,18 @@ class GameLoop(State):
             match self.state:
 
                 case GameState.LOAD_LEVEL:
-                    if curr_level >= self.config.level_count:
+                    if level_num >= self.config.level_count:
                         return LoopState.WIN_SCREEN
 
-                    lvl_conf = self.config.levels[curr_level]
-                    self.load_level(level_num=curr_level)
-                    self.hud.time = lvl_conf.timer + 1
+                    # lvl_conf = self.config.levels[curr_level]
+                    self.load_level(level_num=level_num)
+                    self.hud.time = self.config.levels[level_num].timer + 1
                     self.hud.update_time_second()
-                    curr_level += 1
+                    level_num += 1
                     self.set_state(GameState.PAUSE)
 
                 case GameState.RUN_LEVEL:
-                    # self.limit -= self.dt
-                    # if self.limit <= 0:
-                    #     return LoopState.DEATH_SCREEN
-                    # if self.limit <= 0:
-                    #     self.set_state(GameState.GAME_OVER)
-                    #     continue
                     self.dstart: float = 0
-                    # self.handle_event()
 
                     is_no_pacgums = self.level.run(self.dt)
                     if self.level.pacman.state != PlayerState.ALIVE:
@@ -203,13 +196,12 @@ class GameLoop(State):
 
                     if self.hud.loop(self.dt):
                         self.state = GameState.PLAYER_DEATH
-                    # if not alive:
-                    #     self.set_state(GameState.PLAYER_DEATH)
 
                 case GameState.RESPAWN_LEVEL:
                     self.dstart += self.dt
                     self.level.pacman.kill(self.dt)
                     self.level.render()
+                    self.hud.time = self.config.levels[level_num].timer
                     if self.dstart > 1:
                         self.level.init_characters()
                         self.hud.update_lives(self.lives)

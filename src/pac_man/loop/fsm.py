@@ -83,21 +83,18 @@ class LoopMachine(State):
         """Finite State machine for entirety of PacMan."""
         while self.state != LoopState.END_GAME:
             self.screen.fill(0)
-            # self.handle_event()
 
             match self.state:
                 case LoopState.MAIN_MENU:
-                    # self.log.debug("Enter MainMenu")
                     self.state = self.main_menu.run()
 
                 case LoopState.GAME_LOOP:
-                    # self.log.debug("Enter GameLoop")
                     self.game_loop = GameLoop(
                         config=self._config,
                         screen=self.screen,
                         clock=self.clock
                     )
-                    self.state = self.game_loop.run(ShowHighscore.highscore)
+                    self.state = self.game_loop.run(ShowHighscore.highscore, 0)
 
                 case LoopState.DEATH_SCREEN:
                     self._log.debug("Enter State: DEATH_SCREEN")
