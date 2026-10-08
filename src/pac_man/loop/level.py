@@ -270,10 +270,8 @@ class Level(State):
     def switch_ghosts(self) -> None:
         for ghost in self.ghost_group:
             ghost: Ghost = ghost
-            if ghost.state == GhostState.ROAMING:
+            if ghost.state != GhostState.RESPAWNING:
                 ghost.state = GhostState.FLEEING
-            elif ghost.state == GhostState.FLEEING:
-                ghost.state = GhostState.ROAMING
 
     def collission_logic(self) -> bool:
 

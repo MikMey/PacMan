@@ -9,6 +9,8 @@ from .characters import CharacterName, Character, DIRECTION_REVERSE
 from .player import Player
 from .tile import Tile
 
+SPEED_FACTOR = 1
+
 
 class GhostState(Enum):
     ROAMING = 0
@@ -37,7 +39,7 @@ class Ghost(Character):
 
         super().__init__(
             character_name=CharacterName[ghost_peronality.name],
-            speed_factor=1,
+            speed_factor=SPEED_FACTOR,
             asset_cache=asset_cache,
             start_pos=start_pos,
             subtile_size=subtile_size
@@ -54,8 +56,6 @@ class Ghost(Character):
             frames = self.asset_cache.get_anim(
                 'GHOST-DEAD-' + self._dir_to_string(self.current_dir)
             )
-            if not len(frames) > self.current_frame:
-                self.current_frame = 0
         elif self.state == GhostState.FLEEING:
             frames = self.asset_cache.get_anim(
                 self.name + "SCARED"
@@ -64,6 +64,8 @@ class Ghost(Character):
             frames = self.asset_cache.get_anim(
                 self.name + self._dir_to_string(self.current_dir)
             )
+        if not len(frames) > self.current_frame:
+            self.current_frame = 0
         self.max_frame = len(frames)
         self.image = frames[self.current_frame]
 
@@ -86,6 +88,29 @@ class Ghost(Character):
                 self.current_tile,
                 self.current_dir
                 )
+
+    def update(self, dt: float, tile_matrix: list[list[Tile]]) -> None:
+        """Update player frame and position every frame.
+
+        Parameters
+        ----------
+        dt : float
+            Delta Time between loop pass.
+        tile_matrix : list[list[Tile]]
+            Full matrix of Tiles to look up wall states in.
+
+        """
+        self.speed: int = int(self.asset_cache.scale_factor * SPEED_FACTOR)
+        if self.state == GhostState.RESPAWNING:
+            self.speed: int = int(self.asset_cache.scale_factor * SPEED_FACTOR + 4)
+            self.count += dt
+            if self.count >= 10:
+                self.state = GhostState.ROAMING
+        elif self.state != GhostState.RESPAWNING:
+            self.count = 0
+        self.tile_matrix = tile_matrix
+        self._update_frame(dt)
+        self._update_position()
 
     def blinky(self) -> None:
         """Direct chase; flee top right"""
@@ -284,6 +309,8 @@ class Ghost(Character):
                 if (neighbour.x, neighbour.y) == pos.get():
                     queue = []
                     break
+                if (neighbour.x, neighbour.y) == self.player.current_tile.get() and self.state == GhostState.FLEEING:
+                    continue
                 queue.append(neighbour)
         location: Tile = Tile.get_tile(pos)
         direction: UnitVector = UnitVector(0, 0)

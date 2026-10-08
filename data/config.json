@@ -3,7 +3,7 @@
     # Data that has to be present to run
 
     "highscore_filename": "./data/highscore.json",  // [str] highscore json file location
-    "level_count": 1,                               // [int] [>=1] amount of levels
+    "level_count": 10,                               // [int] [>=1] amount of levels
 
     /* === OPTIONAL GLOBAL CONFIG === */
     # Data non-specific to individual levels
