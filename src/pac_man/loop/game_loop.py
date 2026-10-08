@@ -170,7 +170,7 @@ class GameLoop(State):
                     if curr_level >= self.config.level_count:
                         return LoopState.WIN_SCREEN
 
-                    lvl_conf = self.config.levels[curr_level]                    
+                    lvl_conf = self.config.levels[curr_level]
                     self.load_level(level_num=curr_level)
                     self.limit = lvl_conf.timer
                     curr_level += 1

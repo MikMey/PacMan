@@ -177,32 +177,63 @@ class MainMenu(State):
         self.selector = Selector(self.scale_factor)
         self.selector_group.add(self.selector)
 
-    def handle_input(self) -> None:
-        if self.keys[pygame.K_w]:
-            if self.curr == 0:
-                self.selector.rect.y += (
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor *
-                    4)*2
-            else:
-                self.selector.rect.y -= (
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor *
-                    4)
-            self.curr = (self.curr - 1) % 3
-        elif self.keys[pygame.K_s]:
-            if self.curr == 2:
-                self.selector.rect.y -= (
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor *
-                    4)*2
-            else:
-                self.selector.rect.y += (
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor
-                    * 4
-                    )
-            self.curr = (self.curr + 1) % 3
+    def handle_input(self, event: pygame.event.Event) -> None:
+        if event.type != pygame.KEYDOWN:
+            return
+
+        print("AA")
+        match event.key:
+            case pygame.K_w | pygame.K_UP:
+                if self.curr == 0:
+                    self.selector.rect.y += (
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor *
+                        4)*2
+                else:
+                    self.selector.rect.y -= (
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor *
+                        4)
+                self.curr = (self.curr - 1) % 3
+            case pygame.K_s | pygame.K_DOWN:
+                if self.curr == 2:
+                    self.selector.rect.y -= (
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor *
+                        4)*2
+                else:
+                    self.selector.rect.y += (
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor
+                        * 4
+                        )
+                self.curr = (self.curr + 1) % 3
+
+        # if event.key == K_w:
+        #     if self.curr == 0:
+        #         self.selector.rect.y += (
+        #             SUBTILE_SIZE *
+        #             self.selector.selector_cache.scale_factor *
+        #             4)*2
+        #     else:
+        #         self.selector.rect.y -= (
+        #             SUBTILE_SIZE *
+        #             self.selector.selector_cache.scale_factor *
+        #             4)
+        #     self.curr = (self.curr - 1) % 3
+        # elif self.keys[pygame.K_s]:
+        #     if self.curr == 2:
+        #         self.selector.rect.y -= (
+        #             SUBTILE_SIZE *
+        #             self.selector.selector_cache.scale_factor *
+        #             4)*2
+        #     else:
+        #         self.selector.rect.y += (
+        #             SUBTILE_SIZE *
+        #             self.selector.selector_cache.scale_factor
+        #             * 4
+        #             )
+        #     self.curr = (self.curr + 1) % 3
 
     def render(self) -> None:
         self.surface.fill(0)
@@ -211,11 +242,22 @@ class MainMenu(State):
         self.screen.blit(self.surface, self.position)
 
     def run(self) -> LoopState:
-        self.keys = pygame.key.get_pressed()
-        if self.keys[pygame.K_SPACE]:
-            return MainMenu.state[self.curr]
-        self.handle_input()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                raise SystemExit
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    return MainMenu.state[self.curr]
+                self.handle_input(event)
 
         self.render()
-        time.sleep(0.15)
         return LoopState.MAIN_MENU
+        # self.keys = pygame.key.get_pressed()
+        # if self.keys[pygame.K_SPACE]:
+        #     return MainMenu.state[self.curr]
+        # self.handle_input()
+
+        # self.render()
+        # time.sleep(0.15)
+        # return LoopState.MAIN_MENU
