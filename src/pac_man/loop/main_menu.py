@@ -1,5 +1,4 @@
 import sys
-import time
 
 import pygame
 from pydantic import ValidationError
@@ -235,6 +234,8 @@ class MainMenu(State):
         match key_event.key:
             case pygame.K_ESCAPE:
                 sys.exit()
+            case pygame.K_SPACE | pygame.K_RETURN:
+                self.next_state = MainMenu.state[self.curr]
             case pygame.K_w | pygame.K_UP:
                 if self.curr == 0:
                     self.selector.rect.y += int(
@@ -268,12 +269,7 @@ class MainMenu(State):
         self.screen.blit(self.surface, self.position)
 
     def run(self) -> LoopState:
-        self.keys = pygame.key.get_pressed()
-        if self.keys[pygame.K_SPACE]:
-            return MainMenu.state[self.curr]
-        # self.handle_input()
+        self.next_state = LoopState.MAIN_MENU
         self.handle_event()
-
         self.render()
-        # time.sleep(0.15)
-        return LoopState.MAIN_MENU
+        return self.next_state

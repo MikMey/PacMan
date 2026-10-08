@@ -157,35 +157,37 @@ class SpriteSheetCache(BaseModel):
         # Numbers, Letters and Special Characters
         self.bake_text_offset(self.text_color_offset)
 
-        self.cache_new("S-PACMAN-RIGHT", 103, 151, 16)
+        self.cache_new("S-PACMAN-RIGHT", 503, 337, 16)
 
         # === ANIMATED TILES === #
 
         # Pacman Sprites
         self.cache_new_anim(
             "PACMAN-RIGHT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
+            [(503, 354), (503, 337), (503, 320), (503, 337)],
             size=16
         )
         self.cache_new_anim(
             "PACMAN-LEFT",
-            [(103, 168), (103, 151), (103, 134), (103, 151)],
+            [(503, 354), (503, 337), (503, 320), (503, 337)],
             size=16, flip_x=True
         )
         self.cache_new_anim(
             "PACMAN-BOTTOM",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
+            [(503, 354), (520, 337), (520, 320), (520, 337)],
             size=16
         )
         self.cache_new_anim(
             "PACMAN-TOP",
-            [(103, 168), (120, 151), (120, 134), (120, 151)],
+            [(503, 354), (520, 337), (520, 320), (520, 337)],
             size=16, flip_y=True
         )
         self.cache_new_anim(
             "PACMAN-DEATH",
-            [(1, 134), (18, 134), (35, 134), (52, 134), (69, 134), (86, 134),
-             (1, 151), (18, 151), (35, 151), (52, 151), (69, 151), (86, 151)],
+            [(401, 320), (418, 320), (435, 320),
+             (452, 320), (469, 320), (486, 320),
+             (401, 337), (418, 337), (435, 337),
+             (452, 337), (469, 337), (486, 337)],
             size=16
         )
 

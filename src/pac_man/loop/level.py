@@ -129,7 +129,7 @@ class Level(State):
             )
         self.player_group.add(self.pacman)
 
-        self.ghost_group: pygame.sprite.Group[Ghost] = pygame.sprite.Group()
+        self.ghost_group: pygame.sprite.Group = pygame.sprite.Group()
 
         PrepGhost = functools.partial(
             Ghost,
