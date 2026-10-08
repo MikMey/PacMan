@@ -201,7 +201,7 @@ class GameLoop(State):
                     self.dstart += self.dt
                     self.level.pacman.kill(self.dt)
                     self.level.render()
-                    self.hud.time = self.config.levels[level_num].timer
+                    self.hud.time = self.config.levels[level_num - 1].timer
                     if self.dstart > 1:
                         self.level.init_characters()
                         self.hud.update_lives(self.lives)

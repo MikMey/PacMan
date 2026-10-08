@@ -263,13 +263,16 @@ class Level(State):
 
         eat_radius = 5 * self.asset_cache.scale_factor
 
+        objs = []
+
         for item in possible_collisions:
             dx = self.pacman.rect.centerx - item.rect.centerx
             dy = self.pacman.rect.centery - item.rect.centery
             distance_squared = (dx ** 2) + (dy ** 2)
 
             if distance_squared < (eat_radius ** 2):
-                return item
+                objs.append(item)
+        return objs
 
     def switch_ghosts(self) -> None:
         for ghost in self.ghost_group:
@@ -280,8 +283,8 @@ class Level(State):
     def collission_logic(self) -> bool:
 
         # ghost
-        item = self.check_collission(self.ghost_group)
-        if item:
+        items: list = self.check_collission(self.ghost_group)
+        for item in items:
             if item.state == GhostState.ROAMING:
                 self.pacman.state = PlayerState.DEAD
                 self.start_tick = 0
@@ -290,16 +293,16 @@ class Level(State):
                 item.state = GhostState.RESPAWNING
 
         # pacgum
-        item = self.check_collission(self.gum_group)
-        if item:
+        items = self.check_collission(self.gum_group)
+        for item in items:
             Hud.score += self.config.points_per_pacgum
             item.kill()
             if len(self.gum_group) == 0 and len(self.super_gum_group) == 0:
                 return True
 
         # superpacgum
-        item = self.check_collission(self.super_gum_group)
-        if item:
+        items = self.check_collission(self.super_gum_group)
+        for item in items:
             Hud.score += self.config.points_per_super_pacgum
             self.switch_ghosts()
             item.kill()
