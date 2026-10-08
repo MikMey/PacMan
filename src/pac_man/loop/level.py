@@ -9,7 +9,7 @@ import pygame
 import logging
 from pydantic import ValidationError
 
-from ..utils import Tile_Pos
+from ..utils import Tile_Pos, Config
 from ..utils.configuration import LevelMetadata
 from ..render import SpriteSheetCache, Hud
 from ..models import TileSpriteFactory, Tile, GhostPersonality, \
@@ -25,7 +25,8 @@ class Level(State):
     def __init__(self,
                  hex_matrix: list[list[int]],
                  screen: pygame.Surface,
-                 level: LevelMetadata
+                 level: LevelMetadata,
+                 config: Config
                  ) -> None:
         """Create sprites that are needed in level."""
         self.log = logging.getLogger('PacMan')
@@ -34,6 +35,7 @@ class Level(State):
         self.data = level
         self.rows = self.data.height
         self.columns = self.data.width
+        self.config = config
 
         self.tile_matrix = self.create_tile_matrix(hex_matrix)
 
@@ -73,7 +75,7 @@ class Level(State):
                     scale_factor=self.scale_factor
                 )
         except ValidationError as e:
-            sys.exit(str(e), style="red", markup=False, highlight=False)
+            sys.exit(str(e))
 
         level_screen_w = int(raw_level_w * self.scale_factor)
         # level_screen_h = int(raw_level_h * self.scale_factor)
@@ -106,9 +108,9 @@ class Level(State):
             for x, item in enumerate(row):
                 matrix[y].append(Tile.create(item, x, y))
         Tile.set_matrix(matrix)
-        for row in matrix:
+        for row in matrix:  # type: ignore
             for item in row:
-                item.create_reference()
+                item.create_reference()  # type: ignore
         return matrix
 
     def init_characters(self) -> None:
@@ -127,7 +129,7 @@ class Level(State):
             )
         self.player_group.add(self.pacman)
 
-        self.ghost_group: pygame.sprite.Group = pygame.sprite.Group()
+        self.ghost_group: pygame.sprite.Group[Ghost] = pygame.sprite.Group()
 
         PrepGhost = functools.partial(
             Ghost,
@@ -269,7 +271,6 @@ class Level(State):
 
     def switch_ghosts(self) -> None:
         for ghost in self.ghost_group:
-            ghost: Ghost = ghost
             if ghost.state != GhostState.RESPAWNING:
                 ghost.state = GhostState.FLEEING
 
@@ -284,13 +285,14 @@ class Level(State):
                 self.pacman.state = PlayerState.DEAD
                 self.start_tick = 0
             elif item.state == GhostState.FLEEING:
+                Hud.score += self.config.points_per_ghost
                 item.state = GhostState.RESPAWNING
 
         # pacgum
         item = self.check_collission(self.gum_group)
         if item:
             # print(len(self.gum_group))
-            Hud.score += 1
+            Hud.score += self.config.points_per_pacgum
             item.kill()
             if len(self.gum_group) == 0:
                 return True

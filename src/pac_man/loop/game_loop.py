@@ -65,7 +65,8 @@ class GameLoop(State):
         self.level: Level = Level(
             hex_matrix=hex_matrix,
             screen=self.screen,
-            level=level_data
+            level=level_data,
+            config=self.config
         )
 
         self.hud = Hud(
@@ -161,7 +162,7 @@ class GameLoop(State):
 
     def run(self, highscore: int) -> LoopState:
         """Finite State Machine for level based/gameloop logic."""
-        self.state = GameState.LOAD_LEVEL
+        self.state: GameState = GameState.LOAD_LEVEL
         curr_level = 0
         self.lives = 3
         self.highscore = highscore
@@ -175,9 +176,9 @@ class GameLoop(State):
                     if curr_level >= self.config.level_count:
                         return LoopState.WIN_SCREEN
 
-                    lvl_conf = self.config.levels[curr_level]                    
+                    lvl_conf = self.config.levels[curr_level]
                     self.load_level(level_num=curr_level)
-                    self.limit = lvl_conf.timer
+                    self.limit: float = lvl_conf.timer
                     curr_level += 1
                     self.set_state(GameState.PAUSE)
 
@@ -188,7 +189,7 @@ class GameLoop(State):
                     # if self.limit <= 0:
                     #     self.set_state(GameState.GAME_OVER)
                     #     continue
-                    self.dstart = 0
+                    self.dstart: float = 0
                     self.handle_event()
 
                     is_no_pacgums = self.level.run(self.dt)

@@ -3,7 +3,7 @@
 
 ## Logic
 - make superpacgums turn ghost fleeing
-- ghost sometimes not edible when inside respawning ghost
+- ghost sometimes not edible when inside respawning ghost (bonus)
 - [increase ghost touch radius](./src/pac_man/loop/level.py#L242) (bonus)
 
 ## Visual
