@@ -51,6 +51,7 @@ class _BaseHighscore():
         try:
             with open(self.highscore_file, 'r') as f:
                 raw_highscores: str = f.read()
+
                 if (
                     not raw_highscores or not
                     len(raw_highscores) or
@@ -59,6 +60,9 @@ class _BaseHighscore():
                     highscores = {}
                 else:
                     highscores = json.loads(raw_highscores)
+
+                if isinstance(highscores, list):
+                    raise ValueError("Highscore cannot be a list")
         except json.decoder.JSONDecodeError as err:
             sys.exit(f"Invalid json file:\n{err}")
         except (PermissionError, OSError, FileNotFoundError,
@@ -119,34 +123,6 @@ class ShowHighscore(_BaseHighscore, State):
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
         self.state = LoopState.MAIN_MENU
-        # match key_event.key:
-        #     case pygame.K_ESCAPE | pygame.K_RETURN:
-        #         print("AAAAAA")
-        #         match self.state:
-        #             case LoopState.SHOW_HIGHSCORE:
-        #                 self.state = LoopState.MAIN_MENU
-        #             case LoopState.GUIDE:
-        #                 self.state = LoopState.MAIN_MENU
-        #             case (LoopState.DEATH_SCREEN | LoopState.WIN_SCREEN):
-        #                 self.state = LoopState.ENTER_HIGHSCORE
-        #             case _:
-        #                 sys.exit()
-        #     case pygame.K_RETURN:
-        #         match self.state:
-        #             case LoopState.SHOW_HIGHSCORE:
-        #                 self.state = LoopState.MAIN_MENU
-        #             case LoopState.GUIDE:
-        #                 self.state = LoopState.MAIN_MENU
-        #             case (LoopState.DEATH_SCREEN | LoopState.WIN_SCREEN):
-        #                 self.state = LoopState.ENTER_HIGHSCORE
-        #     case pygame.K_KP1:
-        #         self.state = LoopState.MAIN_MENU
-        #     case pygame.K_KP2:
-        #         self.state = LoopState.ENTER_HIGHSCORE
-        #     case pygame.K_KP3:
-        #         self.state = LoopState.DEATH_SCREEN
-        #     case pygame.K_KP4:
-        #         self.state = LoopState.WIN_SCREEN
 
     def run(self) -> LoopState:
         self.state = LoopState.SHOW_HIGHSCORE

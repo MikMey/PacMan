@@ -49,10 +49,10 @@ class GameLoop(State):
 
         level_data: LevelMetadata = self.config.levels[level_num]
 
-        if level_data.seed is None:
+        if self.config.seed is None:
             seed = random.randint(-sys.maxsize - 1, sys.maxsize)
         else:
-            seed = level_data.seed
+            seed = self.config.seed
 
         try:
             hex_matrix = MazeGenerator(
@@ -164,7 +164,7 @@ class GameLoop(State):
         """Finite State Machine for level based/gameloop logic."""
         self.state: GameState = GameState.LOAD_LEVEL
         # curr_level = 0
-        self.lives = self.config.levels[level_num].lives
+        self.lives = self.config.lives
         self.highscore = highscore
 
         while self.state != GameState.RETURN:
@@ -215,10 +215,6 @@ class GameLoop(State):
                     if self.lives <= 0:
                         return LoopState.DEATH_SCREEN
                     self.set_state(GameState.RESPAWN_LEVEL)
-                    # if self.lives > 0:
-                    #     self.set_state(GameState.RESPAWN_LEVEL)
-                    # else:
-                    #     self.set_state(GameState.GAME_OVER)
 
             pygame.display.flip()
         return LoopState.MAIN_MENU

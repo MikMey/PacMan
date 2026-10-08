@@ -54,7 +54,7 @@ class LoopMachine(State):
         self.death_screen = DeathScreen()
         self.win_screen = WinScreen()
         self.enter_highscore =\
-            EnterHighscore('data/highscore.json', self.screen)
+            EnterHighscore(self._config.highscore_filename, self.screen)
         self.show_highscore = ShowHighscore(None, None)
         self.guide = Guide(None, None)
         return self
