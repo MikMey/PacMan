@@ -204,32 +204,62 @@ class MainMenu(State):
         self.selector = Selector(self.scale_factor)
         self.selector_group.add(self.selector)
 
-    def handle_input(self) -> None:  # type: ignore
-        if self.keys[pygame.K_w]:
-            if self.curr == 0:
-                self.selector.rect.y += int(
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor *
-                    4) * (TOTAL - 1)
-            else:
-                self.selector.rect.y -= int(
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor *
-                    4)
-            self.curr = (self.curr - 1) % TOTAL
-        elif self.keys[pygame.K_s]:
-            if self.curr == TOTAL - 1:
-                self.selector.rect.y -= int(
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor *
-                    4) * (TOTAL - 1)
-            else:
-                self.selector.rect.y += int(
-                    SUBTILE_SIZE *
-                    self.selector.selector_cache.scale_factor
-                    * 4
-                    )
-            self.curr = (self.curr + 1) % TOTAL
+    # def handle_input(self) -> None:  # type: ignore
+    #     if self.keys[pygame.K_w]:
+    #         if self.curr == 0:
+    #             self.selector.rect.y += int(
+    #                 SUBTILE_SIZE *
+    #                 self.selector.selector_cache.scale_factor *
+    #                 4) * (TOTAL - 1)
+    #         else:
+    #             self.selector.rect.y -= int(
+    #                 SUBTILE_SIZE *
+    #                 self.selector.selector_cache.scale_factor *
+    #                 4)
+    #         self.curr = (self.curr - 1) % TOTAL
+    #     elif self.keys[pygame.K_s]:
+    #         if self.curr == TOTAL - 1:
+    #             self.selector.rect.y -= int(
+    #                 SUBTILE_SIZE *
+    #                 self.selector.selector_cache.scale_factor *
+    #                 4) * (TOTAL - 1)
+    #         else:
+    #             self.selector.rect.y += int(
+    #                 SUBTILE_SIZE *
+    #                 self.selector.selector_cache.scale_factor
+    #                 * 4
+    #                 )
+    #         self.curr = (self.curr + 1) % TOTAL
+
+    def handle_input(self, key_event: pygame.event.Event) -> None:
+        match key_event.key:
+            case pygame.K_ESCAPE:
+                sys.exit()
+            case pygame.K_w | pygame.K_UP:
+                if self.curr == 0:
+                    self.selector.rect.y += int(
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor *
+                        4) * (TOTAL - 1)
+                else:
+                    self.selector.rect.y -= int(
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor *
+                        4)
+                self.curr = (self.curr - 1) % TOTAL
+            case pygame.K_s | pygame.K_DOWN:
+                if self.curr == TOTAL - 1:
+                    self.selector.rect.y -= int(
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor *
+                        4) * (TOTAL - 1)
+                else:
+                    self.selector.rect.y += int(
+                        SUBTILE_SIZE *
+                        self.selector.selector_cache.scale_factor
+                        * 4
+                        )
+                self.curr = (self.curr + 1) % TOTAL
 
     def render(self) -> None:
         self.surface.fill(0)
@@ -241,8 +271,9 @@ class MainMenu(State):
         self.keys = pygame.key.get_pressed()
         if self.keys[pygame.K_SPACE]:
             return MainMenu.state[self.curr]
-        self.handle_input()
+        # self.handle_input()
+        self.handle_event()
 
         self.render()
-        time.sleep(0.15)
+        # time.sleep(0.15)
         return LoopState.MAIN_MENU

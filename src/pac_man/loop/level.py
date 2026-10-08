@@ -182,7 +182,9 @@ class Level(State):
         self.tile_group: pygame.sprite.Group =\
             pygame.sprite.Group()  # Tiles without pacgums
         self.gum_group: pygame.sprite.Group =\
-            pygame.sprite.Group()  # Pacgums and such
+            pygame.sprite.Group()  # Pacgums
+        self.super_gum_group: pygame.sprite.Group =\
+            pygame.sprite.Group()  # Super Pacgums
         self.fruit_group: pygame.sprite.Group =\
             pygame.sprite.Group()  # Decorative Fruits
 
@@ -235,7 +237,7 @@ class Level(State):
             pos = possible_pacgums.pop(idx)
 
             if s_gums > 0:
-                self.gum_group.add(StaticSpriteElement.from_relative(
+                self.super_gum_group.add(StaticSpriteElement.from_relative(
                     tile_factory.get_item("super_pacgum"),
                     x=pos[0],
                     y=pos[1]
@@ -272,14 +274,13 @@ class Level(State):
     def switch_ghosts(self) -> None:
         for ghost in self.ghost_group:
             if ghost.state != GhostState.RESPAWNING:
+                ghost.count = 0
                 ghost.state = GhostState.FLEEING
 
     def collission_logic(self) -> bool:
 
-        # superpacgum
-
         # ghost
-        item: Ghost = self.check_collission(self.ghost_group)
+        item = self.check_collission(self.ghost_group)
         if item:
             if item.state == GhostState.ROAMING:
                 self.pacman.state = PlayerState.DEAD
@@ -291,10 +292,18 @@ class Level(State):
         # pacgum
         item = self.check_collission(self.gum_group)
         if item:
-            # print(len(self.gum_group))
             Hud.score += self.config.points_per_pacgum
             item.kill()
-            if len(self.gum_group) == 0:
+            if len(self.gum_group) == 0 and len(self.super_gum_group) == 0:
+                return True
+
+        # superpacgum
+        item = self.check_collission(self.super_gum_group)
+        if item:
+            Hud.score += self.config.points_per_super_pacgum
+            self.switch_ghosts()
+            item.kill()
+            if len(self.gum_group) == 0 and len(self.super_gum_group) == 0:
                 return True
 
         return False
@@ -303,6 +312,7 @@ class Level(State):
         # self.display_surface.fill((140, 40, 40))
         self.tile_group.draw(self.display_surface)
         self.gum_group.draw(self.display_surface)
+        self.super_gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
         self.ghost_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)

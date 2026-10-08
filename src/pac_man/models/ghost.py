@@ -107,6 +107,10 @@ class Ghost(Character):
             self.count += dt
             if self.count >= 10:
                 self.state = GhostState.ROAMING
+        elif self.state == GhostState.FLEEING:
+            self.count += dt
+            if self.count >= 7:
+                self.state = GhostState.ROAMING
         elif self.state != GhostState.RESPAWNING:
             self.count: float = 0
         self.tile_matrix = tile_matrix

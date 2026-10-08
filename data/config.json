@@ -3,7 +3,7 @@
     # Data that has to be present to run
 
     "highscore_filename": "./data/highscore.json",  // [str] highscore json file location
-    "level_count": 10,                               // [int] [>=1] amount of levels
+    "level_count": 3,                               // [int] [>=1] amount of levels
 
     /* === OPTIONAL GLOBAL CONFIG === */
     # Data non-specific to individual levels
@@ -18,7 +18,7 @@
     "width": 10,                                    // [int] [>=1] (10) default maze width
     "height": 10,                                   // [int] [>=1] (10) default maze height
     "lives": 3,                                     // [int] [>=1] (3) default amount of lives per level
-    "pacgums": 0,                                  // [int] [>=0] (0) default pacgum amount per level (0=full)
+    "pacgums": 2,                                  // [int] [>=0] (0) default pacgum amount per level (0=full)
     "super_pacgums": 4,                            // [int] [>=0] (4) default super pacgum amount per level
     "timer": 90,                                    // [int] [>=1] (90) defaut timer per level in seconds
     "seed": 67,                                     // [int|null] (67) seed for the beginning level (null=random)

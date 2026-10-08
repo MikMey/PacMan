@@ -83,7 +83,7 @@ class LoopMachine(State):
         """Finite State machine for entirety of PacMan."""
         while self.state != LoopState.END_GAME:
             self.screen.fill(0)
-            self.handle_event()
+            # self.handle_event()
 
             match self.state:
                 case LoopState.MAIN_MENU:
@@ -110,7 +110,7 @@ class LoopMachine(State):
                     self.state = LoopState.ENTER_HIGHSCORE
 
                 case LoopState.SHOW_HIGHSCORE:
-                    self.show_highscore.run(self.state)
+                    self.state = self.show_highscore.run()
 
                 case LoopState.ENTER_HIGHSCORE:
                     self.enter_highscore.run(Hud.score)
@@ -119,6 +119,6 @@ class LoopMachine(State):
                     self.state = LoopState.SHOW_HIGHSCORE
 
                 case LoopState.GUIDE:
-                    self.guide.run()
+                    self.state = self.guide.run()
 
             pygame.display.flip()

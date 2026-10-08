@@ -2,7 +2,6 @@
 ## Movement
 
 ## Logic
-- make superpacgums turn ghost fleeing
 - spawn superpacgums in corners
 
 ## Visual

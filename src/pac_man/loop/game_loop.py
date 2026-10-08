@@ -82,7 +82,7 @@ class GameLoop(State):
         """Keep state until button is pressed"""
         self.level.render()
         self.hud.render()
-        self.handle_event()
+        # self.handle_event()
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
         """Handle Cheats and color cycling.
@@ -103,10 +103,10 @@ class GameLoop(State):
                 self.hud.populate_sprite_groups()
 
             case pygame.K_KP8:
-                next = self.hud.asset_cache.tile_color_offset + 1
-                self.hud.asset_cache.tile_color_offset = next % 19
-                self.hud.asset_cache.bake_tile_offset(
-                    self.hud.asset_cache.tile_color_offset
+                next = self.level.asset_cache.tile_color_offset + 1
+                self.level.asset_cache.tile_color_offset = next % 19
+                self.level.asset_cache.bake_tile_offset(
+                    self.level.asset_cache.tile_color_offset
                 )
                 self.level.reload_tile_sheet()
 
@@ -170,6 +170,8 @@ class GameLoop(State):
         while self.state != GameState.RETURN:
 
             self.dt = self.clock.tick(60) / 1000.0
+            self.handle_event()
+
             match self.state:
 
                 case GameState.LOAD_LEVEL:
@@ -190,7 +192,7 @@ class GameLoop(State):
                     #     self.set_state(GameState.GAME_OVER)
                     #     continue
                     self.dstart: float = 0
-                    self.handle_event()
+                    # self.handle_event()
 
                     is_no_pacgums = self.level.run(self.dt)
                     if self.level.pacman.state != PlayerState.ALIVE:
