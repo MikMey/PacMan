@@ -12,7 +12,7 @@ from .main_menu import MainMenu
 from .death_screen import DeathScreen
 from .win_screen import WinScreen
 from .states import State, LoopState
-from .highscore import EnterHighscore, ShowHighscore
+from .highscore import EnterHighscore, ShowHighscore, Guide
 
 
 class LoopMachine(State):
@@ -56,6 +56,7 @@ class LoopMachine(State):
         self.enter_highscore =\
             EnterHighscore('data/highscore.json', self.screen)
         self.show_highscore = ShowHighscore(None, None)
+        self.guide = Guide(None, None)
         return self
 
     def __exit__(self,
@@ -118,6 +119,6 @@ class LoopMachine(State):
                     self.state = LoopState.SHOW_HIGHSCORE
 
                 case LoopState.GUIDE:
-                    print("ahhhhhh")
+                    self.guide.run()
 
             pygame.display.flip()

@@ -36,6 +36,8 @@ class State(ABC):
                 match self.state:
                     case LoopState.SHOW_HIGHSCORE:
                         self.state = LoopState.MAIN_MENU
+                    case LoopState.GUIDE:
+                        self.state = LoopState.MAIN_MENU
                     case (LoopState.DEATH_SCREEN | LoopState.WIN_SCREEN):
                         self.state = LoopState.ENTER_HIGHSCORE
                     case _:
@@ -43,6 +45,8 @@ class State(ABC):
             case pygame.K_RETURN:
                 match self.state:
                     case LoopState.SHOW_HIGHSCORE:
+                        self.state = LoopState.MAIN_MENU
+                    case LoopState.GUIDE:
                         self.state = LoopState.MAIN_MENU
                     case (LoopState.DEATH_SCREEN | LoopState.WIN_SCREEN):
                         self.state = LoopState.ENTER_HIGHSCORE

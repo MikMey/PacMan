@@ -8,11 +8,11 @@
 ## Visual
 - visualize timer
 - visualize current level
-- guide show inforrr
 
 # Features
 
 # Optional
+- guide make better
 - Highscore file sourced from  config file
 - [death animation always correct lenght](./src/pac_man/loop/game_loop.py#L150)
 - make highscore screens look nicer
