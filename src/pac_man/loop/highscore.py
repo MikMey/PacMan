@@ -262,19 +262,29 @@ class Guide(_BaseHighscore, State):
             self.asset_cache,
             self._guide
         )
-        prep("Move", [0, 0])
-        prep("WASD/Arrow", [9, 0])
-        prep("quit", [0, 2])
-        prep("esc", [9, 2])
-        prep("CHEAT", [0, 4])
-        prep("lives", [0, 6])
-        prep("kp2", [9, 6])
-        prep("nomove", [0, 8])
-        prep("kp3", [9, 8])
-        prep("skip", [0, 10])
-        prep("enter", [9, 10])
-        prep("pause", [0, 12])
-        prep("space", [9, 12])
+
+        def entry(row: int, action: str, key: str) -> None:
+            prep("..........", [0, row])
+            prep(action, [0, row])
+            prep(key, [9, row])
+
+        prep("GAMEPLAY", [4.5, 0])
+        entry(1, "move", "wasd/arrow")
+        entry(2, "pause", "space")
+        entry(3, "quit", "esc")
+
+        prep("CHEAT", [4.5, 5])
+        entry(6, "skip", "enter")
+        entry(7, "death", "kp1")
+        entry(8, "1up", "kp2")
+        entry(9, "freeze", "kp3")
+        entry(10, "scare", "kp5")
+        entry(11, "fast", "pageup")
+        entry(12, "slow", "pagedown")
+
+        prep("VISUAL", [4.5, 14])
+        entry(15, "text", "kp7")
+        entry(16, "walls", "kp8")
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
         self.state = LoopState.MAIN_MENU

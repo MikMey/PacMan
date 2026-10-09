@@ -11,7 +11,7 @@ from .text import TextSpriteFactory
 
 class Hud:
     score = 0
-    # time = 5
+    time = -1
 
     def __init__(self,
                  screen: pygame.Surface,
@@ -51,7 +51,7 @@ class Hud:
             0, screen.get_height() - vertical_padding
         )
 
-        self.time = -1
+        # self.time = -1
         self.time_delta: float = 0
 
         # Text and numbers
@@ -72,6 +72,20 @@ class Hud:
         self.text_factory = TextSpriteFactory(assets=self.asset_cache)
 
         # Top Display
+        self.level_name_element = StaticSpriteElement.from_pixel(
+            self.text_factory.from_string(s=str("level -1")),
+            x=(self.screen.get_width() * 0.5),
+            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor / 2
+        )
+        self.text_group.add(self.level_name_element)
+
+        self.score_element = StaticSpriteElement.from_pixel(
+            self.text_factory.from_string(s=str(self.score)),
+            x=(self.screen.get_width() * 0.25),
+            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor * 1.5
+        )
+        self.text_group.add(self.score_element)
+
         high_score_surface = self.text_factory.from_string(s="high score")
         self.text_group.add(StaticSpriteElement.from_pixel(
             high_score_surface,
@@ -87,13 +101,6 @@ class Hud:
             y=SUBTILE_SIZE * self.asset_cache._text_scale_factor * 1.5
         )
         self.text_group.add(self.high_score_element)
-
-        self.score_element = StaticSpriteElement.from_pixel(
-            self.text_factory.from_string(s=str(self.score)),
-            x=(self.screen.get_width() * 0.25),
-            y=SUBTILE_SIZE * self.asset_cache._text_scale_factor * 1.5
-        )
-        self.text_group.add(self.score_element)
 
         # Bottom Display
         self.update_lives(self.lives)
@@ -140,6 +147,10 @@ class Hud:
                     s=str(self.time))
         return False
 
+    def update_level_name(self, new_name: str) -> None:
+        self.level_name_element.image = self.text_factory.from_string(
+            s=new_name)
+
     def add_score(self) -> None:
         """Updates the score and maybe the highscore image.
 
@@ -159,6 +170,7 @@ class Hud:
 
     def render(self) -> None:
         # self.top_display.fill((50, 0, 0))
+        self.top_display.fill(0)
         self.text_group.draw(self.top_display)
         self.screen.blit(self.top_display, self.top_position)
 

@@ -180,6 +180,7 @@ class GameLoop(State):
 
                     # lvl_conf = self.config.levels[curr_level]
                     self.load_level(level_num=level_num)
+                    self.hud.update_level_name(f"level {level_num + 1}")
                     self.hud.time = self.config.levels[level_num].timer + 1
                     self.hud.update_time_second()
                     level_num += 1

@@ -14,7 +14,7 @@
         "ghost": 200                                // [int] [>=0] (200) points for each ghost eaten
     },
     "lives": 3,                                     // [int] [>=1] [<=100] (3) starting lives
-    "seed": 0,                                      // [int] [>=0] (67) seed for all (0=random)
+    "seed": 67,                                     // [int] [>=0] (67) seed for all (0=random)
 
     # Fallback for level data if not defined.
     "width": 10,                                    // [int] [>=3] (10) default maze width
