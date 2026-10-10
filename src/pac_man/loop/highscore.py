@@ -214,20 +214,24 @@ class EnterHighscore(_BaseHighscore, State):
             New dictionary of NAME: SCORE with score maybe added.
 
         """
-        if highscores and highscores != {}:
-            to_check = min(highscores.values())
-            if score <= to_check and len(highscores.items()) >= 10:
+        if self.player_name in highscores:
+            if score > highscores[self.player_name]:
+                highscores[self.player_name] = score
+            return highscores
+
+        if len(highscores) >= 10:
+            lowest_score = min(highscores.values())
+            if score <= lowest_score:
                 return highscores
-            if (len(highscores.items()) >= 10 and
-                    self.player_name not in highscores.keys()):
-                for key, value in highscores.copy().items():
-                    if value == to_check:
-                        highscores.pop(key)
-                        break
-        if (len(self.player_name) and
-            (self.player_name not in highscores.keys() or
-             highscores[self.player_name] > score)):
+
+            for k, v in list(highscores.items()):
+                if v == lowest_score:
+                    highscores.pop(k)
+                    break
+
+        if len(self.player_name):
             highscores[self.player_name] = score
+
         return highscores
 
     def _write_highscore(self, content: dict) -> None:
