@@ -8,8 +8,8 @@ from pydantic_core import InitErrorDetails
 
 class LevelMetadata(BaseModel):
     """Metadata of a given level config."""
-    width: int = Field(ge=3, default=10)
-    height: int = Field(ge=3, default=10)
+    width: int = Field(ge=3, le=70, default=10)
+    height: int = Field(ge=3, le=70, default=10)
     pacgums: int = Field(ge=0, default=0)
     super_pacgums: int = Field(ge=0, default=4)
     timer: int = Field(ge=1, default=90)

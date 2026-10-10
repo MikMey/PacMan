@@ -9,7 +9,7 @@
     # Data non-specific to individual levels
 
     "points": {
-        "pacgum": 0,                               // [int] [>=0] (10) points for each pacgum eaten
+        "pacgum": 10,                               // [int] [>=0] (10) points for each pacgum eaten
         "super_pacgum": 50,                         // [int] [>=0] (50) points for each super pacgum eaten
         "ghost": 200                                // [int] [>=0] (200) points for each ghost eaten
     },
@@ -17,10 +17,10 @@
     "seed": 67,                                     // [int] [>=0] (67) seed for all (0=random)
 
     # Fallback for level data if not defined.
-    "width": 10,                                    // [int] [>=3] (10) default maze width
-    "height": 10,                                   // [int] [>=3] (10) default maze height
-    "pacgums": 9,                                   // [int] [>=0] (0) default pacgum amount per level (0=full)
-    "super_pacgums": 0,                             // [int] [>=0] (4) default super pacgum amount per level
+    "width": 10,                                    // [int] [>=3] [<=70] (10) default maze width
+    "height": 10,                                   // [int] [>=3] [<=70] (10) default maze height
+    "pacgums": 0,                                   // [int] [>=0] (0) default pacgum amount per level (0=full)
+    "super_pacgums": 4,                             // [int] [>=0] (4) default super pacgum amount per level
     "timer": 90,                                    // [int] [>=1] (90) defaut timer per level in seconds
 
     /* === OPTIONAL LEVEL CONFIG === */
@@ -28,21 +28,30 @@
 
     "levels": [                                     // Any fallback data may be specifically re-set here
         {
-            // "width": 3,
-            "height": 3
+            "width": 7,
+            "height": 7
         },
         {
-            "width": 20,
-            "height": 4,
-            "timer": 2
+            "pacgums": 100
         },
         {
-            "width": 20,
-            "height": 20
+            "width": 15,
+            "height": 10,
+            "timer": 120
         },
         {
-            "width": 4,
-            "height": 10
+            "width": 10,
+            "height": 3,
+            "pacgums": 30,
+            "super_pacgums": 9999,
+            "timer": 20
+        },
+        {
+            "width": 70,
+            "height": 70,
+            "pacgums": 1,
+            "super_pacgums": 0,
+            "timer": 200
         }
     ]
 }
