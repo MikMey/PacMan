@@ -1,6 +1,5 @@
 import pathlib
 from typing import Optional, Any
-
 from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, ValidationError
 from pydantic_core import InitErrorDetails
 import pygame
@@ -75,7 +74,7 @@ class SpriteSheetCache(BaseModel):
 
     """
     sheet_surface: pygame.Surface
-    scale_factor: float
+    scale_factor: float = Field(ge=1)
 
     reg_static: dict[str, pygame.Surface] = Field(default_factory=dict)
     reg_anim: dict[str, list[pygame.Surface]] = Field(default_factory=dict)
@@ -230,8 +229,16 @@ class SpriteSheetCache(BaseModel):
         self.cache_new_anim("GHOST-DEAD-TOP", [(303, 269)], size=16)
 
     def bake_tile_offset(self, offset: int) -> None:
+        """Loads tile color varient from the tilesheet.
 
+        Parameters
+        ----------
+        offset : int
+            Number of tile color varient to choose. Must be 0-18.
+
+        """
         def cache_tile(name: str, x: int, y: int) -> None:
+            """Helper function to cache tile offset more easily."""
             self.cache_new(
                 name,
                 x + SHEET_OFFSET_X * (offset % 5),
@@ -284,18 +291,18 @@ class SpriteSheetCache(BaseModel):
         cache_tile("CORNER-BOTTOM-LEFT", 163, 1)
 
     def bake_text_offset(self, offset: int) -> None:
-        """Pick a global text and number color.
+        """Loads text color varient from the tilesheet.
 
         Parameters
         ----------
         offset : int
-            Offset in the tile sheet (0-19).
+            Number of text color varient to choose. Must be 0-18.
 
         """
         text_scale = self._text_scale_factor
 
         def cache_text(name: str, x: int, y: int) -> None:
-            """Helper to cache the text with correct offset"""
+            """Helper to cache the text with correct offset."""
             self.cache_new(
                 name,
                 x + SHEET_OFFSET_X * (offset % 5),

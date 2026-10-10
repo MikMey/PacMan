@@ -2,13 +2,11 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from dataclasses import replace
 from typing import Any
-
 import logging
 import pygame
 
 from ..utils import Tile_Pos, Pixel_Pos, UnitVector
 from ..render import SpriteSheetCache
-
 from .tile import Tile
 
 DIRECTION_REVERSE = {
@@ -27,6 +25,22 @@ DIRECTION = {
 
 
 class CharacterName(Enum):
+    """Mapping of ghost name to sprite name.
+
+    Attributes
+    ----------
+    PACMAN
+        Pacman texture.
+    BLINKY
+        Red ghost texture.
+    PINKY
+        Pink ghost texture.
+    INKY
+        Cyan ghost texture.
+    CLYDE
+        Orange ghost texture.
+
+    """
     PACMAN = 'PACMAN-'
     BLINKY = 'GHOST-1-'
     PINKY = 'GHOST-2-'
@@ -44,7 +58,8 @@ class Character(ABC, pygame.sprite.Sprite):
             asset_cache: SpriteSheetCache,
             start_pos: Tile_Pos,
             subtile_size: int
-            ):
+            ) -> None:
+        """Sets up movement, frame and location logic."""
         super().__init__()
 
         self.log = logging.getLogger('PacMan')
@@ -76,9 +91,9 @@ class Character(ABC, pygame.sprite.Sprite):
         )
 
         self.speed: int = int(self.asset_cache.scale_factor * speed_factor)
-        # self.log.debug(f"speed={self.speed},subtile={self.subtile_size}")
 
     def init_image(self) -> None:
+        """Initializes default sprite."""
         frames = self.asset_cache.get_anim(
             self.name + 'RIGHT'
         )
@@ -122,14 +137,6 @@ class Character(ABC, pygame.sprite.Sprite):
         """
         if not any(direction):
             return False
-
-        # next_tile = replace(self.current_tile)
-        # next_tile.x += self.current_dir.hori
-        # next_tile.y += self.current_dir.vert
-
-        # if not (0 <= next_tile.y < len(tile_matrix) and
-        #         0 <= next_tile.x < len(tile_matrix[0])):
-        #     return True
 
         if direction[1] == -1 and tile.is_top_closed:
             return True

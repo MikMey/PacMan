@@ -4,7 +4,6 @@ import random
 
 from ..utils import Tile_Pos, UnitVector
 from ..render import SpriteSheetCache
-
 from .characters import CharacterName, Character, DIRECTION_REVERSE
 from .player import Player
 from .tile import Tile
@@ -13,13 +12,38 @@ SPEED_FACTOR = 1
 
 
 class GhostState(Enum):
+    """Finite state of ghost logic.
+
+    Attributes
+    ----------
+    ROAMING : 0
+        Following their normal movement logic.
+    FLEEING : 1
+        Choosing a corner to run away from pacman.
+    RESPAWNING : 2
+        Kills ghost and makes them respawn in a corner.
+
+    """
     ROAMING = 0
     FLEEING = 1
     RESPAWNING = 2
 
 
 class GhostPersonality(Enum):
+    """Ghost personality mapping.
 
+    Parameters
+    ----------
+    BLINKY : 'blinky'
+        Gets shortest path to player.
+    PINKY : 'pinky'
+        Gets shortest path two tiles ahead of player.
+    INKY : 'inky'
+        Weighted randomized movement.
+    CLYDE : 'clyde'
+        Randomized Movement.
+
+    """
     BLINKY = 'blinky'
     PINKY = 'pinky'
     INKY = 'inky'
@@ -27,6 +51,7 @@ class GhostPersonality(Enum):
 
 
 class Ghost(Character):
+    """Ghost entity with peronalities."""
 
     def __init__(
             self,
@@ -36,6 +61,7 @@ class Ghost(Character):
             player: Player,
             subtile_size: int
             ) -> None:
+        """Assigns ghost name, player, direction, etc."""
 
         super().__init__(
             character_name=CharacterName[ghost_peronality.name],
@@ -52,6 +78,7 @@ class Ghost(Character):
         self.current_dir.set((0, 1))
 
     def set_image(self) -> None:
+        """Set new frame depending on state and frame data."""
         if self.state == GhostState.RESPAWNING:
             frames = self.asset_cache.get_anim(
                 'GHOST-DEAD-' + self._dir_to_string(self.current_dir)
@@ -73,14 +100,12 @@ class Ghost(Character):
         pass
 
     def _update_position(self) -> None:
-        # self.log.debug(f'update call name={self.ghost_name.value}')
-        # self.current_dir.set((0, 1))
+        """Sets current tile to target and updates target tile."""
         if not self._move_straight():
             self.current_tile = self.target_tile.copy()
-            # self.log.debug(f'pos={self.current_tile.get()}')
             tile: Tile = Tile.get_tile(self.current_tile)
+
             if tile.neighbours != [] or tile.neighbours is not None:
-                # self.log.debug('func call')
                 func: Callable = self.__getattribute__(self.ghost_name.value)
                 func()
 
@@ -120,7 +145,6 @@ class Ghost(Character):
     def blinky(self) -> None:
         """Direct chase; flee top right"""
         if self.state == GhostState.ROAMING:
-            # self.log.debug('blinky call')
             self.current_dir = self.bfs(
                 Tile_Pos(self.current_tile.x, self.current_tile.y),
                 Tile_Pos(
@@ -150,7 +174,6 @@ class Ghost(Character):
                     )
             ):
                 return
-            # self.log.debug('pinky call')
             if self.player.current_tile.x + 3 <= len(self.tile_matrix[0]):
                 self.current_dir = self.bfs(
                     Tile_Pos(self.current_tile.x, self.current_tile.y),
@@ -183,7 +206,6 @@ class Ghost(Character):
 
     def inky(self) -> None:
         """go left (1/3 go right); flee bottom right"""
-        # self.log.debug('inky call')
 
         TURN_RIGHT = {
             (1, 0): (0, 1),
@@ -243,7 +265,6 @@ class Ghost(Character):
                     ):
                         self.current_dir.set(turn)
                         break
-                # self.log.debug(f"turn={turn}")
         elif self.state == GhostState.FLEEING:
             self.current_dir = self.bfs(
                 Tile_Pos(self.current_tile.x, self.current_tile.y),
@@ -260,11 +281,9 @@ class Ghost(Character):
                     0
                     )
                 )
-        # self.log.debug('inky finish')
 
     def clyde(self) -> None:
         """move random at intersection; flee bottom left"""
-        # self.log.debug('clyde call')
         CHANGE = [
             (1, 0),
             (0, 1),
@@ -301,7 +320,7 @@ class Ghost(Character):
                 )
 
     def bfs(self, pos: Tile_Pos, target: Tile_Pos) -> UnitVector:
-        # self.log.debug('bfs call')
+        """Gets next direction based on Breadth-First-Search."""
         curr: Tile = Tile.get_tile(target)
         curr.cost = 0
         queue: list[Tile] = [curr]
@@ -331,5 +350,4 @@ class Ghost(Character):
         for row in self.tile_matrix:
             for tile in row:
                 tile.cost = -1
-        # self.log.debug(f'dir={direction}')
         return direction

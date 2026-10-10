@@ -4,7 +4,6 @@ import functools
 import sys
 from typing import Any
 import random
-
 import pygame
 import logging
 from pydantic import ValidationError
@@ -15,7 +14,6 @@ from ..render import SpriteSheetCache, Hud
 from ..models import TileSpriteFactory, Tile, GhostPersonality, \
     StaticSpriteElement, TILE_SIZE, SUBTILE_SIZE, \
     Player, Ghost, GhostState, PlayerState
-
 from .states import State
 
 
@@ -78,7 +76,6 @@ class Level(State):
             sys.exit(str(e))
 
         level_screen_w = int(raw_level_w * self.scale_factor)
-        # level_screen_h = int(raw_level_h * self.scale_factor)
 
         self.horizontal_padding = int(level_screen_w * 0.1)
         self.vertical_padding = int(screen_h * 0.1)
@@ -157,12 +154,9 @@ class Level(State):
         self.ghost_group.add(self.pinky, self.inky, self.blinky, self.clyde)
 
     def reload_tile_sheet(self) -> None:
+        """Reloads tile sprites to match new offset selection."""
         self.tile_group.empty()
-
         tile_factory = TileSpriteFactory(assets=self.asset_cache)
-
-        # maze_x = len(self.tile_matrix[0])
-        # maze_y = len(self.tile_matrix)
 
         for y in range(len(self.tile_matrix)):
             for x in range(len(self.tile_matrix[y])):
@@ -255,6 +249,7 @@ class Level(State):
         self.init_characters()
 
     def check_collission(self, obj: pygame.sprite.Group) -> Any:
+        """Checks collision of pacman with a given sprite group."""
         possible_collisions = pygame.sprite.spritecollide(
             self.pacman,  # type: ignore
             obj,
@@ -275,12 +270,14 @@ class Level(State):
         return objs
 
     def switch_ghosts(self) -> None:
+        """Changes the ghosts state to scared."""
         for ghost in self.ghost_group:
             if ghost.state != GhostState.RESPAWNING:
                 ghost.count = 0
                 ghost.state = GhostState.FLEEING
 
     def collission_logic(self) -> bool:
+        """Eats pacgums and ghosts depending on logic."""
 
         # ghost
         items: list = self.check_collission(self.ghost_group)
@@ -312,19 +309,17 @@ class Level(State):
         return False
 
     def render(self) -> None:
-        # self.display_surface.fill((140, 40, 40))
+        """Draws all groups."""
         self.tile_group.draw(self.display_surface)
         self.gum_group.draw(self.display_surface)
         self.super_gum_group.draw(self.display_surface)
         self.fruit_group.draw(self.display_surface)
         self.ghost_group.draw(self.display_surface)
         self.player_group.draw(self.display_surface)
-
         self.screen.blit(self.display_surface, self.position)
 
     def run(self, dt: float) -> bool:
-        """
-        Update and display loop to be run every frame.
+        """Update and display loop to be run every frame.
 
         Parameters
         ----------
@@ -333,7 +328,6 @@ class Level(State):
 
         """
 
-        # self.handle_player_state(dt)
         if not self.freeze:
             self.ghost_group.update(dt, self.tile_matrix)
         self.player_group.update(dt, self.tile_matrix)
@@ -341,4 +335,3 @@ class Level(State):
         self.render()
 
         return rc
-        # return self.pacman.state == PlayerState.ALIVE

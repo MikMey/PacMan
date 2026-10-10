@@ -1,16 +1,26 @@
 from dataclasses import replace
 from enum import Enum, auto
-
 import pygame
 
 from ..utils import Tile_Pos, UnitVector
 from ..render import SpriteSheetCache
-
 from .tile import Tile
 from .characters import Character, CharacterName, DIRECTION_REVERSE
 
 
 class PlayerState(Enum):
+    """Finite state of player.
+
+    Parameters
+    ----------
+    ALIVE
+        Allows for normal movement.
+    DEAD
+        Plays death animation and freezes movement.
+    RESPAWNING
+        Hides player.
+
+    """
     ALIVE = auto()
     DEAD = auto()
     RESPAWNING = auto()
@@ -25,7 +35,7 @@ class Player(Character):
             start_pos: Tile_Pos,
             subtile_size: int
     ) -> None:
-
+        """Sets state and direction."""
         super().__init__(
             character_name=CharacterName.PACMAN,
             speed_factor=1.4,
@@ -58,6 +68,7 @@ class Player(Character):
         self.image = frames[self.current_frame]
 
     def kill(self, dt: float) -> None:  # type: ignore
+        """Sets state to dead and updates frame."""
         self.state = PlayerState.DEAD
         self._update_frame(dt)
 

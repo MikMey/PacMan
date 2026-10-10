@@ -1,17 +1,26 @@
-import sys
-
 import pygame
-from pydantic import ValidationError
 
 from ..models import SUBTILE_SIZE, StaticSpriteElement
-
 from .spritesheet import SpriteSheetCache
 from .text import TextSpriteFactory
 
 
 class Hud:
-    score = 0
-    time = -1
+    """Deals with Heads Up Display graphics and level metadata logic.
+
+    Attributes
+    ----------
+    score : int
+        Score to be displayed on the top display. Defaults to 0.
+    time : int
+        Time number in seconds on the bottom display. Defaults to -1.
+    level_name : str
+        Level name on the top display. Defaults to "level -1".
+
+    """
+    score: int = 0
+    time: int = -1
+    level_name: str = "level -1"
 
     def __init__(self,
                  screen: pygame.Surface,
@@ -20,21 +29,16 @@ class Hud:
                  lives: int
                  ) -> None:
         """Create sprites that are needed in level."""
-        self.scale_factor = 8
-        try:
-            self.asset_cache: SpriteSheetCache =\
-                SpriteSheetCache.from_default_file_path(
-                    scale_factor=self.scale_factor
-                )
-        except ValidationError as e:
-            sys.exit(str(e))
         self.screen = screen
         self.vertical_padding = vertical_padding
-
-        # Value Logic
-        # self.score = 0
         self.high_score = high_score
         self.lives = lives
+
+        self.scale_factor = 8
+        self.asset_cache: SpriteSheetCache =\
+            SpriteSheetCache.from_default_file_path(
+                scale_factor=self.scale_factor
+            )
 
         # Display Logic
         self.top_display = pygame.Surface((
@@ -73,7 +77,7 @@ class Hud:
 
         # Top Display
         self.level_name_element = StaticSpriteElement.from_pixel(
-            self.text_factory.from_string(s=str("level -1")),
+            self.text_factory.from_string(s=self.level_name),
             x=(self.screen.get_width() * 0.5),
             y=SUBTILE_SIZE * self.asset_cache._text_scale_factor / 2
         )
@@ -122,6 +126,7 @@ class Hud:
         self.timer_group.add(self.time_element)
 
     def update_lives(self, new_lives: int) -> None:
+        """Updates the hud life count."""
         self.lives = new_lives
 
         live_sprite = self.asset_cache.get_anim("PACMAN-LEFT")[3]
@@ -138,7 +143,14 @@ class Hud:
             ))
 
     def update_time_second(self) -> bool:
+        """Decerases the time by one second and updates sprite.
 
+        Returns
+        -------
+        bool
+            True if time is negative, False otherwise.
+
+        """
         self.time -= 1
         if self.time < 0:
             return True
@@ -148,18 +160,13 @@ class Hud:
         return False
 
     def update_level_name(self, new_name: str) -> None:
+        """Updates the hud level name."""
+        self.level_name = new_name
         self.level_name_element.image = self.text_factory.from_string(
-            s=new_name)
+            s=self.level_name)
 
     def add_score(self) -> None:
-        """Updates the score and maybe the highscore image.
-
-        Parameters
-        ----------
-        addend : int
-            Number of points to be added to score.
-
-        """
+        """Updates the score and perhaps the highscore image."""
         self.score_element.image = self.text_factory.from_string(
             s=str(Hud.score))
 
@@ -169,12 +176,11 @@ class Hud:
                 s=str(self.high_score))
 
     def render(self) -> None:
-        # self.top_display.fill((50, 0, 0))
+        """Draws top and bottom hud displays."""
         self.top_display.fill(0)
         self.text_group.draw(self.top_display)
         self.screen.blit(self.top_display, self.top_position)
 
-        # self.bottom_display.fill((120, 0, 43))
         self.bottom_display.fill(0)
         self.lives_group.draw(self.bottom_display)
         self.timer_group.draw(self.bottom_display)

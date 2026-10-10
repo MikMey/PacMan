@@ -1,8 +1,8 @@
-from .spritesheet import SpriteSheetCache
-
 from pydantic import BaseModel, PrivateAttr, ConfigDict
 from typing import Any
 import pygame
+
+from .spritesheet import SpriteSheetCache
 
 
 DEFAULT_CHAR_SIZE = 8

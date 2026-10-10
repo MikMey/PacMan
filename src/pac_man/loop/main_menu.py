@@ -1,10 +1,8 @@
 import sys
-
 import pygame
 from pydantic import ValidationError
 
 from ..render import SpriteSheetCache
-
 from .states import State, LoopState
 
 START_MENU: list[list[str | None]] = [
@@ -134,7 +132,10 @@ TOTAL = 4
 
 
 class Selector(pygame.sprite.Sprite):
+    """Pacman Icon indicating selection."""
+
     def __init__(self, scale_factor: int) -> None:
+        """Initializes image and position."""
         super().__init__()
         self.selector_cache =\
             SpriteSheetCache.from_default_file_path(scale_factor * 1.5)
@@ -147,6 +148,8 @@ class Selector(pygame.sprite.Sprite):
 
 
 class MainMenu(State):
+    """State that shows the main menu with selections."""
+
     state: list[LoopState] = [
         LoopState.GAME_LOOP,
         LoopState.SHOW_HIGHSCORE,
@@ -155,7 +158,7 @@ class MainMenu(State):
     ]
 
     def __init__(self, screen: pygame.Surface) -> None:
-
+        """Sets up asset cache and intializes draws."""
         self.screen = screen
         self.curr = START
 
@@ -188,7 +191,7 @@ class MainMenu(State):
         self.init_draw()
 
     def init_draw(self) -> None:
-
+        """Draws all tiles of START_MENU."""
         self.menu_group: pygame.sprite.Group = pygame.sprite.Group()
 
         for y, row in enumerate(START_MENU):
@@ -203,34 +206,8 @@ class MainMenu(State):
         self.selector = Selector(self.scale_factor)
         self.selector_group.add(self.selector)
 
-    # def handle_input(self) -> None:  # type: ignore
-    #     if self.keys[pygame.K_w]:
-    #         if self.curr == 0:
-    #             self.selector.rect.y += int(
-    #                 SUBTILE_SIZE *
-    #                 self.selector.selector_cache.scale_factor *
-    #                 4) * (TOTAL - 1)
-    #         else:
-    #             self.selector.rect.y -= int(
-    #                 SUBTILE_SIZE *
-    #                 self.selector.selector_cache.scale_factor *
-    #                 4)
-    #         self.curr = (self.curr - 1) % TOTAL
-    #     elif self.keys[pygame.K_s]:
-    #         if self.curr == TOTAL - 1:
-    #             self.selector.rect.y -= int(
-    #                 SUBTILE_SIZE *
-    #                 self.selector.selector_cache.scale_factor *
-    #                 4) * (TOTAL - 1)
-    #         else:
-    #             self.selector.rect.y += int(
-    #                 SUBTILE_SIZE *
-    #                 self.selector.selector_cache.scale_factor
-    #                 * 4
-    #                 )
-    #         self.curr = (self.curr + 1) % TOTAL
-
     def handle_input(self, key_event: pygame.event.Event) -> None:
+        """Recognizes space/enter to select, escape to quit."""
         match key_event.key:
             case pygame.K_ESCAPE:
                 sys.exit()
@@ -263,12 +240,14 @@ class MainMenu(State):
                 self.curr = (self.curr + 1) % TOTAL
 
     def render(self) -> None:
+        """Draws all options and selector."""
         self.surface.fill(0)
         self.menu_group.draw(self.surface)
         self.selector_group.draw(self.surface)
         self.screen.blit(self.surface, self.position)
 
     def run(self) -> LoopState:
+        """Draws and listens to keys."""
         self.next_state = LoopState.MAIN_MENU
         self.handle_event()
         self.render()

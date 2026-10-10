@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 import sys
 from enum import Enum, auto
 from typing import Any
-
 import pygame
 
 from ..models import StaticSpriteElement
@@ -12,6 +11,28 @@ SUBTILE_SIZE = 8
 
 
 class LoopState(Enum):
+    """All finite states outside of the main gameplay loop.
+
+    Parameters
+    ----------
+    MAIN_MENU
+        State that shows options with a selector.
+    GAME_LOOP
+        Main gameplay loop. More substates in game_loop.py.
+    DEATH_SCREEN
+        Passes immedietely to ENTER_HIGHSCORE.
+    WIN_SCREEN
+        Passes immedietely to ENTER_HIGHSCORE.
+    END_GAME
+        Stopping condition for main run loop.
+    SHOW_HIGHSCORE
+        Shows the leaderboard of highscore json file.
+    ENTER_HIGHSCORE
+        Allows entering name for score to be added to highscore file.
+    GUIDE
+        Displays control information.
+
+    """
     MAIN_MENU = auto()
     GAME_LOOP = auto()
     DEATH_SCREEN = auto()
@@ -23,14 +44,26 @@ class LoopState(Enum):
 
 
 class State(ABC):
+    """Abstract class that defines a finite state."""
+
     def __init__(self, state: LoopState | Any) -> None:
+        """Assigns current state name/enum."""
         self.state = state
 
     @abstractmethod
     def run(self, *args: Any, **kwargs: Any) -> Any:
+        """Called by the Finite State Machine each frame."""
         pass
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
+        """Checks for key_events. Usually always re-set.
+
+        Parameters
+        ----------
+        key_event : pygame.event.Event
+            Class filled with pressed keys.
+
+        """
         match key_event.key:
             case pygame.K_ESCAPE:
                 match self.state:
@@ -75,6 +108,20 @@ class State(ABC):
         s: str,
         pos: list
     ) -> None:
+        """Adds a character sprite to a group.
+
+        Parameters
+        ----------
+        cache : SpriteSheetCache
+            Cache class to get sprite from.
+        group : pygame.sprite.Group
+            Group to add sprite to.
+        s : str
+            Name of sprite.
+        pos : list
+            Location of sprite [x, y].
+
+        """
         for char in s:
             group.add(
                 StaticSpriteElement.from_pixel(
@@ -92,6 +139,20 @@ class State(ABC):
         arr: list[str | None],
         pos: list
     ) -> None:
+        """Adds a list of sprites to group.
+
+        Parameters
+        ----------
+        cache : SpriteSheetCache
+            Cache class to get sprite from.
+        group : pygame.sprite.Group
+            Group to add sprite to.
+        arr : list[str  |  None]
+            List of cached sprite names to add.
+        pos : list
+            List of positions for each sprite.
+
+        """
         for x, name in enumerate(arr):
             if not name:
                 continue

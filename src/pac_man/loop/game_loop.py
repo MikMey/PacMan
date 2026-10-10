@@ -1,28 +1,42 @@
 import sys
 from enum import Enum, auto
-
 import logging
 import pygame
 import random
-
 from mazegenerator import MazeGenerator
 
 from ..utils import Config
 from ..utils.configuration import LevelMetadata
 from ..render import Hud
 from ..models import PlayerState
-
 from .level import Level
 from .states import State, LoopState
 
 
 class GameState(Enum):
+    """Finite states that may happen in the main gameplay loop.
+
+    Attributes
+    ----------
+    LOAD_LEVEL
+        Sets up new level and pauses the game.
+    RUN_LEVEL
+        Main loop that renders and checks for inputs.
+    RESPAWN_LEVEL
+        Kills Pacman and resets level while maintaining pacgums.
+    PAUSE
+        Pauses the movement and animation.
+    PLAYER_DEATH
+        Kills the player and then reloads level.
+    RETURN
+        Exit state.
+
+    """
     LOAD_LEVEL = auto()
     RUN_LEVEL = auto()
     RESPAWN_LEVEL = auto()
     PAUSE = auto()
     PLAYER_DEATH = auto()
-    GAME_OVER = auto()
     RETURN = auto()
 
 
@@ -161,9 +175,22 @@ class GameLoop(State):
         self.state = new_state
 
     def run(self, highscore: int, level_num: int) -> LoopState:
-        """Finite State Machine for level based/gameloop logic."""
+        """Finite State Machine of the main level logic.
+
+        Parameters
+        ----------
+        highscore : int
+            Highest score achieved on leaderboard.
+        level_num : int
+            Index of the level to be played (0-indexed).
+
+        Returns
+        -------
+        LoopState
+            MAIN_MENU=next level, WIN_SCREEN=all won, DEATH_SCREEN=lose.
+
+        """
         self.state: GameState = GameState.LOAD_LEVEL
-        # curr_level = 0
         self.lives = self.config.lives
         self.highscore = highscore
 
@@ -178,7 +205,6 @@ class GameLoop(State):
                     if level_num >= self.config.level_count:
                         return LoopState.WIN_SCREEN
 
-                    # lvl_conf = self.config.levels[curr_level]
                     self.load_level(level_num=level_num)
                     self.hud.update_level_name(f"level {level_num + 1}")
                     self.hud.time = self.config.levels[level_num].timer + 1

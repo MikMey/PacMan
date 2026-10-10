@@ -1,12 +1,10 @@
 from typing import Optional
 from types import TracebackType
-
 import logging
 import pygame
 
 from ..utils import Config
 from ..render import Hud
-
 from .game_loop import GameLoop
 from .main_menu import MainMenu
 from .death_screen import DeathScreen

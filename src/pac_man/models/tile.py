@@ -1,6 +1,5 @@
 from typing import Any, Optional, ClassVar
 from dataclasses import dataclass
-
 from pydantic import BaseModel, PrivateAttr, ConfigDict
 import pygame
 
@@ -96,10 +95,12 @@ class Tile:
 
     @staticmethod
     def set_matrix(matrix: list[list["Tile"]]) -> None:
+        """Simple setter for matrix."""
         Tile._matrix = matrix
 
     @staticmethod
     def get_tile(pos: Tile_Pos) -> "Tile":
+        """Returns the tile at specified position."""
         tile: Tile = Tile._matrix[pos.y][pos.x]
         return tile
 
@@ -122,7 +123,6 @@ class TileSpriteFactory(BaseModel):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Set subtile width and height."""
-        # NOTE: Currently kinda ugly
         super().__init__(*args, **kwargs)
 
         sub_sample = self.assets.get_static("WALL-RIGHT")
@@ -326,24 +326,13 @@ class StaticSpriteElement(pygame.sprite.Sprite):
     @classmethod
     def from_pixel(cls, image: pygame.Surface,
                    x: float, y: float) -> "StaticSpriteElement":
-        """_summary_
-
-        Parameters
-        ----------
-        surface : pygame.Surface
-            _description_
-        x : float
-            _description_
-        y : float
-            _description_
-
-        """
+        """Gets StaticSpriteElement with position in pixels."""
         return cls(image=image, rect=image.get_rect(topleft=(x, y)))
 
     @classmethod
     def from_relative(cls, image: pygame.Surface,
                       x: float, y: float) -> "StaticSpriteElement":
-
+        """Gets StaticSpriteElement with position in image sizes."""
         return cls(image=image, rect=image.get_rect(topleft=(
             x * image.get_width(),
             y * image.get_height()

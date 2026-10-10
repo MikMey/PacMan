@@ -250,10 +250,8 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "argparse" },
-    { name = "flake8" },
     { name = "logging" },
     { name = "mazegenerator" },
-    { name = "mypy" },
     { name = "numpy" },
     { name = "pydantic" },
     { name = "pygame" },
@@ -271,10 +269,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "argparse", specifier = ">=1.4.0" },
-    { name = "flake8", specifier = ">=7.3.0" },
     { name = "logging", specifier = ">=0.4.9.6" },
     { name = "mazegenerator", path = "mazegenerator-2.1.0-py3-none-any.whl" },
-    { name = "mypy", specifier = ">=2.3.1" },
     { name = "numpy", specifier = ">=2.5.3" },
     { name = "pydantic", specifier = ">=2.13.5" },
     { name = "pygame", specifier = ">=2.6.1" },

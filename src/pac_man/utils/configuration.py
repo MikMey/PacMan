@@ -2,7 +2,6 @@
 from typing import Any, Optional
 import sys
 import json
-
 from pydantic import BaseModel, Field, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
@@ -18,7 +17,7 @@ class LevelMetadata(BaseModel):
 
 class HighscoreMetadata(BaseModel):
     """Required keys of the highscore file."""
-    name: str = Field(default="TEST")
+    name: str = ""
     score: int = Field(ge=0, default=-1)
 
 
@@ -258,14 +257,13 @@ class Config(BaseModel):
             with open(self.highscore_filename, 'r', encoding="utf-8") as f:
                 content = f.read()
                 if not content or content == 'null':
-                    scores = []
+                    raw = []
                 else:
-                    scores = json.loads(content)
+                    raw = json.loads(content)
         except (OSError, json.JSONDecodeError):
             return self
 
-        if type(scores) is dict:
-            scores = [scores]
+        scores = [raw] if type(raw) is dict else raw
 
         for score_metadata in scores:
             name = None
