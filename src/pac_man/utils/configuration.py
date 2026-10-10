@@ -364,19 +364,19 @@ class Config(BaseModel):
 
         """
         lines: list[str] = raw_content.splitlines()
-        is_multiline = False
+        # is_multiline = False
 
         for line_idx, line in enumerate(lines):
             comment_idx: Optional[int] = None
 
-            if is_multiline:
-                close_idx = line.find("*/")
-                if close_idx >= 0:
-                    lines[line_idx] = line[close_idx + 2:]
-                    is_multiline = False
-                else:
-                    lines[line_idx] = ""
-                    continue
+            # if is_multiline:
+            #     close_idx = line.find("*/")
+            #     if close_idx >= 0:
+            #         lines[line_idx] = line[close_idx + 2:]
+            #         is_multiline = False
+            #     else:
+            #         lines[line_idx] = ""
+            #         continue
 
             tag_idx = line.find('#')
             if tag_idx >= 0:
@@ -388,19 +388,19 @@ class Config(BaseModel):
                 if comment_idx is None or slash_idx < comment_idx:
                     comment_idx = slash_idx
 
-            open_idx = line.find("/*")
-            if open_idx >= 0:
-                if comment_idx is None or open_idx < comment_idx:
-                    comment_idx = open_idx
-                    is_multiline = True
+            # open_idx = line.find("/*")
+            # if open_idx >= 0:
+            #     if comment_idx is None or open_idx < comment_idx:
+            #         comment_idx = open_idx
+            #         is_multiline = True
 
-            if is_multiline:
-                close_idx = line.find("*/")
-                if close_idx >= 0:
-                    lines[line_idx] = line[close_idx + 2:]
-                    is_multiline = False
-                else:
-                    lines[line_idx] = ""
+            # if is_multiline:
+            #     close_idx = line.find("*/")
+            #     if close_idx >= 0:
+            #         lines[line_idx] = line[close_idx + 2:]
+            #         is_multiline = False
+            #     else:
+            #         lines[line_idx] = ""
 
             if comment_idx is not None:
                 lines[line_idx] = line[:comment_idx]

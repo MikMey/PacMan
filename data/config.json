@@ -1,11 +1,11 @@
 {
-    /* === REQUIRED CONFIG === */
+    // === REQUIRED CONFIG === //
     # Data that has to be present to run
 
     "highscore_filename": "./data/highscore.json",  // [str] highscore json file location
     "level_count": 5,                               // [int] [>=1] amount of levels
 
-    /* === OPTIONAL GLOBAL CONFIG === */
+    // === OPTIONAL GLOBAL CONFIG === //
     # Data non-specific to individual levels
 
     "points": {
@@ -23,7 +23,7 @@
     "super_pacgums": 4,                             // [int] [>=0] (4) default super pacgum amount per level
     "timer": 90,                                    // [int] [>=1] (90) defaut timer per level in seconds
 
-    /* === OPTIONAL LEVEL CONFIG === */
+    // === OPTIONAL LEVEL CONFIG === //
     # Level specific data (last chosen if underdefined, fallback chosen when undefined)
 
     "levels": [                                     // Any fallback data may be specifically re-set here
