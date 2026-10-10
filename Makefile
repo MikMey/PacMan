@@ -27,6 +27,6 @@ lint:
 
 clean:
 	rm -rf .mypy_cache .pytest_cache
-	find . -type d -name __pycache__ -prune -exec rm -rf {} +
+	find . -type d \( -name "__pycache__" -o -name ".mypy_cache" \) -prune -exec rm -rf {} +
 
-.PHONY: all install run lint clean
+.PHONY: all install run source lint clean
