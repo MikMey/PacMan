@@ -84,6 +84,7 @@ class LoopMachine(State):
 
             match self.state:
                 case LoopState.MAIN_MENU:
+                    Hud.score = 0
                     self.state = self.main_menu.run()
 
                 case LoopState.GAME_LOOP:

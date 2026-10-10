@@ -3,13 +3,13 @@
     # Data that has to be present to run
 
     "highscore_filename": "./data/highscore.json",  // [str] highscore json file location
-    "level_count": 3,                               // [int] [>=1] amount of levels
+    "level_count": 5,                               // [int] [>=1] amount of levels
 
     /* === OPTIONAL GLOBAL CONFIG === */
     # Data non-specific to individual levels
 
     "points": {
-        "pacgum": 10,                               // [int] [>=0] (10) points for each pacgum eaten
+        "pacgum": 0,                               // [int] [>=0] (10) points for each pacgum eaten
         "super_pacgum": 50,                         // [int] [>=0] (50) points for each super pacgum eaten
         "ghost": 200                                // [int] [>=0] (200) points for each ghost eaten
     },
@@ -21,7 +21,7 @@
     "height": 10,                                   // [int] [>=3] (10) default maze height
     "pacgums": 9,                                   // [int] [>=0] (0) default pacgum amount per level (0=full)
     "super_pacgums": 0,                             // [int] [>=0] (4) default super pacgum amount per level
-    "timer": 10,                                    // [int] [>=1] (90) defaut timer per level in seconds
+    "timer": 90,                                    // [int] [>=1] (90) defaut timer per level in seconds
 
     /* === OPTIONAL LEVEL CONFIG === */
     # Level specific data (last chosen if underdefined, fallback chosen when undefined)
