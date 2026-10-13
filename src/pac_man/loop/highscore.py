@@ -8,6 +8,7 @@ import pygame
 from ..models import StaticSpriteElement
 from ..render import SpriteSheetCache
 from .states import State, LoopState
+from ..utils import Config
 
 SUBTILE_SIZE = 8
 TILE_SIZE = SUBTILE_SIZE * 3
@@ -74,28 +75,36 @@ class _BaseHighscore():
             When highscore content is invalid or a list.
 
         """
+        if self.highscore_file is None:
+            Config._log.warning("Getting highscore: No file specified. "
+                                "None will be displayed.")
+            return {}
+
         try:
             with open(self.highscore_file, 'r') as f:
-                raw_highscores: str = f.read()
+                raw: str = f.read()
+        except OSError as e:
+            Config._log.warning(f"Getting highscore: {e}. "
+                                "None will be displayed.")
+            return {}
 
-                if (
-                    not raw_highscores or not
-                    len(raw_highscores) or
-                    raw_highscores == 'null'
-                ):
-                    highscores = {}
-                else:
-                    highscores = json.loads(raw_highscores)
+        highscores = None
+        try:
+            highscores = json.loads(raw)
+        except json.decoder.JSONDecodeError as e:
+            Config._log.warning(f"Getting highscore: {e}. "
+                                "None will be displayed.")
+            return {}
 
-                if isinstance(highscores, list):
-                    raise ValueError("Highscore cannot be a list")
-        except json.decoder.JSONDecodeError as err:
-            sys.exit(f"Invalid json file:\n{err}")
-        except (PermissionError, OSError, FileNotFoundError,
-                IsADirectoryError) as err:
-            sys.exit(f"Provided file path is incorrect:\n{err}")
-        except Exception as err:
-            sys.exit(f"Error:\n{err}")
+        if isinstance(highscores, list):
+            Config._log.warning("Getting highscore: Invalid array structure. "
+                                "None will be displayed.")
+            return {}
+        if highscores is None:
+            Config._log.warning("Getting highscore: Invalid null. "
+                                "None will be displayed.")
+            return {}
+
         return highscores
 
 
@@ -243,16 +252,24 @@ class EnterHighscore(_BaseHighscore, State):
             Content of dictionary of NAME: SCORE.
 
         """
+        if self.highscore_file is None:
+            Config._log.warning("Setting highscore: No file specified. "
+                                "Highscore has not been saved.")
+            return
+
         try:
             with open(self.highscore_file, 'w') as f:
                 json.dump(content, f)
-        except json.decoder.JSONDecodeError as err:
-            sys.exit(f"Invalid json file:\n{err}")
-        except (PermissionError, OSError, FileNotFoundError,
-                IsADirectoryError) as err:
-            sys.exit(f"Provided file path is incorrect:\n{err}")
-        except Exception as err:
-            sys.exit(f"Error:\n{err}")
+        except OSError as e:
+            Config._log.warning(f"Setting highscore: {e}. "
+                                "Highscore has not been saved.")
+        except TypeError as e:
+            print(e)
+            Config._log.warning("Setting highscore: JSON corruption. "
+                                "Highscore has not been saved.")
+        except Exception as e:
+            Config._log.warning(f"Setting highscore: {e}. "
+                                "Highscore has not been saved.")
 
     def _get_name(self) -> None:
         """Listens to alphanum character and misc to write name."""

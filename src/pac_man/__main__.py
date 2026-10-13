@@ -32,7 +32,7 @@ class ElapsedFormatter(logging.Formatter):
 
         log = logging.getLogger('PacMan')
         log.setLevel(5)
-        log.info("Programm start")
+        log.info("Program start")
 
 
 def main() -> int:
@@ -40,11 +40,11 @@ def main() -> int:
     ElapsedFormatter.start_log()
     console = Console()
 
-    try:
-        config = Config.from_argv_file()
-    except ValidationError as e:
-        console.print(str(e), style="red", markup=False, highlight=False)
-        return 1
+    # try:
+    config = Config.from_argv_file()
+    # except ValidationError as e:
+    #     console.print(str(e), style="red", markup=False, highlight=False)
+    #     return 1
 
     try:
         with LoopMachine(config=config) as pacman:

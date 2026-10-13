@@ -1,8 +1,10 @@
 
-from typing import Any, Optional
+from typing import ClassVar, Any, Optional, Annotated
 import sys
 import json
-from pydantic import BaseModel, Field, ValidationError, model_validator
+import logging
+from pydantic import (BaseModel, Field, ValidationError,
+                      TypeAdapter, model_validator)
 from pydantic_core import InitErrorDetails
 
 
@@ -12,7 +14,56 @@ class LevelMetadata(BaseModel):
     height: int = Field(ge=3, le=70, default=10)
     pacgums: int = Field(ge=0, default=0)
     super_pacgums: int = Field(ge=0, default=4)
-    timer: int = Field(ge=1, default=90)
+    timer: int = Field(ge=20, default=90)
+
+    @staticmethod
+    def validate_attr(name: str, data: Any) -> Any:
+        field = LevelMetadata.model_fields[name]
+        annotation = field.annotation or Any
+
+        if field.metadata:
+            adapter = TypeAdapter(Annotated[annotation, *field.metadata])
+        else:
+            adapter = TypeAdapter(annotation)
+
+        try:
+            adapter.validate_python(data, strict=True)
+        except ValidationError as e:
+            for error in e.errors():
+                error_type = error.get("type")
+
+                if any(kw in error_type for kw in
+                        ["greater_than", "less_than", "range"]):
+                    min_val = max_val = None
+
+                    for meta in field.metadata:
+                        if hasattr(meta, "ge"):
+                            min_val = meta.ge
+                        elif hasattr(meta, "gt"):
+                            min_val = meta.gt + 1
+                        if hasattr(meta, "le"):
+                            max_val = meta.le
+                        elif hasattr(meta, "lt"):
+                            max_val = meta.lt + 1
+
+                    if isinstance(data, (int, float)):
+                        clamp = data
+                        if min_val is not None:
+                            clamp = max(clamp, min_val)
+                        if max_val is not None:
+                            clamp = max(clamp, max_val)
+
+                        Config._log.warning(f"Field '{name}' is out of bounds."
+                                            f" Clamping to {clamp}.")
+                        return clamp
+
+                fallback = field.get_default()
+                Config._log.warning(f"Error parsing '{name}': "
+                                    f"{error.get("type")}. Using "
+                                    f"default {fallback}.")
+                return fallback
+
+        return data
 
 
 class HighscoreMetadata(BaseModel):
@@ -57,18 +108,200 @@ class Config(BaseModel):
     file_path: Optional[str] = None
     file_content: Optional[str] = None
 
-    highscore_filename: str
-    level_count: int = Field(ge=1)
+    highscore_filename: Optional[str] = None
+    level_count: int = Field(ge=1, default=5)
+    lives: int = Field(ge=1, le=100, default=3)
+    seed: int = Field(ge=0, default=67)
 
     points_per_pacgum: int = Field(ge=0, default=10)
     points_per_super_pacgum: int = Field(ge=0, default=50)
     points_per_ghost: int = Field(ge=0, default=200)
-    lives: int = Field(ge=1, le=100, default=3)
-    seed: int = Field(ge=0, default=67)
 
     default_level: LevelMetadata = Field(default_factory=LevelMetadata)
     levels: list[LevelMetadata] = Field(default_factory=list)
     highscores: list[HighscoreMetadata] = Field(default_factory=list)
+
+    _log: ClassVar[logging.Logger] = logging.getLogger('PacMan')
+
+    # @model_validator(mode="before")
+    # @classmethod
+    # def parse_file_content(cls, data: Any) -> Any:
+    #     """Attempts to parse data from file_content if set.
+
+    #     Raises
+    #     ------
+    #     ValidationError
+    #         When config.json cannot be read or has invalid syntax.
+
+    #     """
+    #     if not isinstance(data, dict) or not data.get("file_content"):
+    #         return data
+
+    #     errors: list[InitErrorDetails] = []
+
+    #     raw_content: str = data["file_content"]
+    #     content_str = Config._strip_config_comments(raw_content)
+
+    #     try:
+    #         content = json.loads(content_str)
+    #     except json.JSONDecodeError as e:
+    #         raise ValidationError.from_exception_data(
+    #             title=cls.__name__,
+    #             line_errors=[
+    #                 InitErrorDetails(
+    #                     type="value_error",
+    #                     loc=("file_content", "_strip_config_comments"),
+    #                     input=content_str,
+    #                     ctx={"error": e}
+    #                 )
+    #             ]
+    #         )
+
+    #     if not isinstance(content, dict):
+    #         errors.append(InitErrorDetails(
+    #             type="value_error",
+    #             loc=("file_content",),
+    #             input=content,
+    #             ctx={"error": ValueError(
+    #                 "json must be an object. "
+    #                 "Usage: Check README.md"
+    #             )}
+    #         ))
+    #         raise ValidationError.from_exception_data(
+    #             title=cls.__name__,
+    #             line_errors=errors
+    #         )
+
+    #     if "levels" not in data:
+    #         data["levels"] = []
+    #     if "highscores" not in data:
+    #         data["highscores"] = []
+
+    #     default_level_dict = (
+    #         data["default_level"].model_dump() if "default_level" in data
+    #         and isinstance(data["default_level"], LevelMetadata)else {}
+    #     )
+    #     levels_overwrite = []
+
+    #     for k, v in content.items():
+    #         match k:
+    #             case "highscore_filename":
+    #                 data[k] = v
+    #             case "level_count":
+    #                 if isinstance(v, int):
+    #                     data[k] = v
+    #                 else:
+    #                     errors.append(InitErrorDetails(
+    #                         type="value_error",
+    #                         loc=("file_content", k),
+    #                         input=v,
+    #                         ctx={"error": ValueError(
+    #                             "incorrect type. "
+    #                             "Usage: Check README.md "
+    #                             "for key information"
+    #                         )}
+    #                     ))
+    #             case "points":
+    #                 if isinstance(v, dict):
+    #                     for k2, v2 in v.items():
+    #                         match k2:
+    #                             case "pacgum":
+    #                                 data["points_per_pacgum"] = v2
+    #                             case "super_pacgum":
+    #                                 data["points_per_super_pacgum"] = v2
+    #                             case "ghost":
+    #                                 data["points_per_ghost"] = v2
+    #                             case _:
+    #                                 errors.append(InitErrorDetails(
+    #                                     type="value_error",
+    #                                     loc=("file_content", k, k2),
+    #                                     input=v2,
+    #                                     ctx={"error": ValueError(
+    #                                         "unknown configuration key. "
+    #                                         "Usage: Check README.md "
+    #                                         "for allowed keys"
+    #                                     )}
+    #                                 ))
+    #             case "lives":
+    #                 data[k] = v
+    #             case "seed":
+    #                 data[k] = v
+    #             case ("width" | "height" | "pacgums" |
+    #                   "super_pacgums" | "timer"):
+    #                 default_level_dict[k] = v
+    #             case "levels":
+    #                 if isinstance(v, list):
+    #                     levels_overwrite = v
+    #             case _:
+    #                 errors.append(InitErrorDetails(
+    #                     type="value_error",
+    #                     loc=("file_content", k),
+    #                     input=v,
+    #                     ctx={"error": ValueError(
+    #                         "unknown configuration key. "
+    #                         "Usage: Check README.md for allowed keys"
+    #                     )}
+    #                 ))
+
+    #     try:
+    #         data["default_level"] = (LevelMetadata.model_validate
+    #                                  (default_level_dict))
+    #     except ValidationError as e:
+    #         for error in e.errors():
+    #             field_name = error["loc"][0] if error["loc"] else "unknown"
+    #             errors.append(InitErrorDetails(
+    #                 type="value_error",
+    #                 loc=("file_content", str(field_name)),
+    #                 input=error.get("input"),
+    #                 ctx={"error": ValueError(error["msg"])}
+    #             ))
+    #         data["default_level"] = LevelMetadata()
+
+    #     if "level_count" in data and isinstance(data["level_count"], int):
+    #         base_defaults = data["default_level"].model_dump()
+
+    #         for i in range(data["level_count"]):
+    #             level_dict = base_defaults.copy()
+
+    #             if i < len(levels_overwrite):
+    #                 for k, v in levels_overwrite[i].items():
+    #                     if k in LevelMetadata.model_fields:
+    #                         level_dict[k] = v
+    #                     else:
+    #                         errors.append(InitErrorDetails(
+    #                             type="value_error",
+    #                             loc=("file_content", f"level_{i}", k),
+    #                             input=v,
+    #                             ctx={"error": ValueError(
+    #                                 "unknown configuration key. "
+    #                                 "Usage: Check README.md "
+    #                                 "for allowed keys"
+    #                             )}
+    #                         ))
+
+    #             try:
+    #                 validated = LevelMetadata.model_validate(level_dict)
+    #                 data["levels"].append(validated)
+    #             except ValidationError as e:
+    #                 for error in e.errors():
+    #                     field_name = (error["loc"][0] if error["loc"]
+    #                                   else "unknown")
+
+    #                     errors.append(InitErrorDetails(
+    #                         type="value_error",
+    #                         loc=("file_content", f"level_{i}",
+    #                              str(field_name)),
+    #                         input=error.get("input"),
+    #                         ctx={"error": ValueError(error["msg"])}
+    #                     ))
+
+    #     if errors:
+    #         raise ValidationError.from_exception_data(
+    #             title=cls.__name__,
+    #             line_errors=errors
+    #         )
+
+    #     return data
 
     @model_validator(mode="before")
     @classmethod
@@ -82,9 +315,7 @@ class Config(BaseModel):
 
         """
         if not isinstance(data, dict) or not data.get("file_content"):
-            return data
-
-        errors: list[InitErrorDetails] = []
+            return Config.abort_before_validator(data)
 
         raw_content: str = data["file_content"]
         content_str = Config._strip_config_comments(raw_content)
@@ -92,167 +323,186 @@ class Config(BaseModel):
         try:
             content = json.loads(content_str)
         except json.JSONDecodeError as e:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    InitErrorDetails(
-                        type="value_error",
-                        loc=("file_content", "_strip_config_comments"),
-                        input=content_str,
-                        ctx={"error": e}
-                    )
-                ]
-            )
+            Config._log.warning(f"Error parsing config: {e}. "
+                                "Fallback to default.")
+            return Config.abort_before_validator(data)
 
         if not isinstance(content, dict):
-            errors.append(InitErrorDetails(
-                type="value_error",
-                loc=("file_content",),
-                input=content,
-                ctx={"error": ValueError(
-                    "json must be an object. "
-                    "Usage: Check README.md"
-                )}
-            ))
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=errors
-            )
+            Config._log.warning("Error parsing config: Data must be a dict. "
+                                "Fallback to default.")
+            return Config.abort_before_validator(data)
 
         if "levels" not in data:
             data["levels"] = []
         if "highscores" not in data:
             data["highscores"] = []
 
-        default_level_dict = (
-            data["default_level"].model_dump() if "default_level" in data
-            and isinstance(data["default_level"], LevelMetadata)else {}
-        )
+        default_level_dict = {}
         levels_overwrite = []
 
+        # Attempt to parse all recognized from config.json
         for k, v in content.items():
             match k:
-                case "highscore_filename":
-                    data[k] = v
-                case "level_count":
-                    if isinstance(v, int):
-                        data[k] = v
-                    else:
-                        errors.append(InitErrorDetails(
-                            type="value_error",
-                            loc=("file_content", k),
-                            input=v,
-                            ctx={"error": ValueError(
-                                "incorrect type. "
-                                "Usage: Check README.md "
-                                "for key information"
-                            )}
-                        ))
+                case "highscore_filename" | "level_count" | "lives" | "seed":
+                    data[k] = Config.validate_attr(k, v)
                 case "points":
-                    if isinstance(v, dict):
-                        for k2, v2 in v.items():
-                            match k2:
-                                case "pacgum":
-                                    data["points_per_pacgum"] = v2
-                                case "super_pacgum":
-                                    data["points_per_super_pacgum"] = v2
-                                case "ghost":
-                                    data["points_per_ghost"] = v2
-                                case _:
-                                    errors.append(InitErrorDetails(
-                                        type="value_error",
-                                        loc=("file_content", k, k2),
-                                        input=v2,
-                                        ctx={"error": ValueError(
-                                            "unknown configuration key. "
-                                            "Usage: Check README.md "
-                                            "for allowed keys"
-                                        )}
-                                    ))
-                case "lives":
-                    data[k] = v
-                case "seed":
-                    data[k] = v
+                    if not isinstance(v, dict):
+                        Config._log.warning("'points' does not "
+                                            "match type dict.")
+                        continue
+
+                    for k2, v2 in v.items():
+                        match k2:
+                            case "pacgum":
+                                data["points_per_pacgum"] =\
+                                    Config.validate_attr(
+                                        "points_per_pacgum", v2)
+                            case "super_pacgum":
+                                data["points_per_super_pacgum"] =\
+                                    Config.validate_attr(
+                                        "points_per_super_pacgum", v2)
+                            case "ghost":
+                                data["points_per_ghost"] =\
+                                    Config.validate_attr(
+                                        "points_per_ghost", v2)
+                            case _:
+                                Config._log.warning("Skipping unrecognized "
+                                                    f"key: {k2} in {k}.")
                 case ("width" | "height" | "pacgums" |
-                      "super_pacgums" | "timer"):
-                    default_level_dict[k] = v
+                        "super_pacgums" | "timer"):
+                    # default_level_dict[k] = v
+                    default_level_dict[k] = LevelMetadata.validate_attr(k, v)
                 case "levels":
-                    if isinstance(v, list):
-                        levels_overwrite = v
+                    if not isinstance(v, list):
+                        Config._log.warning("Unrecognized type for "
+                                            f"'{k}': {type(v)}")
+                        continue
+
+                    for i, level in enumerate(v):
+                        meta = LevelMetadata()
+
+                        if not isinstance(level, dict):
+                            Config._log.warning("Unrecognized type for "
+                                                f"level {i+1}: {type(v)}")
+                            levels_overwrite.append(meta)
+                            continue
+
+                        for k2, v2 in level.items():
+                            if k2 not in LevelMetadata.model_fields:
+                                Config._log.warning("Skipping unrecognized "
+                                                    "key for level "
+                                                    f"{i+1}: '{k2}'.")
+                                continue
+                            setattr(meta, k2,
+                                    LevelMetadata.validate_attr(k2, v2))
+
+                        levels_overwrite.append(meta)
                 case _:
-                    errors.append(InitErrorDetails(
-                        type="value_error",
-                        loc=("file_content", k),
-                        input=v,
-                        ctx={"error": ValueError(
-                            "unknown configuration key. "
-                            "Usage: Check README.md for allowed keys"
-                        )}
-                    ))
+                    Config._log.warning(f"Skipping unrecognized key: {k}.")
+
+        for attr in ("highscore_filename", "level_count",
+                     "lives", "seed", "points_per_pacgum",
+                     "points_per_super_pacgum", "points_per_ghost"):
+            if attr not in data:
+                fallback = Config.model_fields[attr].get_default()
+                Config._log.warning("Choosing default for "
+                                    f"{attr}: {fallback}.")
+                data[attr] = fallback
+
+        for attr in ("width", "height", "pacgums",
+                     "super_pacgums", "timer"):
+            if attr not in default_level_dict:
+                fallback = LevelMetadata.model_fields[attr].get_default()
+                Config._log.warning("Choosing default for "
+                                    f"{attr}: {fallback}.")
+                default_level_dict[attr] = fallback
 
         try:
             data["default_level"] = (LevelMetadata.model_validate
                                      (default_level_dict))
         except ValidationError as e:
-            for error in e.errors():
-                field_name = error["loc"][0] if error["loc"] else "unknown"
-                errors.append(InitErrorDetails(
-                    type="value_error",
-                    loc=("file_content", str(field_name)),
-                    input=error.get("input"),
-                    ctx={"error": ValueError(error["msg"])}
-                ))
+            Config._log.warning(f"Improper default level data: {e}. "
+                                "Picking default.")
             data["default_level"] = LevelMetadata()
 
-        if "level_count" in data and isinstance(data["level_count"], int):
-            base_defaults = data["default_level"].model_dump()
+        base_defaults = data["default_level"].model_dump()
 
-            for i in range(data["level_count"]):
+        for i in range(data["level_count"]):
+            if i < len(levels_overwrite):
+                level_dict = levels_overwrite[i]
+            else:
                 level_dict = base_defaults.copy()
 
-                if i < len(levels_overwrite):
-                    for k, v in levels_overwrite[i].items():
-                        if k in LevelMetadata.model_fields:
-                            level_dict[k] = v
-                        else:
-                            errors.append(InitErrorDetails(
-                                type="value_error",
-                                loc=("file_content", f"level_{i}", k),
-                                input=v,
-                                ctx={"error": ValueError(
-                                    "unknown configuration key. "
-                                    "Usage: Check README.md "
-                                    "for allowed keys"
-                                )}
-                            ))
+            try:
+                validated = LevelMetadata.model_validate(level_dict)
+                data["levels"].append(validated)
+            except ValidationError as e:
+                Config._log.warning(f"Error parsing level data: {e}. "
+                                    "Picking default.")
 
-                try:
-                    validated = LevelMetadata.model_validate(level_dict)
-                    data["levels"].append(validated)
-                except ValidationError as e:
-                    for error in e.errors():
-                        field_name = (error["loc"][0] if error["loc"]
-                                      else "unknown")
+        return data
 
-                        errors.append(InitErrorDetails(
-                            type="value_error",
-                            loc=("file_content", f"level_{i}",
-                                 str(field_name)),
-                            input=error.get("input"),
-                            ctx={"error": ValueError(error["msg"])}
-                        ))
+    @classmethod
+    def abort_before_validator(cls, data: Any) -> Any:
+        data["levels"] = [LevelMetadata()] * 5
+        return data
 
-        if errors:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=errors
-            )
+    @staticmethod
+    def validate_attr(name: str, data: Any) -> Any:
+        field = Config.model_fields[name]
+        annotation = field.annotation or Any
+
+        if field.metadata:
+            adapter = TypeAdapter(Annotated[annotation, *field.metadata])
+        else:
+            adapter = TypeAdapter(annotation)
+
+        try:
+            adapter.validate_python(data, strict=True)
+        except ValidationError as e:
+            for error in e.errors():
+                error_type = error.get("type")
+
+                if any(kw in error_type for kw in
+                       ["greater_than", "less_than", "range"]):
+                    min_val = max_val = None
+
+                    for meta in field.metadata:
+                        if hasattr(meta, "ge"):
+                            min_val = meta.ge
+                        elif hasattr(meta, "gt"):
+                            min_val = meta.gt + 1
+                        if hasattr(meta, "le"):
+                            max_val = meta.le
+                        elif hasattr(meta, "lt"):
+                            max_val = meta.lt + 1
+
+                    if isinstance(data, (int, float)):
+                        clamp = data
+                        if min_val is not None:
+                            clamp = max(clamp, min_val)
+                        if max_val is not None:
+                            clamp = min(clamp, max_val)
+
+                        Config._log.warning(f"Field '{name}' is out of bounds:"
+                                            f" Clamping to {clamp}.")
+                        return clamp
+
+                fallback = field.get_default()
+                Config._log.warning(f"Error parsing '{name}': "
+                                    f"{error.get("type")}. Using "
+                                    f"default {fallback}.")
+                return fallback
 
         return data
 
     @model_validator(mode="after")
     def validate_config(self) -> "Config":
         """Best effort parsing of data in highscore.json."""
+        if self.highscore_filename is None:
+            self.highscores = []
+            return self
+
         try:
             with open(self.highscore_filename, 'r', encoding="utf-8") as f:
                 content = f.read()
@@ -288,69 +538,106 @@ class Config(BaseModel):
 
         return self
 
+    # @classmethod
+    # def from_argv_file(cls) -> "Config":
+    #     """Attempts to read config.json specified in CLI argument.
+
+    #     Raises
+    #     ------
+    #     ValidationError
+    #         When CLI argument is malformed or destination cannot be read.
+
+    #     """
+    #     if len(sys.argv) < 2:
+    #         raise ValidationError.from_exception_data(
+    #             title=cls.__name__,
+    #             line_errors=[
+    #                 InitErrorDetails(
+    #                     type="value_error",
+    #                     loc=("sys.argv",),
+    #                     input=sys.argv,
+    #                     ctx={"error": ValueError(
+    #                         "missing CLI argument. "
+    #                         "Usage: uv run python -m src <path_to_config_file>"
+    #                     )}
+    #                 )
+    #             ]
+    #         )
+    #     if len(sys.argv) > 2:
+    #         raise ValidationError.from_exception_data(
+    #             title=cls.__name__,
+    #             line_errors=[
+    #                 InitErrorDetails(
+    #                     type="value_error",
+    #                     loc=("sys.argv",),
+    #                     input=sys.argv,
+    #                     ctx={"error": ValueError(
+    #                         "unexpected CLI argument. "
+    #                         "Usage: uv run python -m src <path_to_config_file>"
+    #                     )}
+    #                 )
+    #             ]
+    #         )
+
+    #     path = sys.argv[1]
+    #     try:
+    #         with open(path, 'r', encoding="utf-8") as f:
+    #             content = f.read()
+    #     except OSError as e:
+    #         raise ValidationError.from_exception_data(
+    #             title=cls.__name__,
+    #             line_errors=[
+    #                 InitErrorDetails(
+    #                     type="value_error",
+    #                     loc=("sys.argv", sys.argv[1]),
+    #                     input=sys.argv[1],
+    #                     ctx={"error": e}
+    #                 )
+    #             ]
+    #         )
+
+    #     return cls(file_path=path, file_content=content)  # type: ignore
+
     @classmethod
     def from_argv_file(cls) -> "Config":
-        """Attempts to read config.json specified in CLI argument.
+        """Reads config.json from CLI argument or picks default."""
 
-        Raises
-        ------
-        ValidationError
-            When CLI argument is malformed or destination cannot be read.
-
-        """
         if len(sys.argv) < 2:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    InitErrorDetails(
-                        type="value_error",
-                        loc=("sys.argv",),
-                        input=sys.argv,
-                        ctx={"error": ValueError(
-                            "missing CLI argument. "
-                            "Usage: uv run python -m src <path_to_config_file>"
-                        )}
-                    )
-                ]
-            )
+            Config._log.warning("No CLI argument provided.")
+            return Config.default_config()
+
         if len(sys.argv) > 2:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    InitErrorDetails(
-                        type="value_error",
-                        loc=("sys.argv",),
-                        input=sys.argv,
-                        ctx={"error": ValueError(
-                            "unexpected CLI argument. "
-                            "Usage: uv run python -m src <path_to_config_file>"
-                        )}
-                    )
-                ]
-            )
+            Config._log.warning("Unexpected CLI argument provided.")
+            return Config.default_config()
 
         path = sys.argv[1]
         try:
             with open(path, 'r', encoding="utf-8") as f:
                 content = f.read()
         except OSError as e:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    InitErrorDetails(
-                        type="value_error",
-                        loc=("sys.argv", sys.argv[1]),
-                        input=sys.argv[1],
-                        ctx={"error": e}
-                    )
-                ]
-            )
+            Config._log.warning(f"Error reading config '{path}': {e}.")
+            return Config.default_config()
 
         return cls(file_path=path, file_content=content)  # type: ignore
 
+    @classmethod
+    def default_config(cls) -> "Config":
+        Config._log.warning("Choosing default configurations...")
+
+        return cls(highscore_filename=None,
+                   level_count=5,
+                   points_per_pacgum=10,
+                   points_per_super_pacgum=50,
+                   points_per_ghost=200,
+                   lives=3,
+                   seed=67,
+                   # default_level
+                   # levels=[]
+                   highscores=[])
+
     @staticmethod
     def _strip_config_comments(raw_content: str) -> str:
-        """Removes all comments (#, //, /*) from string.
+        """Removes all comments (#, //) from string.
 
         Parameters
         ----------
