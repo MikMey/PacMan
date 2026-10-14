@@ -21,7 +21,8 @@ class LevelMetadata(BaseModel):
         annotation = field.annotation or Any
 
         if field.metadata:
-            adapter = TypeAdapter(Annotated[annotation, *field.metadata])
+            adapter: TypeAdapter = TypeAdapter(
+                Annotated[annotation, *field.metadata])
         else:
             adapter = TypeAdapter(annotation)
 
@@ -272,7 +273,8 @@ class Config(BaseModel):
         annotation = field.annotation or Any
 
         if field.metadata:
-            adapter = TypeAdapter(Annotated[annotation, *field.metadata])
+            adapter: TypeAdapter = TypeAdapter(
+                Annotated[annotation, *field.metadata])
         else:
             adapter = TypeAdapter(annotation)
 
@@ -334,7 +336,7 @@ class Config(BaseModel):
             Config._log.warning(f"Error reading config '{path}': {e}.")
             return Config.default_config()
 
-        return cls(file_path=path, file_content=content)  # type: ignore
+        return cls(file_path=path, file_content=content)
 
     @classmethod
     def default_config(cls) -> "Config":
