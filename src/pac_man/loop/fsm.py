@@ -69,6 +69,7 @@ class LoopMachine(State):
 
         """
         self._log.info("Quitting LoopMachine...")
+        pygame.display.quit()
         pygame.quit()
 
     def _init_screen(self) -> None:

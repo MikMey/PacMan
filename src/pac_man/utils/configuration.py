@@ -50,7 +50,7 @@ class LevelMetadata(BaseModel):
                         if min_val is not None:
                             clamp = max(clamp, min_val)
                         if max_val is not None:
-                            clamp = max(clamp, max_val)
+                            clamp = min(clamp, max_val)
 
                         Config._log.warning(f"Field '{name}' is out of bounds."
                                             f" Clamping to {clamp}.")

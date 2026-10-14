@@ -4,6 +4,7 @@ import logging
 from pydantic import ValidationError
 from rich.console import Console
 from typing import ClassVar
+import pygame
 
 from .utils import Config
 from .loop import LoopMachine
@@ -62,7 +63,7 @@ def main() -> int:
     try:
         with LoopMachine(config=config) as pacman:
             pacman.run()
-    except ValidationError as e:
+    except (ValidationError, pygame.error) as e:
         console.print(str(e), style="red", markup=False, highlight=False)
         return 1
 

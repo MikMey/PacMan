@@ -18,6 +18,9 @@ install:
 run:
 	uv run $(PYTHON) $(NAME) $(CONFIG)
 
+debug:
+	uv run $(PYTHON) pdb -m $(NAME) $(CONFIG)
+
 source:
 	find $(SOURCE) -type f -name '*.py' -print0 | xargs -0
 
@@ -29,4 +32,4 @@ clean:
 	rm -rf .mypy_cache .pytest_cache
 	find . -type d \( -name "__pycache__" -o -name ".mypy_cache" \) -prune -exec rm -rf {} +
 
-.PHONY: all install run source lint clean
+.PHONY: all install run debug source lint clean
