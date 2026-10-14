@@ -1,6 +1,5 @@
 import time
 import json
-import sys
 from typing import Optional
 import functools
 import pygame
@@ -81,31 +80,30 @@ class _BaseHighscore():
             return {}
 
         try:
-            with open(self.highscore_file, 'r') as f:
-                raw: str = f.read()
-        except OSError as e:
+            with open(self.highscore_file, 'r', encoding="utf-8") as f:
+                scores = json.load(f)
+        except (OSError, json.JSONDecodeError) as e:
             Config._log.warning(f"Getting highscore: {e}. "
                                 "None will be displayed.")
             return {}
 
-        highscores = None
-        try:
-            highscores = json.loads(raw)
-        except json.decoder.JSONDecodeError as e:
-            Config._log.warning(f"Getting highscore: {e}. "
+        if not isinstance(scores, dict):
+            Config._log.warning("Getting highscore: Not of tpye dict. "
                                 "None will be displayed.")
             return {}
 
-        if isinstance(highscores, list):
-            Config._log.warning("Getting highscore: Invalid array structure. "
-                                "None will be displayed.")
-            return {}
-        if highscores is None:
-            Config._log.warning("Getting highscore: Invalid null. "
-                                "None will be displayed.")
-            return {}
+        valid = {}
+        for k, v in scores.items():
+            if not isinstance(v, int):
+                Config._log.warning(f"Getting highscore: Score of {k} is "
+                                    f"invalid {type(v)}. Skipping score.")
+            elif v < 0:
+                Config._log.warning(f"Getting highscore: Score of {k} is "
+                                    f"negative. Skipping score.")
+            else:
+                valid[k] = v
 
-        return highscores
+        return valid
 
 
 class ShowHighscore(_BaseHighscore, State):
@@ -258,18 +256,11 @@ class EnterHighscore(_BaseHighscore, State):
             return
 
         try:
-            with open(self.highscore_file, 'w') as f:
+            with open(self.highscore_file, 'w', encoding="utf-8") as f:
                 json.dump(content, f)
-        except OSError as e:
-            Config._log.warning(f"Setting highscore: {e}. "
-                                "Highscore has not been saved.")
-        except TypeError as e:
-            print(e)
-            Config._log.warning("Setting highscore: JSON corruption. "
-                                "Highscore has not been saved.")
-        except Exception as e:
-            Config._log.warning(f"Setting highscore: {e}. "
-                                "Highscore has not been saved.")
+        except (OSError, TypeError) as e:
+            Config._log.warning(f"Getting highscore: {e}. "
+                                "None will be displayed.")
 
     def _get_name(self) -> None:
         """Listens to alphanum character and misc to write name."""
