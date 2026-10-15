@@ -41,14 +41,39 @@ Equivalent direct invocation:
 uv run python3 -m src.pac_man data/config.json
 ```
 
-The game opens fullscreen. In-game movement uses the arrow keys or WASD. Use
-Space to pause, Enter to continue or advance, and Escape to leave the current
-game. The guide available from the menu lists the game controls.
+The game opens in fullscreen. Controls can be found in the "GUIDE" option in the main menu:
 
-Run static checks with `make lint`.
+| Action | Keys |
+| - | - |
+| Movement | WASD and Arrow keys |
+| Pause | Space |
+| Quit | Esc |
+| Skip Level | Enter |
+| Kill Pacman | Numpad1 |
+| Gain 1UP | Numpad2 |
+| Freeze Ghosts | Numpad3 |
+| Scare Ghosts | Numpad5 |
+| Speed Up Pacman | Page Up |
+| Slow Down Pacman | Page Down |
+| Cycle Text Color | Numpad7 |
+| Cycle Wall Color | Numpad8 |
 
-package
-uv run pyinstaller --noconfirm --clean pac_man.spec
+## Other
+
+The Makefile supports multiple rules:
+
+| Rule | Description |
+| - | - |
+| `all` | Equivalent to `install run`. This is the default. |
+| `install` | Runs `uv sync` that installs/updates all dependencies. |
+| `run` | Runs the program. |
+| `debug` | Runs the program in debug mode (`pdb`). |
+| `source` | Lists all python files inside of `src/pac_man`. |
+| `lint` | Checks for lint and mypy compliance. |
+| `clean` | Removes python artifacts such as `__pycache__` and `.mypy_cache`. |
+
+A runnable binary can be created like this:
+`uv run pyinstaller --noconfirm --clean pac_man.spec`
 
 # Resources
 
