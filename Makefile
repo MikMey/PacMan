@@ -9,6 +9,11 @@ MYPY_FLAGS := --warn-return-any \
 				--check-untyped-defs
 UV_VENV := uv sync
 CONFIG ?= data/config.json
+ifeq ($(OS),Windows_NT)
+	SEP := ;
+else
+	SEP := :
+endif
 
 all: install run
 
@@ -28,8 +33,15 @@ lint:
 	$(FLAKE8) $(FLAKE8_FLAGS) $(SOURCE)
 	$(MYPY) $(SOURCE) $(MYPY_FLAGS)
 
+build:
+	uv run --with pyinstaller pyinstaller --onefile --add-data "data$(SEP)data" pac-man.py
+
 clean:
 	rm -rf .mypy_cache .pytest_cache
 	find . -type d \( -name "__pycache__" -o -name ".mypy_cache" \) -prune -exec rm -rf {} +
 
-.PHONY: all install run debug source lint clean
+fclean: clean
+	rm -rf build/ dist/ *.spec
+
+
+.PHONY: all install run debug source lint build clean fclean

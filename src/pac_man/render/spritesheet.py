@@ -1,8 +1,9 @@
-import pathlib
 from typing import Optional, Any
 from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, ValidationError
 from pydantic_core import InitErrorDetails
 import pygame
+import os
+import sys
 
 
 DEFAULT_FILE_PATH = "./data/spritesheet.bmp"
@@ -94,6 +95,15 @@ class SpriteSheetCache(BaseModel):
 
         self._init_default_cache()
 
+    @staticmethod
+    def resource_path(relative_path: str) -> str:
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            base_path = sys._MEIPASS  # type: ignore
+        else:
+            base_path = os.path.abspath('.')
+
+        return os.path.join(base_path, relative_path)
+
     @classmethod
     def from_default_file_path(cls, scale_factor: float) -> "SpriteSheetCache":
         """Creates class from default spritesheet (DEFAULT_FILE_PATH).
@@ -109,13 +119,20 @@ class SpriteSheetCache(BaseModel):
             When default spritesheet cannot be opened is is invalid.
 
         """
-        git_root = pathlib.Path.cwd()
-        absolute_sheet_path = (git_root / DEFAULT_FILE_PATH).resolve()
+        # git_root = pathlib.Path.cwd()
+        # absolute_sheet_path = (git_root / DEFAULT_FILE_PATH).resolve()
+
+        # try:
+        #     raw_sheet_image = pygame.image.load(
+        #         SpriteSheetCache.resource_path(str(absolute_sheet_path))
+        #     ).convert_alpha()
+
+        clean_relative = str(DEFAULT_FILE_PATH).lstrip("./")
+        target_absolute = SpriteSheetCache.resource_path(clean_relative)
 
         try:
             raw_sheet_image = pygame.image.load(
-                str(absolute_sheet_path)
-            ).convert_alpha()
+                target_absolute).convert_alpha()
         except (OSError, pygame.error) as e:
             raise ValidationError.from_exception_data(
                 title=cls.__name__,

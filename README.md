@@ -8,6 +8,8 @@ super pac-gums, avoid or eat the four ghosts, and try to complete each
 configured level before time runs out. The game includes a main menu, gameplay,
 win and game-over screens, a guide, and a persistent high-score table.
 
+Our broad implementation utilizes pygame together with a centralized sprite sheet to balance current game development standards together with retro game restrictions.
+
 # Instructions
 
 ## Requirements
@@ -19,7 +21,7 @@ win and game-over screens, a guide, and a persistent high-score table.
 The project restricts Python to `>=3.13,<3.14`. The assigned MazeGenerator
 package is included as a wheel in this repository.
 
-## Install and run
+## Installation and Running
 
 From the repository root, install the project dependencies and start the game:
 
@@ -28,37 +30,21 @@ make install
 make run
 ```
 
-`make run` loads `data/config.json` by default. To use another configuration
-file, pass its path through `CONFIG`:
+For controls, navigate to the "GUIDE" option in the main menu or see [Details](#controls).
+
+---
+
+By default, `make run` loads `data/config.json`. To use another configuration file, pass its path through `CONFIG`:
 
 ```sh
 make run CONFIG=path/to/config.json
+# Equivalent to: 
+# uv run python3 -m src.pac_man path/to/config.json
 ```
 
-Equivalent direct invocation:
+For more info on availible configurations, see [Details](#the-configuration-file).
 
-```sh
-uv run python3 -m src.pac_man data/config.json
-```
-
-The game opens in fullscreen. Controls can be found in the "GUIDE" option in the main menu:
-
-| Action | Keys |
-| - | - |
-| Movement | WASD and Arrow keys |
-| Pause | Space |
-| Quit | Esc |
-| Skip Level | Enter |
-| Kill Pacman | Numpad1 |
-| Gain 1UP | Numpad2 |
-| Freeze Ghosts | Numpad3 |
-| Scare Ghosts | Numpad5 |
-| Speed Up Pacman | Page Up |
-| Slow Down Pacman | Page Down |
-| Cycle Text Color | Numpad7 |
-| Cycle Wall Color | Numpad8 |
-
-## Other
+## All Makefile Rules
 
 The Makefile supports multiple rules:
 
@@ -70,12 +56,13 @@ The Makefile supports multiple rules:
 | `debug` | Runs the program in debug mode (`pdb`). |
 | `source` | Lists all python files inside of `src/pac_man`. |
 | `lint` | Checks for lint and mypy compliance. |
+| `build` | Creates a ready to be distributed game executable using `pyinstaller`. |
 | `clean` | Removes python artifacts such as `__pycache__` and `.mypy_cache`. |
-
-A runnable binary can be created like this:
-`uv run pyinstaller --noconfirm --clean pac_man.spec`
+| `fclean` | Removes python artifacts in addition to artifacts and executable of `build`. |
 
 # Resources
+
+Multiple resources have been consulted in the development of this project. Some references such as MinilibX did not end up mattering in the final project since we changed to a pygame architecture.
 
 - [42 Pac-Man project subject](https://projects.intra.42.fr/projects/pac-man)
 - [Pygame documentation](https://www.pygame.org/docs/)
@@ -91,6 +78,8 @@ descriptions. No AI-generated gameplay code or artwork is part of this
 documentation change; this repository does not document other AI use.
 
 # Details
+
+The general game loop of this project is shown in the flowchart below. A flowchart representation is very fitting, since our practical implementation uses a [Finite State Machine](https://en.wikipedia.org/wiki/Finite-state_machine): We have one main loop that processes certain logic, called states, every frame. Note that we have another flowchart for gameplay this is not included here.
 
 ```mermaid
 flowchart TD
@@ -114,36 +103,76 @@ flowchart TD
     start_screen -->|Esc| finish
 ```
 
+## Controls
 
-## Configuration
+The game opens in fullscreen. Controls can be found in the "GUIDE" option in the main menu:
 
-The game reads one configuration file path from the command line. The default
-is `data/config.json`; it is a JSON object that allows `#`, `//`, and `/* ... */`
-comments, which are removed before parsing. Unknown keys and invalid values
-are rejected during validation.
+| Action | Keys |
+| - | - |
+| Movement | WASD and Arrow keys |
+| Pause | Space |
+| Quit | Esc |
+| Skip Level | Enter |
+| Kill Pacman | Numpad1 |
+| Gain 1UP | Numpad2 |
+| Freeze Ghosts | Numpad3 |
+| Scare Ghosts | Numpad5 |
+| Speed Up Pacman | Page Up |
+| Slow Down Pacman | Page Down |
+| Cycle Text Color | Numpad7 |
+| Cycle Wall Color | Numpad8 |
 
-Top-level settings are:
+## The Configuration File
 
-| Key | Default in `data/config.json` | Meaning |
-| --- | --- | --- |
-| `highscore_filename` | `./data/highscore.json` | File used to load and save scores |
-| `level_count` | `3` | Number of levels played |
-| `points.pacgum` | `10` | Points for a pac-gum |
-| `points.super_pacgum` | `50` | Points for a super pac-gum |
-| `points.ghost` | `200` | Points for a ghost |
-| `width`, `height` | `10`, `10` | Fallback maze dimensions; each must be at least 3 |
-| `lives` | `3` | Fallback lives per level; must be at least 1 |
-| `pacgums` | `2` | Fallback number of collectible positions; `0` fills available positions |
-| `super_pacgums` | `4` | Fallback number of super pac-gums |
-| `timer` | `90` | Fallback time limit in seconds; must be at least 1 |
-| `seed` | `67` | Fallback maze seed; use `null` for a random seed |
-| `levels` | Three level entries are played | Optional per-level overrides |
+The game reads one configuration file path from the command line. The default is `data/config.json`; it is a JSON object that allows `#` and `//` comments, which are removed before parsing. Unknown keys will throw a warning in the console but are then ignored.
 
-The values in the table are the checked-in configuration's values. If a setting
-is omitted, the code-level defaults are width 10, height 10, lives 3, pac-gums
-0 (meaning all available positions), super pac-gums 4, timer 90 seconds, and a
-random seed. Each entry in `levels` overrides those fallback values for its
-stage; `level_count` controls how many entries are used.
+Configuration settings are:
+
+| Key | Constraints | Default in `data/config.json` | Description |
+| - | - | - | - |
+| `highscore_filename` | `str` or `null` | `./data/highscore.json` | File used to load and save scores. If not set or invalid, no highscore data will be displayed nor saved; No new JSON file will be created. |
+| `level_count` | `int >= 10` | `10` | Number of levels to be played. If this number is lower than defined overrides in `levels`, those levels will not be played. |
+| `points.pacgum` | `int >= 0` | `10` | Points for a Pacgum. |
+| `points.super_pacgum` | `int >= 0` | `50` | Points for a Super Pacgum. |
+| `points.ghost` | `int >= 0` | `200` | Points for a ghost |
+| `lives` | `100 >= int >= 1` | `3` | Lives to start out with. |
+| `seed` | `int >= 0` | `67` | Seed fo the first maze generation. `0` will give an unreproducibly random maze. |
+| `width`, `height` | `70 >= int >= 3` | `10` | Default maze dimensions. |
+| `pacgums` | `int >= 0` | `0` | Number of Pacgums per level. Greater number than availible pacgum locations will be ignored. `0` fils all locations. |
+| `super_pacgums` | `int >= 0` | `4` | Number of Super Pacgums to replace normal pacgums with. If this number is equal or greater to the number of pacgums, all pellets will be super. |
+| `timer` | `int >= 20` | `90` | Time limit per level in seconds. |
+| `levels` | ^ | -- | Optional per-level overrides of `width`, `height`, `pacgums`, `super_pacgums`, or `timer`. |
+
+The values in the table are the checked-in configuration's values. If a setting is omitted, the code-level defaults are width 10, height 10, lives 3, pac-gums 0 (meaning all available positions), super pac-gums 4, timer 90 seconds, and a seed of 67.
+
+For reference, here is the original configuration file:
+
+```json
+{
+    "highscore_filename": "./data/highscore.json",
+    "level_count": 10,
+    "points": { "pacgum": 10, "super_pacgum": 50, "ghost": 200 },
+    "lives": 3,
+    "seed": 67,
+    "width": 10,
+    "height": 10,
+    "pacgums": 0,
+    "super_pacgums": 4,
+    "timer": 90,
+    "levels": [
+        { "width": 7, "height": 7 },
+        { "width": 15, "height": 13 },
+        { "width": 5, "pacgums": 100 },
+        { "width": 15, "height": 5, "pacgums": 50 },
+        { "width": 15, "timer": 120 },
+        { "width": 10, "height": 3, "pacgums": 30, "super_pacgums": 9999, "timer": 30 },
+        { "width": 20, "height": 3, "pacgums": 50, "super_pacgums": 9999 },
+        {},
+        {},
+        { "width": 70, "height": 70, "pacgums": 1, "super_pacgums": 0, "timer": 200 }
+    ]
+}
+```
 
 ## Highscore
 
@@ -199,8 +228,19 @@ current frame, while the HUD displays time, lives, and score.
 ## Project Management
 
 We coordinated the project through GitHub, used Miro for collaborative
-planning, and held frequent meetings to review progress and decide next steps.
-The project-management overview is in the
-[project management directory](project_management/). The GitHub repository is
+planning, used a since removed TODO.md file for coordination, and held frequent meetings to review progress and decide next steps.
+
+We initally tried to work with a subject recommended MiniLibX library for this project, but quickly ran into implementation independent bottlenecks. We switched to pygame for game logic since this is the industry standard for simple python games, while still maintaining a low-level retro implementation by using just one sprite sheet for rendering.
+
+| ldreger | mimeyer |
+| - | - |
+| Sprite rendering | FSM architecture |
+| Configuration file parsing | Highscore file reading and writing |
+| MazeGenerator implementation | Main run loop implementation |
+| General Character Movement Logic | Main Menu and Guide |
+| HUD implementation and text rendering | Ghost AI with Super Pacgum logic |
+| Pallet Generation | Logging |
+
+The GitHub repository is
 [MikMey/PacMan](https://github.com/MikMey/PacMan); the Miro board link is not
 stored in this repository.
