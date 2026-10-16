@@ -84,23 +84,32 @@ The general game loop of this project is shown in the flowchart below. A flowcha
 ```mermaid
 flowchart TD
     start([Start Program])
-    start_screen[Start Screen]
+
+    main_menu[Main Menu]
     level[Playable Level]
     win_screen[Win Screen]
     lose_screen[Lose Screen]
+    type_score[Enter Highscores]
+    show_score[Show Highscores]
+    guide[Show Controls]
+
     finish([End Program])
 
-    start --> start_screen
-    start_screen -->|Enter| level
-    level -->|Loads new level| level
-    level -->|All levels beaten| win_screen
-    level -->|Ran out of lives| lose_screen
-    level -->|Esc| finish
-    win_screen -->|Enter| start_screen
-    win_screen -->|Esc| finish
-    lose_screen -->|Enter| start_screen
-    lose_screen -->|Esc| finish
-    start_screen -->|Esc| finish
+    start --> main_menu
+    main_menu --> level
+    main_menu --> show_score
+    main_menu --> guide
+    main_menu --> finish
+    
+    level -->|loads new level| level
+    level -->|all levels beaten| win_screen
+    level -->|ran out of lives| lose_screen
+    level --> main_menu
+
+    win_screen --> type_score
+    lose_screen --> type_score
+    type_score --> show_score
+    show_score --> main_menu
 ```
 
 ## Controls
