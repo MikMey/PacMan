@@ -8,7 +8,7 @@ super pac-gums, avoid or eat the four ghosts, and try to complete each
 configured level before time runs out. The game includes a main menu, gameplay,
 win and game-over screens, a guide, and a persistent high-score table.
 
-Our broad implementation utilizes pygame together with a centralized sprite sheet to balance current game development standards together with retro game restrictions.
+Our broad implementation utilizes pygame together with a centralized sprite sheet to balance current game development standards together with retro game restrictions. This game has also been published privately to [Itch.io](https://kiro6058.itch.io/pac-man-42); The project has not been made public because of respect to copyright laws.
 
 # Instructions
 
@@ -139,7 +139,7 @@ Configuration settings are:
 
 | Key | Constraints | Default in `data/config.json` | Description |
 | - | - | - | - |
-| `highscore_filename` | `str` or `null` | `./data/highscore.json` | File used to load and save scores. If not set or invalid, no highscore data will be displayed nor saved; No new JSON file will be created. |
+| `highscore_filename` | `str` or `null` | `./data/highscore.json` | File used to load and save scores. If not set or invalid, no highscore data will be displayed nor saved; Any specified file may be overwriten. |
 | `level_count` | `int >= 10` | `10` | Number of levels to be played. If this number is lower than defined overrides in `levels`, those levels will not be played. |
 | `points.pacgum` | `int >= 0` | `10` | Points for a Pacgum. |
 | `points.super_pacgum` | `int >= 0` | `50` | Points for a Super Pacgum. |
