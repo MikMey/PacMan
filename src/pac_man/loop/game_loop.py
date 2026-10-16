@@ -96,7 +96,7 @@ class GameLoop(State):
         """Keep state until button is pressed"""
         self.level.render()
         self.hud.render()
-        # self.handle_event()
+        self.hud.render_pause()
 
     def handle_input(self, key_event: pygame.event.Event) -> None:
         """Handle Cheats and color cycling.
@@ -108,30 +108,21 @@ class GameLoop(State):
 
         """
         match key_event.key:
-            case pygame.K_KP7:
-                next = self.hud.asset_cache.text_color_offset + 1
-                self.hud.asset_cache.text_color_offset = next % 19
-                self.hud.asset_cache.bake_text_offset(
-                    self.hud.asset_cache.text_color_offset
-                )
-                self.hud.populate_sprite_groups()
-
-            case pygame.K_KP8:
-                next = self.level.asset_cache.tile_color_offset + 1
-                self.level.asset_cache.tile_color_offset = next % 19
-                self.level.asset_cache.bake_tile_offset(
-                    self.level.asset_cache.tile_color_offset
-                )
-                self.level.reload_tile_sheet()
-
             case pygame.K_RETURN:
                 self.state = GameState.LOAD_LEVEL
 
             case pygame.K_SPACE:
-                self.state = GameState.PAUSE
+                if self.state == GameState.PAUSE:
+                    self.state = GameState.RUN_LEVEL
+                else:
+                    self.state = GameState.PAUSE
 
             case pygame.K_ESCAPE:
-                self.state = GameState.RETURN
+                match self.state:
+                    case GameState.PAUSE:
+                        self.state = GameState.RETURN
+                    case _:
+                        self.state = GameState.PAUSE
 
             case pygame.K_KP1:
                 self.level.pacman.kill(self.dt)
@@ -158,6 +149,22 @@ class GameLoop(State):
             case pygame.K_KP5:
                 if self.level:
                     self.level.switch_ghosts()
+
+            case pygame.K_KP7:
+                next = self.hud.asset_cache.text_color_offset + 1
+                self.hud.asset_cache.text_color_offset = next % 19
+                self.hud.asset_cache.bake_text_offset(
+                    self.hud.asset_cache.text_color_offset
+                )
+                self.hud.populate_sprite_groups()
+
+            case pygame.K_KP8:
+                next = self.level.asset_cache.tile_color_offset + 1
+                self.level.asset_cache.tile_color_offset = next % 19
+                self.level.asset_cache.bake_tile_offset(
+                    self.level.asset_cache.tile_color_offset
+                )
+                self.level.reload_tile_sheet()
 
             case _:
                 self.state = GameState.RUN_LEVEL

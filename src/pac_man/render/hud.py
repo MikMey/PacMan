@@ -1,8 +1,120 @@
 import pygame
 
 from ..models import SUBTILE_SIZE, StaticSpriteElement
+from ..loop.states import State
 from .spritesheet import SpriteSheetCache
 from .text import TextSpriteFactory
+
+
+PAUSE_MENU: list[list[str | None]] = [
+            ["CORNER-TOP-LEFT", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "CORNER-TOP-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             "CHAR-P", "CHAR-A", "CHAR-U", "CHAR-S",
+             "CHAR-E", None, "CHAR-M", "CHAR-E",
+             "CHAR-N", "CHAR-U", None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, "CHAR--",
+             "CHAR--", "CHAR--", "CHAR--", "CHAR--",
+             "CHAR--", "CHAR--", "CHAR--", "CHAR--",
+             "CHAR--", "CHAR--", "CHAR--", None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, "CHAR-Q",
+             "CHAR-U", "CHAR-I", "CHAR-T", None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, "CHAR-E", "CHAR-S",
+             "CHAR-C", "CHAR-A", "CHAR-P", "CHAR-E",
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, "CHAR-R", "CHAR-E",
+             "CHAR-S", "CHAR-U", "CHAR-M", "CHAR-E",
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             "CHAR-A", "CHAR-N", "CHAR-Y", None,
+             "CHAR-B", "CHAR-U", "CHAR-T", "CHAR-T",
+             "CHAR-O", "CHAR-N", None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["BORDER-LEFT", None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, None, None, None,
+             None, "BORDER-RIGHT"],
+
+            ["CORNER-BOTTOM-LEFT", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "BORDER-TOP", "BORDER-TOP", "BORDER-TOP",
+             "BORDER-TOP", "CORNER-BOTTOM-RIGHT"],
+        ]
 
 
 class Hud:
@@ -55,6 +167,16 @@ class Hud:
             0, screen.get_height() - vertical_padding
         )
 
+        self.pause_display = pygame.Surface((
+            # screen.get_width() // 2,
+            self.scale_factor * 20 * 8,
+            self.scale_factor * 20 * 8
+        ))
+        self.pause_position = pygame.Vector2(
+            screen.get_width() // 2 - self.pause_display.get_width() // 2,
+            screen.get_height() // 2 - self.pause_display.get_width() // 2,
+        )
+
         # self.time = -1
         self.time_delta: float = 0
 
@@ -64,6 +186,7 @@ class Hud:
         self.text_group: pygame.sprite.Group = pygame.sprite.Group()
         self.lives_group: pygame.sprite.Group = pygame.sprite.Group()
         self.timer_group: pygame.sprite.Group = pygame.sprite.Group()
+        self.pause_group: pygame.sprite.Group = pygame.sprite.Group()
 
         self.populate_sprite_groups()
 
@@ -72,6 +195,7 @@ class Hud:
         self.text_group = pygame.sprite.Group()
         self.lives_group = pygame.sprite.Group()
         self.timer_group = pygame.sprite.Group()
+        self.pause_group = pygame.sprite.Group()
 
         self.text_factory = TextSpriteFactory(assets=self.asset_cache)
 
@@ -124,6 +248,32 @@ class Hud:
             y=SUBTILE_SIZE * self.asset_cache._text_scale_factor * 1.5
         )
         self.timer_group.add(self.time_element)
+
+        # Pause Display
+        # static_pause_element = self.text_factory.from_string(s="timer")
+        # self.pause_group.add(StaticSpriteElement.from_relative(
+        #     self.asset_cache.get_static("BORDER-TOP"),
+        #     x=0,
+        #     y=0
+        # ))
+
+        # for y, row in enumerate(PAUSE_MENU):
+        #     for x, val in enumerate(row):
+        #         if val is None:
+        #             continue
+        #         self.pause_group.add(StaticSpriteElement.from_relative(
+        #             self.asset_cache.get_static(val),
+        #             x=x,
+        #             y=y
+        #         ))
+
+        for y, row in enumerate(PAUSE_MENU):
+            State._group_add_name(
+                self.asset_cache,
+                self.pause_group,
+                row,
+                [1, y + 1]
+                )
 
     def update_lives(self, new_lives: int) -> None:
         """Updates the hud life count."""
@@ -185,6 +335,12 @@ class Hud:
         self.lives_group.draw(self.bottom_display)
         self.timer_group.draw(self.bottom_display)
         self.screen.blit(self.bottom_display, self.bottom_position)
+
+    def render_pause(self) -> None:
+        """Draws static pause menu instructions."""
+        self.pause_display.fill(0)
+        self.pause_group.draw(self.pause_display)
+        self.screen.blit(self.pause_display, self.pause_position)
 
     def loop(self, dt: float) -> bool:
         """Update and display loop to be run every frame.

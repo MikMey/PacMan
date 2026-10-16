@@ -97,8 +97,21 @@ class SpriteSheetCache(BaseModel):
 
     @staticmethod
     def resource_path(relative_path: str) -> str:
+        """Uses temporary file location for exporting executable logic.
+
+        Parameters
+        ----------
+        relative_path : str
+            Relative file path of desired location.
+
+        Returns
+        -------
+        str
+            Absolute file path of temorary location.
+
+        """
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-            base_path = sys._MEIPASS  # type: ignore
+            base_path = sys._MEIPASS  # pyright: ignore
         else:
             base_path = os.path.abspath('.')
 
@@ -119,13 +132,6 @@ class SpriteSheetCache(BaseModel):
             When default spritesheet cannot be opened is is invalid.
 
         """
-        # git_root = pathlib.Path.cwd()
-        # absolute_sheet_path = (git_root / DEFAULT_FILE_PATH).resolve()
-
-        # try:
-        #     raw_sheet_image = pygame.image.load(
-        #         SpriteSheetCache.resource_path(str(absolute_sheet_path))
-        #     ).convert_alpha()
 
         clean_relative = str(DEFAULT_FILE_PATH).lstrip("./")
         target_absolute = SpriteSheetCache.resource_path(clean_relative)

@@ -64,33 +64,7 @@ class State(ABC):
             Class filled with pressed keys.
 
         """
-        match key_event.key:
-            case pygame.K_ESCAPE:
-                match self.state:
-                    case LoopState.SHOW_HIGHSCORE:
-                        self.state = LoopState.MAIN_MENU
-                    case LoopState.GUIDE:
-                        self.state = LoopState.MAIN_MENU
-                    case (LoopState.DEATH_SCREEN | LoopState.WIN_SCREEN):
-                        self.state = LoopState.ENTER_HIGHSCORE
-                    case _:
-                        sys.exit()
-            case pygame.K_RETURN:
-                match self.state:
-                    case LoopState.SHOW_HIGHSCORE:
-                        self.state = LoopState.MAIN_MENU
-                    case LoopState.GUIDE:
-                        self.state = LoopState.MAIN_MENU
-                    case (LoopState.DEATH_SCREEN | LoopState.WIN_SCREEN):
-                        self.state = LoopState.ENTER_HIGHSCORE
-            case pygame.K_KP1:
-                self.state = LoopState.MAIN_MENU
-            case pygame.K_KP2:
-                self.state = LoopState.ENTER_HIGHSCORE
-            case pygame.K_KP3:
-                self.state = LoopState.DEATH_SCREEN
-            case pygame.K_KP4:
-                self.state = LoopState.WIN_SCREEN
+        pass
 
     def handle_event(self) -> None:
         """handle different types of pygame events"""
