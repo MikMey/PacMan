@@ -299,13 +299,8 @@ class EnterHighscore(_BaseHighscore, State):
         self._group_add_str(
             self.asset_cache,
             self._enter_group,
-            'game over',
-            [0, 0])
-        self._group_add_str(
-            self.asset_cache,
-            self._enter_group,
             f'score {score}',
-            [0, 2])
+            [0, 0])
         self._group_add_str(
             self.asset_cache,
             self._enter_group,

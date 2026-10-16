@@ -49,8 +49,8 @@ class LoopMachine(State):
         pygame.init()
         self._init_screen()
         self.main_menu = MainMenu(screen=self.screen)
-        self.death_screen = DeathScreen()
-        self.win_screen = WinScreen()
+        self.death_screen = DeathScreen(None, self.screen)
+        self.win_screen = WinScreen(None, self.screen)
         self.enter_highscore =\
             EnterHighscore(self._config.highscore_filename, self.screen)
         self.show_highscore = ShowHighscore(None, None)
@@ -97,14 +97,10 @@ class LoopMachine(State):
                     self.state = self.game_loop.run(ShowHighscore.highscore, 0)
 
                 case LoopState.DEATH_SCREEN:
-                    self._log.debug("Enter State: DEATH_SCREEN")
-                    self.death_screen.run()
-                    self.state = LoopState.ENTER_HIGHSCORE
+                    self.state = self.death_screen.run()
 
                 case LoopState.WIN_SCREEN:
-                    self._log.debug("Enter State: WIN_SCREEN")
-                    self.win_screen.run()
-                    self.state = LoopState.ENTER_HIGHSCORE
+                    self.state = self.win_screen.run()
 
                 case LoopState.SHOW_HIGHSCORE:
                     self.state = self.show_highscore.run()
