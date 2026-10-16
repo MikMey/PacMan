@@ -63,10 +63,10 @@ class GameLoop(State):
 
         level_data: LevelMetadata = self.config.levels[level_num]
 
-        if self.config.seed is None:
-            seed = random.randint(-sys.maxsize - 1, sys.maxsize)
-        else:
+        if level_num == 0:
             seed = self.config.seed
+        else:
+            seed = random.randint(-sys.maxsize - 1, sys.maxsize)
 
         try:
             hex_matrix = MazeGenerator(
