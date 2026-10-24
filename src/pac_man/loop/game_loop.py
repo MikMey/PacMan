@@ -3,7 +3,7 @@ from enum import Enum, auto
 import logging
 import pygame
 import random
-from mazegenerator import MazeGenerator
+from mazegenerator import MazeGenerator  # type: ignore[import-untyped]
 
 from ..utils import Config
 from ..utils.configuration import LevelMetadata
