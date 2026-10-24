@@ -167,6 +167,7 @@ class GameLoop(State):
                 self.level.reload_tile_sheet()
 
             case _:
+                self.screen.fill(0)
                 self.state = GameState.RUN_LEVEL
 
     def set_state(self, new_state: GameState) -> None:
