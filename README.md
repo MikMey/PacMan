@@ -74,7 +74,7 @@ Multiple resources have been consulted in the development of this project. Some 
 
 AI assistance was used to inspect the existing project files and draft this
 README, including its configuration, implementation, and architecture
-descriptions. No AI-generated gameplay code or artwork is part of this
+descriptions. AI has also been used to generate project the management files. No AI-generated gameplay code or artwork is part of this
 documentation change; this repository does not document other AI use.
 
 # Details
@@ -236,20 +236,16 @@ current frame, while the HUD displays time, lives, and score.
 
 ## Project Management
 
-We coordinated the project through GitHub, used Miro for collaborative
-planning, used a since removed TODO.md file for coordination, and held frequent meetings to review progress and decide next steps.
+We coordinated the project through GitHub, used Miro for collaborative planning, used a constantly updating TODO.md file for coordination, and held frequent meetings to review progress and decide next steps.
 
 We initally tried to work with a subject recommended MiniLibX library for this project, but quickly ran into implementation independent bottlenecks. We switched to pygame for game logic since this is the industry standard for simple python games, while still maintaining a low-level retro implementation by using just one sprite sheet for rendering.
 
-| ldreger | mimeyer |
-| - | - |
-| Sprite rendering | FSM architecture |
-| Configuration file parsing | Highscore file reading and writing |
-| MazeGenerator implementation | Main run loop implementation |
-| General Character Movement Logic | Main Menu and Guide |
-| HUD implementation and text rendering | Ghost AI with Super Pacgum logic |
-| Pallet Generation | Logging |
+Details can be found in the `porject_magnagement/` folder:
 
-The GitHub repository is
-[MikMey/PacMan](https://github.com/MikMey/PacMan); the Miro board link is not
-stored in this repository.
+| File | Description |
+| - | - |
+| [TIMELINE.md](/project_management/TIMELINE.md) | A comprehensive list of changes per day based on github logs. |
+| [ORGANIZATION.md](/project_management/ORGANIZATION.md) | A comparison between theoretical workload splits and practical commit observed splits. |
+| [TODO.md](/project_management/TODO.md) | A chronological changelog of the since deleted TODO.md file with a focus on added features and bugs. |
+| [miro.url](/project_management/miro.url) | A link to the miro board we used to visualize the FSM. |
+| [repo.url](/project_management/repo.url) | A link to our private Github repo that has comprehensive commit logs. |
